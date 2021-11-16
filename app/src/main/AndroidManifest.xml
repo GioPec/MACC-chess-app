@@ -12,15 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chess">
 
-        <activity android:name=".MainActivity"
+        <activity android:name=".StockfishGame"
             android:screenOrientation="portrait">
+        </activity>
 
-            <intent-filter>
+        <activity android:name=".MainMenu"
+            android:screenOrientation="portrait">
+            <intent-filter> <!-- decides the starting activity -->
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

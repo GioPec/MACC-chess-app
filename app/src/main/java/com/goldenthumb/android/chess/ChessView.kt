@@ -3,6 +3,7 @@ package com.goldenthumb.android.chess
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import kotlin.math.min
@@ -12,8 +13,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var originX = 20f
     private var originY = 200f
     private var cellSide = 130f
-    private val lightColor = Color.parseColor("#F2E6D6") //"#EEEEEE"
-    private val darkColor = Color.parseColor("#D8B27E")  //"#BBBBBB"
     private val imgResIDs = setOf(
             R.drawable.chess_bdt60,
             R.drawable.chess_blt60,
@@ -84,7 +83,9 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
                 if (fromCol != col || fromRow != row) {
-                    chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
+                    if (!ChessGame.waitTurn) {  //wait for black move
+                        chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
+                    }
                 }
                 movingPiece = null
                 movingPieceBitmap = null
@@ -123,7 +124,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     }
 
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
-        paint.color = if (isDark) darkColor else lightColor
+        paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor
         canvas.drawRect(originX + col * cellSide, originY + row * cellSide, originX + (col + 1)* cellSide, originY + (row + 1) * cellSide, paint)
     }
 }

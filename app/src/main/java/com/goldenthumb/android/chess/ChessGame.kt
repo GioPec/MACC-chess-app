@@ -1,14 +1,20 @@
 package com.goldenthumb.android.chess
 
+import android.graphics.Color
 import android.util.Log
 import kotlin.math.abs
 
 object ChessGame {
     private var piecesBox = mutableSetOf<ChessPiece>()
 
-    var moveNum = 0
+    var moveNum = 0 //num of moves in game
 
-    var castlingAvailability = "KQkq"
+    var castlingAvailability = "KQkq"   //for fen notation
+
+    var waitTurn = false    //flag to avoid double moves by malicious white players
+
+    val lightColor: Int = Color.parseColor("#F2E6D6") //"#EEEEEE"
+    val darkColor: Int = Color.parseColor("#D8B27E")  //"#BBBBBB"
 
     init {
         reset()
@@ -163,7 +169,7 @@ object ChessGame {
                 return pieceAt(to.col, to.row)!!.player != thePawn!!.player
             }
         }
-        //TODO: en-passant e promozione!
+        //TODO: en-passant? e promozione!
         return false
     }
 
@@ -200,6 +206,20 @@ object ChessGame {
             piecesBox.remove(it)
         }
 
+        //promozione
+        if (movingPiece.chessman.equals(Chessman.PAWN)) {
+            if (movingPiece.player.equals(Player.WHITE) && fromRow==6 && toRow==7) {
+                piecesBox.remove(movingPiece)
+                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qlt60, col = toCol, row = toRow, moved = true))
+                return
+            }
+            else if (movingPiece.player.equals(Player.BLACK) && fromRow==1 && toRow==0) {
+                piecesBox.remove(movingPiece)
+                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qdt60, col = toCol, row = toRow, moved = true))
+                return
+            }
+        }
+
         piecesBox.remove(movingPiece)
         addPiece(movingPiece.copy(col = toCol, row = toRow, moved = true))
     }
@@ -210,6 +230,7 @@ object ChessGame {
         Log.i("!", "######################################")
         moveNum=0
         castlingAvailability = "KQkq"
+        waitTurn=false
         clear()
         for (i in 0 until 2) {
             addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60, false))
