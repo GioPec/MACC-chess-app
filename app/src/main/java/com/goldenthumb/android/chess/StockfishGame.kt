@@ -1,15 +1,14 @@
 package com.goldenthumb.android.chess
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.NetworkResponse
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import java.io.PrintWriter
 import java.net.ConnectException
@@ -20,12 +19,8 @@ import java.util.*
 import java.util.concurrent.Executors
 
 import com.android.volley.toolbox.Volley
-import org.json.JSONObject
-import java.nio.charset.Charset
 
-const val TAG = "MainActivity"
-
-class MainActivity : AppCompatActivity(), ChessDelegate {
+class StockfishGame : AppCompatActivity(), ChessDelegate {
     private val socketHost = "127.0.0.1"
     private val socketPort: Int = 50000
     private val socketGuestPort: Int = 50001 // used for socket server on emulator
@@ -39,7 +34,7 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_stockfish)
 
         chessView = findViewById<ChessView>(R.id.chess_view)
         resetButton = findViewById<Button>(R.id.reset_button)
@@ -54,6 +49,7 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
             listenButton.isEnabled = true
         }
 
+        /*
         listenButton.setOnClickListener {
             listenButton.isEnabled = false
             val port = if (isEmulator) socketGuestPort else socketPort
@@ -72,7 +68,7 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         }
 
         connectButton.setOnClickListener {
-            Log.d(TAG, "socket client connecting ...")
+            Log.d("LOG", "socket client connecting ...")
             Executors.newSingleThreadExecutor().execute {
                 try {
                     val socket = Socket(socketHost, socketPort)
@@ -84,8 +80,10 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
                 }
             }
         }
+        */
     }
 
+    /*
     private fun receiveMove(socket: Socket) {
         val scanner = Scanner(socket.getInputStream())
         printWriter = PrintWriter(socket.getOutputStream(), true)
@@ -97,17 +95,26 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
             }
         }
     }
+    */
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
     override fun movePiece(from: Square, to: Square) {
+
         if (!ChessGame.canMove(from, to)) {
             Log.w("warning: ", "mossa errata")
             return
         }
+
+        ChessGame.waitTurn = true
+
+        //TODO? ChessGame.highlightLastMove(from, to)
+        //chessView.invalidate()
+
         ChessGame.movePiece(from, to)
         ChessGame.moveNum++
         chessView.invalidate()
+
         val moveStr = "${from.col},${from.row},${to.col},${to.row}"
         //Log.i("moveStr", moveStr)
         //Log.i("from, to", "$from, $to")
@@ -118,43 +125,13 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         Log.i("!", "############# BLACK TURN #############")
         Log.i("!", "######################################")
 
-        //var stockfishHelloWorld = getHelloWorldFromStockfishAPI()
-        //Log.i("RETURN VALUE STOCKFISH:", stockfishHelloWorld)
-
         sendMoveToStockfish(ChessGame.boardToFen())
 
-        //var stockfishAnswer = sendMoveToStockfish(ChessGame.boardToFen())
-        //Log.i("Stockfish says", stockfishAnswer)
-
-        //TODO: catch API errors
-
-        //makeStockfishMove("e7e5")
-        //Thread.sleep(2_000)
-        //makeStockfishMove(stockfishAnswer)
-
-        printWriter?.let {
+/*        printWriter?.let {
             Executors.newSingleThreadExecutor().execute {
                 it.println(moveStr)
             }
-        }
-    }
-
-    fun getHelloWorldFromStockfishAPI() {
-        // Instantiate the RequestQueue.
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://chess.apurn.com"
-
-        // Request a string response from the provided URL.
-        val stringRequest = StringRequest(Request.Method.GET, url,
-                Response.Listener<String> { response ->
-                    Log.i("STOCKFISH SAYS", response.toString())
-                },
-                Response.ErrorListener { error ->
-                    Log.e("STOCKFISH ERROR!!!", error.toString())
-                }
-        )
-
-        queue.add(stringRequest)
+        }*/
     }
 
     fun sendMoveToStockfish(fen: String) {
@@ -163,33 +140,35 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
 
         // NB: usa StringRequest (anziché JsonObjectRequest), ma con override di body e headers
         val stringRequest : StringRequest =
-            object : StringRequest(Method.POST, url,
-                 Response.Listener<String> { response ->
-                    Log.i("STOCKFISH SAYS", response.toString())
-                     makeStockfishMove(response)    //fa la mossa del nero
-                },
-                Response.ErrorListener { error ->
-                    Log.e("STOCKFISH ERROR!!!", error.toString())
+                object : StringRequest(Method.POST, url,
+                        Response.Listener<String> { response ->
+                            Log.i("STOCKFISH SAYS", response.toString())
+                            makeStockfishMove(response)    //fa la mossa del nero
+                        },
+                        Response.ErrorListener { error ->
+                            Log.e("STOCKFISH ERROR!", error.toString())
+                            Toast.makeText(this, "End of match: Stockfish can't make any sense of this position", Toast.LENGTH_LONG).show()
+                            //TODO: catch API errors
+                        }
+                ) {
+                    override fun getBody(): ByteArray? {
+                        var fenba = fen.toByteArray(Charsets.UTF_8)
+                        //Log.i("fenba", fenba.toString(Charsets.UTF_8))
+                        return fenba
+                    }
+                    override fun getHeaders(): MutableMap<String, String> {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "text/plain"  //essenziale!!!
+                        return headers
+                    }
                 }
-        ) {
-            override fun getBody(): ByteArray? {
-                var fenba = fen.toByteArray(Charsets.UTF_8)
-                //Log.i("BBBBBBBAAAAAAA", fenba.toString(Charsets.UTF_8))
-                return fenba
-            }
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "text/plain"  //essenziale!!!
-                return headers
-            }
-        }
 
         queue.add(stringRequest)
     }
 
     fun makeStockfishMove(move: String) {
         //Log.i("move: ", move)
-        assert(move.length==4)
+        assert(move.length>=4)  //è 5 in caso di promozione! (es: e2f1q)
         var fromCol = 0
         var firstChar = move.substring(0,1)
         when (firstChar) {
@@ -223,11 +202,15 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
 
         if (!ChessGame.canMove(fromSquare, toSquare)) {
             Log.e("error: ", "Stockfish sta cercando di fare una mossa errata! :(")
+            Toast.makeText(this, "Stockfish sta cercando di fare una mossa errata! :(", Toast.LENGTH_LONG).show()
         }
 
         ChessGame.movePiece(fromSquare, toSquare)
         ChessGame.moveNum++
         chessView.invalidate()
+
+        ChessGame.waitTurn = false
+
         Log.i("PGN", ChessGame.pgnBoard())
         Log.i("FEN", ChessGame.boardToFen())
 
