@@ -182,22 +182,34 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return ""
     }
 
-    fun arrocco(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :Boolean{
+    fun arrocco(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :String{
         if (movingPiece!!.chessman.equals(Chessman.KING)) {
             if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==6 && row==0) {
-                return true
+                return "whiteshort"
             }
             if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==2 && row==0) {
-                return true
+                return "whitelong"
             }
             if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==6 && row==7) {
-                return true
+                return "blackshort"
             }
             if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==2 && row==7) {
-                return true
+                return "blacklong"
             }
         }
-        return false
+        return ""
+    }
+
+    fun removeEnpassantPawn(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) {
+        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
+            if(fromCol!=col){
+                Log.e("fuoriEnpassant",ChessGame.pieceAt(col, row).toString())
+                if(ChessGame.pieceAt(col, row)==null){
+                    Log.e("Enpassant","sono qua"+col.toString()+fromRow.toString())
+                    ChessGame.piecesBox.remove(ChessGame.pieceAt(col,fromRow))
+                }
+            }
+        }
     }
 
 
@@ -243,7 +255,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                             job.join()
                             Log.e("check2", check.toString());
                             var arrocco_check=arrocco(movingPiece,fromRow,fromCol,row,col)
-                            if(check== true && arrocco_check==false){
+
+                            if(check==true){
+
+                                removeEnpassantPawn(movingPiece,fromRow,fromCol,row,col)
 
                                 Log.e("removing piece _parte2", movingPiece.toString())
                                 ChessGame.piecesBox.remove(movingPiece)
@@ -259,44 +274,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     }
                                 }
 
-
-                                if(movingPiece!=null) {
-                                    ChessGame.pieceAt(col, row)?.let {
-                                        if (it.player != movingPiece?.player) {
-                                            ChessGame.piecesBox.remove(it)
-                                        }
-                                    }
+                                when (arrocco_check) {
+                                    "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
+                                    "whitelong" -> ChessGame.movePiece(0,0,3,0)
+                                    "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
+                                    "blacklong" -> ChessGame.movePiece(0,7,3,7)
                                 }
-                            }
-                            if(check== true && arrocco_check==true){
 
-                                var arrocco_Piece: ChessPiece? = null
-                                ChessGame.piecesBox.remove(movingPiece)
-                                ChessGame.piecesBox.remove(arrocco_Piece!!.copy(col = 7, row = 0, moved = true))
-
-
-                                if(promozione.equals("")) {
-                                    movingPiece?.let {
-                                        ChessGame.addPiece(
-                                            it.copy(
-                                                col = col,
-                                                row = row,
-                                                moved = true
-                                            )
-                                        )
-                                    }
-                                    ChessGame.addPiece(
-                                        arrocco_Piece!!.copy(
-                                            chessman = Chessman.ROOK,
-                                            resID = R.drawable.rook_white,
-                                            col = col-1,
-                                            row = row,
-                                            moved = true
-                                        )
-                                    )
-
-
-                                }
 
 
                                 if(movingPiece!=null) {

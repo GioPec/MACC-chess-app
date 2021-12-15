@@ -68,6 +68,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stockfish)
+        resetStockfish()
 
         chessView = findViewById<ChessView>(R.id.chess_view)
         resetButton = findViewById<Button>(R.id.reset_button)
