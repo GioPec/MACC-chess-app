@@ -5,7 +5,7 @@ import android.util.Log
 import kotlin.math.abs
 
 object ChessGame {
-    private var piecesBox = mutableSetOf<ChessPiece>()
+    var piecesBox = mutableSetOf<ChessPiece>()
 
     var moveNum = 0 //num of moves in game
 
@@ -259,7 +259,7 @@ object ChessGame {
         return pieceAt(square.col, square.row)
     }
 
-    private fun pieceAt(col: Int, row: Int): ChessPiece? {
+    fun pieceAt(col: Int, row: Int): ChessPiece? {
         for (piece in piecesBox) {
             if (col == piece.col && row == piece.row) {
                 return piece

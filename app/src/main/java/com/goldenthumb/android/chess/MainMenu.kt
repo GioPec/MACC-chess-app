@@ -27,21 +27,25 @@ class MainMenu : AppCompatActivity()  {
 
     fun getHelloWorldFromStockfishAPI() {
         val queue = Volley.newRequestQueue(this)
-        val url = "https://chess.apurn.com"
+        val url = "https://giacomovenneri.pythonanywhere.com/hello/"
 
         val stringRequest = StringRequest(Request.Method.GET, url,
+
                 Response.Listener<String> { response ->
-                    if (response.equals("Hello, World!")) {
-                        StockfishStatus.setText("Stockfish API is online!")
+                    response.subSequence(1,3)
+
+                    if (response.subSequence(1,3).equals("OK")) {
+                        StockfishStatus.setText("Chess API is online!")
                     }
                     else {
-                        StockfishStatus.setText("Unexpected result from Stockfish API! :(")
+                        StockfishStatus.setText("Chess API is offline! ")
                     }
-                },
-                Response.ErrorListener { error ->
-                    StockfishStatus.setText("Stockfish API is offline! :(")
-                    StockfishStatus.setTextColor(Color.RED)
                 }
+                ,Response.ErrorListener { error ->
+                    StockfishStatus.setText("Chess API"+error)
+                    StockfishStatus.setTextColor(Color.RED)
+                },
+
         )
         queue.add(stringRequest)
     }

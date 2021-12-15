@@ -3,6 +3,7 @@ package com.goldenthumb.android.chess
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
@@ -18,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -27,21 +29,41 @@ import java.util.*
 
 
 class StockfishGame : AppCompatActivity(), ChessDelegate {
-    private val socketHost = "127.0.0.1"
-    private val socketPort: Int = 50000
-    private val socketGuestPort: Int = 50001 // used for socket server on emulator
+
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
     private lateinit var listenButton: Button
     private lateinit var connectButton: Button
-    private var printWriter: PrintWriter? = null
-    private var serverSocket: ServerSocket? = null
-    private val isEmulator = Build.FINGERPRINT.contains("generic")
+
+    //private var serverSocket: ServerSocket? = null
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var speechRecognizerIntent: Intent? = null
     private lateinit var editText: EditText
     private lateinit var button: ImageView
+
+    override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
+
+    var initial_position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    fun resetStockfish() {
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://giacomovenneri.pythonanywhere.com/reset/"
+
+        val stringRequest = StringRequest(Request.Method.GET, url,
+
+            Response.Listener<String> { response ->
+                if (response.equals(initial_position)) {
+                    Log.i("Info","Succesful reset")
+                }
+            }
+            ,Response.ErrorListener { error ->
+                Log.e("Error","Reset error")
+            },
+
+            )
+        queue.add(stringRequest)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,9 +81,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         resetButton.setOnClickListener {
             ChessGame.reset()
+            resetStockfish()
             chessView.invalidate()
-            serverSocket?.close()
+            //serverSocket?.close()
             listenButton.isEnabled = true
+
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -184,7 +208,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         editText.setText(move)
 
         var squares = convertMoveStringToSquares(move)
-        assert(ChessGame.canMove(squares[0], squares[1]))
+
+        //METTERE CHIAMATA API
+        //assert(ChessGame.canMove(squares[0], squares[1]))
 
         //TODO chiedere conferma della mossa
         //ChessGame.movePiece(squares[0], squares[1])
@@ -219,74 +245,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         else Log.e("E", "error2")
     }
 
-    override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
-    override fun movePiece(from: Square, to: Square) {
 
-        if (!ChessGame.canMove(from, to)) {
-            Log.w("warning: ", "mossa errata")
-            return
-        }
 
-        ChessGame.waitTurn = true
 
-        //TODO? ChessGame.highlightLastMove(from, to)
-        //chessView.invalidate()
 
-        ChessGame.movePiece(from, to)
-        ChessGame.moveNum++
-        chessView.invalidate()
-
-        val moveStr = "${from.col},${from.row},${to.col},${to.row}"
-        //Log.i("moveStr", moveStr)
-        //Log.i("from, to", "$from, $to")
-        Log.i("PGN", ChessGame.pgnBoard())
-        Log.i("FEN", ChessGame.boardToFen())
-
-        Log.i("!", "######################################")
-        Log.i("!", "############# BLACK TURN #############")
-        Log.i("!", "######################################")
-
-        sendMoveToStockfish(ChessGame.boardToFen())
-
-/*        printWriter?.let {
-            Executors.newSingleThreadExecutor().execute {
-                it.println(moveStr)
-            }
-        }*/
-    }
-
-    fun sendMoveToStockfish(fen: String) {
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://chess.apurn.com/nextmove"
-
-        // NB: usa StringRequest (anziché JsonObjectRequest), ma con override di body e headers
-        val stringRequest : StringRequest =
-                object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
-                            Log.i("STOCKFISH SAYS", response.toString())
-                            makeStockfishMove(response)    //fa la mossa del nero
-                        },
-                        Response.ErrorListener { error ->
-                            Log.e("STOCKFISH ERROR!", error.toString())
-                            Toast.makeText(this, "End of match: Stockfish can't make any sense of this position", Toast.LENGTH_LONG).show()
-                            //TODO: catch API errors
-                        }
-                ) {
-                    override fun getBody(): ByteArray? {
-                        var fenba = fen.toByteArray(Charsets.UTF_8)
-                        //Log.i("fenba", fenba.toString(Charsets.UTF_8))
-                        return fenba
-                    }
-                    override fun getHeaders(): MutableMap<String, String> {
-                        val headers = HashMap<String, String>()
-                        headers["Content-Type"] = "text/plain"  //essenziale!!!
-                        return headers
-                    }
-                }
-
-        queue.add(stringRequest)
-    }
 
     fun convertMoveStringToSquares(move: String): Array<Square> {
 
@@ -325,26 +288,28 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         return arrayOf(fromSquare, toSquare)
     }
 
-    fun makeStockfishMove(move: String) {
 
-        var squares = convertMoveStringToSquares(move)
+    public fun sendMovetoStockfish(move: String) {
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://giacomovenneri.pythonanywhere.com/?move="+move;
 
-        if (!ChessGame.canMove(squares[0], squares[1])) {
-            Log.e("error: ", "Stockfish sta cercando di fare una mossa errata! :(")
-            Toast.makeText(this, "Stockfish sta cercando di fare una mossa errata! :(", Toast.LENGTH_LONG).show()
-        }
+        val stringRequest = StringRequest(
+            Request.Method.POST, url,
 
-        ChessGame.movePiece(squares[0], squares[1])
-        ChessGame.moveNum++
-        chessView.invalidate()
+            Response.Listener { response ->
+                Log.e("ciao",response)
+            }
+            ,
+            Response.ErrorListener { error ->
+                Log.e("ciaoa", error.toString())
+            },
 
-        ChessGame.waitTurn = false
-
-        Log.i("PGN", ChessGame.pgnBoard())
-        Log.i("FEN", ChessGame.boardToFen())
-
-        Log.i("!", "######################################")
-        Log.i("!", "############# WHITE TURN #############")
-        Log.i("!", "######################################")
+            )
+        queue.add(stringRequest)
     }
+
+    override fun movePiece(from: Square, to: Square) {
+
+    }
+
 }

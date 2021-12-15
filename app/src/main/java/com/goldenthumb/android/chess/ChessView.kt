@@ -3,10 +3,26 @@ package com.goldenthumb.android.chess
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.JsonReader
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 import kotlin.math.min
+import com.android.volley.toolbox.RequestFuture
+import kotlinx.coroutines.*
+import org.json.JSONArray
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Main
+
 
 class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val scaleFactor = 1.0f
@@ -61,7 +77,132 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         drawPieces(canvas)
     }
 
+    fun IntegerPosition_toString(move: Int, tipo:String): String{
+
+        //assert(move>=0 && move<=7)
+        var Converted = "To_Convert"
+        if(tipo.equals("column")) {
+            when (move) {
+                0 -> Converted = "a"
+                1 -> Converted = "b"
+                2 -> Converted = "c"
+                3 -> Converted = "d"
+                4 -> Converted = "e"
+                5 -> Converted = "f"
+                6 -> Converted = "g"
+                7 -> Converted = "h"
+
+            }
+        }else if (tipo.equals("row")){
+            when (move) {
+                0 -> Converted = "1"
+                1 -> Converted = "2"
+                2 -> Converted = "3"
+                3 -> Converted = "4"
+                4 -> Converted = "5"
+                5 -> Converted = "6"
+                6 -> Converted = "7"
+                7 -> Converted = "8"
+            }
+        }
+
+        return Converted
+    }
+
+    fun ask_move(from_column: Int, from_row: Int, to_column:Int, to_row: Int, prom: String = ""):Boolean? {
+
+        var usable_from_colum= IntegerPosition_toString(from_column,"column");
+        var usable_from_row= IntegerPosition_toString(from_row,"row");
+        var usable_to_colum= IntegerPosition_toString(to_column,"column");
+        var usable_to_row= IntegerPosition_toString(to_row,"row");
+
+        var name="https://giacomovenneri.pythonanywhere.com/?move=" +
+                ""+usable_from_colum+usable_from_row+usable_to_colum+usable_to_row+prom
+
+        val url = URL(name)
+        val conn = url.openConnection() as HttpsURLConnection
+        var chek_validity=false;
+
+        try {
+            conn.run {
+                requestMethod="POST"
+                val r = JSONObject(InputStreamReader(inputStream).readText())
+                var res = ""
+                Log.i("info",r.toString())
+                chek_validity = r.get("valid") as Boolean
+
+                //chek_validity = res.equals("true")
+
+                //Log.i("ask_move", res)
+                Log.i("equals", chek_validity.toString())
+
+                return chek_validity
+            }
+        }
+        catch (e: Exception){
+            Log.i("Error ask move",""+e.toString())
+        }
+        return null
+    }
+
+    fun promozione(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :String{
+        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
+            if (movingPiece!!.player.equals(Player.WHITE) && fromRow==6 && row==7) {
+                ChessGame.piecesBox.remove(movingPiece)
+
+                ChessGame.addPiece(
+                    movingPiece!!.copy(
+                        chessman = Chessman.QUEEN,
+                        resID = R.drawable.chess_qlt60,
+                        col = col,
+                        row = row,
+                        moved = true
+                    )
+                )
+                return "Q"
+                invalidate()
+
+            }
+            else if (movingPiece!!.player.equals(Player.BLACK) && fromRow==1 && row==0) {
+                ChessGame.piecesBox.remove(movingPiece)
+
+                ChessGame.addPiece(
+                    movingPiece!!.copy(
+                        chessman = Chessman.QUEEN,
+                        resID = R.drawable.chess_qdt60,
+                        col = col,
+                        row = row,
+                        moved = true
+                    )
+                )
+                return "q"
+                invalidate()
+            }
+        }
+        return ""
+    }
+
+    fun arrocco(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :Boolean{
+        if (movingPiece!!.chessman.equals(Chessman.KING)) {
+            if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==6 && row==0) {
+                return true
+            }
+            if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==2 && row==0) {
+                return true
+            }
+            if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==6 && row==7) {
+                return true
+            }
+            if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==2 && row==7) {
+                return true
+            }
+        }
+        return false
+    }
+
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+
         event ?: return false
 
         when (event.action) {
@@ -79,12 +220,98 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 movingPieceY = event.y
                 invalidate()
             }
+
             MotionEvent.ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
                 if (fromCol != col || fromRow != row) {
-                    if (!ChessGame.waitTurn) {  //wait for black move
-                        chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
+                    if (!ChessGame.waitTurn) {
+                        //chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
+
+                        var promozione=promozione(movingPiece,fromRow,fromCol,row,col)
+                        Log.e("removing piece", movingPiece.toString())
+
+
+                        var check: Boolean? = null
+                        val job =GlobalScope.launch {
+                            val c1 = async { ask_move(fromCol, fromRow, col, row, promozione) }
+                            check = c1.await()
+                            Log.e("check", check.toString());
+                        }
+
+                        runBlocking {
+                            job.join()
+                            Log.e("check2", check.toString());
+                            var arrocco_check=arrocco(movingPiece,fromRow,fromCol,row,col)
+                            if(check== true && arrocco_check==false){
+
+                                Log.e("removing piece _parte2", movingPiece.toString())
+                                ChessGame.piecesBox.remove(movingPiece)
+                                if(promozione.equals("")) {
+                                    movingPiece?.let {
+                                        ChessGame.addPiece(
+                                            it.copy(
+                                                col = col,
+                                                row = row,
+                                                moved = true
+                                            )
+                                        )
+                                    }
+                                }
+
+
+                                if(movingPiece!=null) {
+                                    ChessGame.pieceAt(col, row)?.let {
+                                        if (it.player != movingPiece?.player) {
+                                            ChessGame.piecesBox.remove(it)
+                                        }
+                                    }
+                                }
+                            }
+                            if(check== true && arrocco_check==true){
+
+                                var arrocco_Piece: ChessPiece? = null
+                                ChessGame.piecesBox.remove(movingPiece)
+                                ChessGame.piecesBox.remove(arrocco_Piece!!.copy(col = 7, row = 0, moved = true))
+
+
+                                if(promozione.equals("")) {
+                                    movingPiece?.let {
+                                        ChessGame.addPiece(
+                                            it.copy(
+                                                col = col,
+                                                row = row,
+                                                moved = true
+                                            )
+                                        )
+                                    }
+                                    ChessGame.addPiece(
+                                        arrocco_Piece!!.copy(
+                                            chessman = Chessman.ROOK,
+                                            resID = R.drawable.rook_white,
+                                            col = col-1,
+                                            row = row,
+                                            moved = true
+                                        )
+                                    )
+
+
+                                }
+
+
+                                if(movingPiece!=null) {
+                                    ChessGame.pieceAt(col, row)?.let {
+                                        if (it.player != movingPiece?.player) {
+                                            ChessGame.piecesBox.remove(it)
+                                        }
+                                    }
+                                }
+
+
+                            }
+                        }
+
+                        Log.e("check3", check.toString());
                     }
                 }
                 movingPiece = null
@@ -93,6 +320,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             }
         }
         return true
+
     }
 
     private fun drawPieces(canvas: Canvas) {
