@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chess">
 
+        <activity android:name=".LocalGame"
+            android:screenOrientation="portrait">
+        </activity>
+
         <activity android:name=".StockfishGame"
             android:screenOrientation="portrait">
         </activity>

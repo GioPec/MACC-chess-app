@@ -23,7 +23,6 @@ import javax.net.ssl.HttpsURLConnection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 
-
 class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val scaleFactor = 1.0f
     private var originX = 20f
@@ -59,93 +58,69 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         loadBitmaps()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val smaller = min(widthMeasureSpec, heightMeasureSpec)
-        setMeasuredDimension(smaller, smaller)
-    }
+    /////////// CHESS RULES FUNCTIONS //////////////////////////////////////////////////////////////
 
-    override fun onDraw(canvas: Canvas?) {
-        canvas ?: return
-
-        val chessBoardSide = min(width, height) * scaleFactor
-        cellSide = chessBoardSide / 8f
-        originX = (width - chessBoardSide) / 2f
-        originY = (height - chessBoardSide) / 2f
-
-        drawChessboard(canvas)
-        drawPieces(canvas)
-    }
-
-    fun IntegerPosition_toString(move: Int, tipo:String): String{
-
+    fun convertRowColFromIntToString(move: Int, type:String): String {
         //assert(move>=0 && move<=7)
-        var Converted = "To_Convert"
-        if(tipo.equals("column")) {
+        var converted = ""
+        if (type.equals("column")) {
             when (move) {
-                0 -> Converted = "a"
-                1 -> Converted = "b"
-                2 -> Converted = "c"
-                3 -> Converted = "d"
-                4 -> Converted = "e"
-                5 -> Converted = "f"
-                6 -> Converted = "g"
-                7 -> Converted = "h"
+                0 -> converted = "a"
+                1 -> converted = "b"
+                2 -> converted = "c"
+                3 -> converted = "d"
+                4 -> converted = "e"
+                5 -> converted = "f"
+                6 -> converted = "g"
+                7 -> converted = "h"
 
             }
-        }else if (tipo.equals("row")){
+        } else if (type.equals("row")){
             when (move) {
-                0 -> Converted = "1"
-                1 -> Converted = "2"
-                2 -> Converted = "3"
-                3 -> Converted = "4"
-                4 -> Converted = "5"
-                5 -> Converted = "6"
-                6 -> Converted = "7"
-                7 -> Converted = "8"
+                0 -> converted = "1"
+                1 -> converted = "2"
+                2 -> converted = "3"
+                3 -> converted = "4"
+                4 -> converted = "5"
+                5 -> converted = "6"
+                6 -> converted = "7"
+                7 -> converted = "8"
             }
         }
-
-        return Converted
+        return converted
     }
 
-    fun ask_move(from_column: Int, from_row: Int, to_column:Int, to_row: Int, prom: String = ""):Boolean? {
+    fun checkMoveValidity(fromCol:Int, fromRow:Int, toCol:Int, toRow:Int, prom:String=""):Boolean? {
 
-        var usable_from_colum= IntegerPosition_toString(from_column,"column");
-        var usable_from_row= IntegerPosition_toString(from_row,"row");
-        var usable_to_colum= IntegerPosition_toString(to_column,"column");
-        var usable_to_row= IntegerPosition_toString(to_row,"row");
+        var usableFromColumn = convertRowColFromIntToString(fromCol,"column");
+        var usableFromRow = convertRowColFromIntToString(fromRow,"row");
+        var usableToCol = convertRowColFromIntToString(toCol,"column");
+        var usableToRow = convertRowColFromIntToString(toRow,"row");
 
         var name="https://giacomovenneri.pythonanywhere.com/?move=" +
-                ""+usable_from_colum+usable_from_row+usable_to_colum+usable_to_row+prom
+                "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom
 
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
-        var chek_validity=false;
+        var checkValidity = false;
 
         try {
             conn.run {
                 requestMethod="POST"
                 val r = JSONObject(InputStreamReader(inputStream).readText())
-                var res = ""
-                Log.i("info",r.toString())
-                chek_validity = r.get("valid") as Boolean
-
-                //chek_validity = res.equals("true")
-
-                //Log.i("ask_move", res)
-                Log.i("equals", chek_validity.toString())
-
-                return chek_validity
+                Log.d("info", r.toString())
+                checkValidity = r.get("valid") as Boolean
+                Log.d("equals", checkValidity.toString())
+                return checkValidity
             }
         }
         catch (e: Exception){
-            Log.i("Error ask move",""+e.toString())
+            Log.e("Move error: ", e.toString())
         }
         return null
     }
 
-    fun promozione(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :String{
+    fun promotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
         if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
             if (movingPiece!!.player.equals(Player.WHITE) && fromRow==6 && row==7) {
                 ChessGame.piecesBox.remove(movingPiece)
@@ -155,8 +130,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         chessman = Chessman.QUEEN,
                         resID = R.drawable.chess_qlt60,
                         col = col,
-                        row = row,
-                        moved = true
+                        row = row
                     )
                 )
                 return "Q"
@@ -171,8 +145,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         chessman = Chessman.QUEEN,
                         resID = R.drawable.chess_qdt60,
                         col = col,
-                        row = row,
-                        moved = true
+                        row = row
                     )
                 )
                 return "q"
@@ -182,7 +155,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return ""
     }
 
-    fun arrocco(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) :String{
+    fun castle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
         if (movingPiece!!.chessman.equals(Chessman.KING)) {
             if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==6 && row==0) {
                 return "whiteshort"
@@ -200,111 +173,34 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return ""
     }
 
-    fun removeEnpassantPawn(movingPiece:ChessPiece? ,fromRow:Int ,fromCol:Int ,row: Int, col:Int) {
+    fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
         if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
             if(fromCol!=col){
-                Log.e("fuoriEnpassant",ChessGame.pieceAt(col, row).toString())
                 if(ChessGame.pieceAt(col, row)==null){
-                    Log.e("Enpassant","sono qua"+col.toString()+fromRow.toString())
                     ChessGame.piecesBox.remove(ChessGame.pieceAt(col,fromRow))
                 }
             }
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val smaller = min(widthMeasureSpec, heightMeasureSpec)
+        setMeasuredDimension(smaller, smaller)
+    }
 
-        event ?: return false
+    override fun onDraw(canvas: Canvas?) {
+        canvas ?: return
 
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                fromCol = ((event.x - originX) / cellSide).toInt()
-                fromRow = 7 - ((event.y - originY) / cellSide).toInt()
+        val chessBoardSide = min(width, height) * scaleFactor
+        cellSide = chessBoardSide / 8f
+        originX = (width - chessBoardSide) / 2f
+        originY = (height - chessBoardSide) / 2f
 
-                chessDelegate?.pieceAt(Square(fromCol, fromRow))?.let {
-                    movingPiece = it
-                    movingPieceBitmap = bitmaps[it.resID]
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                movingPieceX = event.x
-                movingPieceY = event.y
-                invalidate()
-            }
-
-            MotionEvent.ACTION_UP -> {
-                val col = ((event.x - originX) / cellSide).toInt()
-                val row = 7 - ((event.y - originY) / cellSide).toInt()
-                if (fromCol != col || fromRow != row) {
-                    if (!ChessGame.waitTurn) {
-                        //chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
-
-                        var promozione=promozione(movingPiece,fromRow,fromCol,row,col)
-                        Log.e("removing piece", movingPiece.toString())
-
-
-                        var check: Boolean? = null
-                        val job =GlobalScope.launch {
-                            val c1 = async { ask_move(fromCol, fromRow, col, row, promozione) }
-                            check = c1.await()
-                            Log.e("check", check.toString());
-                        }
-
-                        runBlocking {
-                            job.join()
-                            Log.e("check2", check.toString());
-                            var arrocco_check=arrocco(movingPiece,fromRow,fromCol,row,col)
-
-                            if(check==true){
-
-                                removeEnpassantPawn(movingPiece,fromRow,fromCol,row,col)
-
-                                Log.e("removing piece _parte2", movingPiece.toString())
-                                ChessGame.piecesBox.remove(movingPiece)
-                                if(promozione.equals("")) {
-                                    movingPiece?.let {
-                                        ChessGame.addPiece(
-                                            it.copy(
-                                                col = col,
-                                                row = row,
-                                                moved = true
-                                            )
-                                        )
-                                    }
-                                }
-
-                                when (arrocco_check) {
-                                    "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
-                                    "whitelong" -> ChessGame.movePiece(0,0,3,0)
-                                    "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
-                                    "blacklong" -> ChessGame.movePiece(0,7,3,7)
-                                }
-
-
-
-                                if(movingPiece!=null) {
-                                    ChessGame.pieceAt(col, row)?.let {
-                                        if (it.player != movingPiece?.player) {
-                                            ChessGame.piecesBox.remove(it)
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-
-                        Log.e("check3", check.toString());
-                    }
-                }
-                movingPiece = null
-                movingPieceBitmap = null
-                invalidate()
-            }
-        }
-        return true
-
+        drawChessboard(canvas)
+        drawPieces(canvas)
     }
 
     private fun drawPieces(canvas: Canvas) {
@@ -338,5 +234,164 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor
         canvas.drawRect(originX + col * cellSide, originY + row * cellSide, originX + (col + 1)* cellSide, originY + (row + 1) * cellSide, paint)
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        event ?: return false
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                fromCol = ((event.x - originX) / cellSide).toInt()
+                fromRow = 7 - ((event.y - originY) / cellSide).toInt()
+
+                chessDelegate?.pieceAt(Square(fromCol, fromRow))?.let {
+                    movingPiece = it
+                    movingPieceBitmap = bitmaps[it.resID]
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                movingPieceX = event.x
+                movingPieceY = event.y
+                invalidate()
+            }
+
+            MotionEvent.ACTION_UP -> {
+                val col = ((event.x - originX) / cellSide).toInt()
+                val row = 7 - ((event.y - originY) / cellSide).toInt()
+                if (fromCol != col || fromRow != row) {
+
+                    if (!ChessGame.waitTurn) {
+
+                        var promotionCheck = promotion(movingPiece,fromRow,fromCol,row,col)
+
+                        var moveIsValid: Boolean? = null
+                        val job = GlobalScope.launch {
+                            val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
+                            moveIsValid = c1.await()
+                        }
+
+                        runBlocking {
+                            job.join()
+
+                            if(moveIsValid!!) {
+
+                                removeEnpassantPawn(movingPiece,fromRow,fromCol,row,col)
+
+                                var castleCheck = castle(movingPiece,fromRow,fromCol,row,col)
+                                when (castleCheck) {
+                                    "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
+                                    "whitelong" -> ChessGame.movePiece(0,0,3,0)
+                                    "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
+                                    "blacklong" -> ChessGame.movePiece(0,7,3,7)
+                                }
+
+                                ChessGame.piecesBox.remove(movingPiece)
+                                if (promotionCheck.equals("")) {
+                                    movingPiece?.let {
+                                        ChessGame.addPiece(
+                                                it.copy(
+                                                        col = col,
+                                                        row = row
+                                                )
+                                        )
+                                    }
+                                }
+
+                                if (movingPiece != null) {
+                                    ChessGame.pieceAt(col, row)?.let {
+                                        if (it.player != movingPiece?.player) {
+                                            ChessGame.piecesBox.remove(it)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (moveIsValid!! && ChessGame.gameInProgress == "STOCKFISH") {
+                            var stockfishBestMove = ""
+                            val job2 = GlobalScope.launch {
+                                val c2 = async {
+                                    // Get best move from Stockfish itself...
+                                    var name = "https://giacomovenneri.pythonanywhere.com/"
+                                    var url = URL(name)
+                                    var conn = url.openConnection() as HttpsURLConnection
+                                    try {
+                                        conn.run {
+                                            requestMethod = "GET"
+                                            stockfishBestMove = InputStreamReader(inputStream).readText().replace("\"", "")
+                                            Log.i("Stockfish best move", stockfishBestMove)
+                                            assert(stockfishBestMove.length >= 4 && stockfishBestMove.length <= 5)
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("Move error", e.toString())
+                                    }
+                                    //...and then play it
+                                    var name2 = "https://giacomovenneri.pythonanywhere.com/?move=$stockfishBestMove"
+                                    val url2 = URL(name2)
+                                    val conn2 = url2.openConnection() as HttpsURLConnection
+                                    try {
+                                        conn2.run {
+                                            requestMethod = "POST"
+                                            val r = InputStreamReader(inputStream).readText()
+                                            Log.d("Info", r)
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("Move error", e.toString())
+                                    }
+                                }
+                                c2.await()
+                            }
+
+                            runBlocking{
+                                job2.join()
+                                var squares = ChessGame.convertMoveStringToSquares(stockfishBestMove)
+                                movingPiece = ChessGame.pieceAt(squares[0])
+
+                                var promotionCheck = promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                removeEnpassantPawn(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                var castleCheck = castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                when (castleCheck) {
+                                    "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
+                                    "whitelong" -> ChessGame.movePiece(0,0,3,0)
+                                    "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
+                                    "blacklong" -> ChessGame.movePiece(0,7,3,7)
+                                }
+
+                                ChessGame.piecesBox.remove(movingPiece)
+                                if (promotionCheck.equals("")) {
+                                    movingPiece?.let {
+                                        ChessGame.addPiece(
+                                                it.copy(
+                                                        col = squares[1].col,
+                                                        row = squares[1].row
+                                                )
+                                        )
+                                    }
+                                }
+
+                                if (movingPiece != null) {
+                                    ChessGame.pieceAt(squares[1].col, squares[1].row)?.let {
+                                        if (it.player != movingPiece?.player) {
+                                            ChessGame.piecesBox.remove(it)
+                                        }
+                                    }
+                                }
+                                ChessGame.toString()
+                                invalidate()
+                                ChessGame.waitTurn = false
+                            }
+                        }
+                    }
+                }
+                movingPiece = null
+                movingPieceBitmap = null
+                invalidate()
+                ChessGame.resettedGame = false
+            }
+        }
+        return true
     }
 }

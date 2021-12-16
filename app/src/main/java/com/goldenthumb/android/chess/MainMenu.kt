@@ -17,9 +17,17 @@ class MainMenu : AppCompatActivity()  {
 
     private lateinit var StockfishStatus: TextView
 
+    var resumeButton: Button? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
+
+        resumeButton = findViewById<Button>(R.id.resume_button)
+        Log.i("info", ChessGame.gameInProgress)
+        Log.i("info", ChessGame.resettedGame.toString())
+        if (ChessGame.gameInProgress=="" || ChessGame.resettedGame) resumeButton?.setVisibility(View.GONE)
+        else resumeButton?.setVisibility(View.VISIBLE)  //TODO: fix
 
         StockfishStatus = findViewById<TextView>(R.id.stockfishStatus)
         getHelloWorldFromStockfishAPI()
@@ -50,9 +58,31 @@ class MainMenu : AppCompatActivity()  {
         queue.add(stringRequest)
     }
 
+    /* TODO: ask confirmation to start new game when one is already in progress
+    this should help with popup. https://stackoverflow.com/a/2478662/14126301 */
+
     fun startGameAgainstStockfish(view: View) {
-        //ChessGame.reset()
+        ChessGame.reset()
+        ChessGame.resetStockfishGame()
+        ChessGame.gameInProgress="STOCKFISH"
         startActivity(Intent(this, StockfishGame::class.java))
-        //setContentView(R.layout.activity_stockfish)
+        resumeButton?.setVisibility(View.VISIBLE)
+    }
+
+    fun startGameLocal(view: View) {
+        ChessGame.reset()
+        ChessGame.resetStockfishGame()
+        ChessGame.gameInProgress="LOCAL"
+        startActivity(Intent(this, LocalGame::class.java))
+        resumeButton?.setVisibility(View.VISIBLE)
+    }
+
+    fun resumeGame(view: View) {
+        when (ChessGame.gameInProgress) {
+            "LOCAL" -> startActivity(Intent(this, LocalGame::class.java))
+            "STOCKFISH" -> startActivity(Intent(this, StockfishGame::class.java))
+            "ONLINE" -> return //TODO
+            "" -> return
+        }
     }
 }

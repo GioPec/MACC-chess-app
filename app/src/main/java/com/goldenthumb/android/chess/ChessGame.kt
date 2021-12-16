@@ -2,9 +2,21 @@ package com.goldenthumb.android.chess
 
 import android.graphics.Color
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
+import java.io.InputStreamReader
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 import kotlin.math.abs
 
 object ChessGame {
+
+    var gameInProgress: String = "" //LOCAL, STOCKFISH, ONLINE
+    var resettedGame: Boolean = false
+
     var piecesBox = mutableSetOf<ChessPiece>()
 
     var moveNum = 0 //num of moves in game
@@ -18,6 +30,31 @@ object ChessGame {
 
     init {
         reset()
+    }
+
+    fun resetStockfishGame() {
+        resettedGame = true
+        val job = GlobalScope.launch {
+            val reset = async {
+                var name = "https://giacomovenneri.pythonanywhere.com/reset/"
+                val url = URL(name)
+                val conn = url.openConnection() as HttpsURLConnection
+                try {
+                    conn.run {
+                        requestMethod = "GET"
+                        val r = InputStreamReader(inputStream).readText()
+                        Log.d("Reset", r)
+                    }
+                }
+                catch (e: Exception){
+                    Log.e("Reset error", e.toString())
+                }
+            }
+            reset.await()
+        }
+        runBlocking {
+            job.join()
+        }
     }
 
     fun clear() {
@@ -95,7 +132,7 @@ object ChessGame {
         val deltaCol = abs(from.col - to.col)
         val deltaRow = abs(from.row - to.row)
 
-        if (pieceAt(from)!!.moved==false) { //TODO: condizioni per arrocco
+        if (true) { //pieceAt(from)!!.moved==false //TODO: condizioni per arrocco
             //arrocco lungo
             if (from.col==4 && from.row==0 && to.col==2 && to.row==0) { //bianco
                 if (pieceAt(1,0)!=null || pieceAt(2,0)!=null || pieceAt(3,0)!=null) return false
@@ -210,49 +247,49 @@ object ChessGame {
         if (movingPiece.chessman.equals(Chessman.PAWN)) {
             if (movingPiece.player.equals(Player.WHITE) && fromRow==6 && toRow==7) {
                 piecesBox.remove(movingPiece)
-                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qlt60, col = toCol, row = toRow, moved = true))
+                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qlt60, col = toCol, row = toRow))
                 return
             }
             else if (movingPiece.player.equals(Player.BLACK) && fromRow==1 && toRow==0) {
                 piecesBox.remove(movingPiece)
-                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qdt60, col = toCol, row = toRow, moved = true))
+                addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qdt60, col = toCol, row = toRow))
                 return
             }
         }
 
         piecesBox.remove(movingPiece)
-        addPiece(movingPiece.copy(col = toCol, row = toRow, moved = true))
+        addPiece(movingPiece.copy(col = toCol, row = toRow))
     }
 
     fun reset() {
-        Log.i("!", "######################################")
-        Log.i("!", "############# GAME START #############")
-        Log.i("!", "######################################")
+        //Log.d("!", "######################################")
+        Log.d("!", "############# GAME START #############")
+        //Log.d("!", "######################################")
         moveNum=0
         castlingAvailability = "KQkq"
         waitTurn=false
         clear()
         for (i in 0 until 2) {
-            addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60, false))
-            addPiece(ChessPiece(0 + i * 7, 7, Player.BLACK, Chessman.ROOK, R.drawable.chess_rdt60, false))
+            addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60))
+            addPiece(ChessPiece(0 + i * 7, 7, Player.BLACK, Chessman.ROOK, R.drawable.chess_rdt60))
 
-            addPiece(ChessPiece(1 + i * 5, 0, Player.WHITE, Chessman.KNIGHT, R.drawable.chess_nlt60, false))
-            addPiece(ChessPiece(1 + i * 5, 7, Player.BLACK, Chessman.KNIGHT, R.drawable.chess_ndt60, false))
+            addPiece(ChessPiece(1 + i * 5, 0, Player.WHITE, Chessman.KNIGHT, R.drawable.chess_nlt60))
+            addPiece(ChessPiece(1 + i * 5, 7, Player.BLACK, Chessman.KNIGHT, R.drawable.chess_ndt60))
 
-            addPiece(ChessPiece(2 + i * 3, 0, Player.WHITE, Chessman.BISHOP, R.drawable.chess_blt60, false))
-            addPiece(ChessPiece(2 + i * 3, 7, Player.BLACK, Chessman.BISHOP, R.drawable.chess_bdt60, false))
+            addPiece(ChessPiece(2 + i * 3, 0, Player.WHITE, Chessman.BISHOP, R.drawable.chess_blt60))
+            addPiece(ChessPiece(2 + i * 3, 7, Player.BLACK, Chessman.BISHOP, R.drawable.chess_bdt60))
         }
 
         for (i in 0 until 8) {
-            addPiece(ChessPiece(i, 1, Player.WHITE, Chessman.PAWN, R.drawable.chess_plt60, false))
-            addPiece(ChessPiece(i, 6, Player.BLACK, Chessman.PAWN, R.drawable.chess_pdt60, false))
+            addPiece(ChessPiece(i, 1, Player.WHITE, Chessman.PAWN, R.drawable.chess_plt60))
+            addPiece(ChessPiece(i, 6, Player.BLACK, Chessman.PAWN, R.drawable.chess_pdt60))
         }
 
-        addPiece(ChessPiece(3, 0, Player.WHITE, Chessman.QUEEN, R.drawable.chess_qlt60, false))
-        addPiece(ChessPiece(3, 7, Player.BLACK, Chessman.QUEEN, R.drawable.chess_qdt60, false))
+        addPiece(ChessPiece(3, 0, Player.WHITE, Chessman.QUEEN, R.drawable.chess_qlt60))
+        addPiece(ChessPiece(3, 7, Player.BLACK, Chessman.QUEEN, R.drawable.chess_qdt60))
 
-        addPiece(ChessPiece(4, 0, Player.WHITE, Chessman.KING, R.drawable.chess_klt60, false))
-        addPiece(ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60, false))
+        addPiece(ChessPiece(4, 0, Player.WHITE, Chessman.KING, R.drawable.chess_klt60))
+        addPiece(ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60))
     }
 
     fun pieceAt(square: Square): ChessPiece? {
@@ -360,5 +397,42 @@ object ChessGame {
             }
         } ?: "."
         return res
+    }
+
+    fun convertMoveStringToSquares(move: String): Array<Square> {
+
+        assert(move.length >= 4)  //è 5 in caso di promozione! (es: e2f1q)
+        var fromCol = 0
+        var firstChar = move.substring(0, 1)
+        when (firstChar) {
+            "a" -> fromCol = 0
+            "b" -> fromCol = 1
+            "c" -> fromCol = 2
+            "d" -> fromCol = 3
+            "e" -> fromCol = 4
+            "f" -> fromCol = 5
+            "g" -> fromCol = 6
+            "h" -> fromCol = 7
+        }
+        val fromRow = (move.substring(1, 2).toInt()-1)
+
+        var toCol = 0
+        var thirdChar = move.substring(2, 3)
+        when (thirdChar) {
+            "a" -> toCol = 0
+            "b" -> toCol = 1
+            "c" -> toCol = 2
+            "d" -> toCol = 3
+            "e" -> toCol = 4
+            "f" -> toCol = 5
+            "g" -> toCol = 6
+            "h" -> toCol = 7
+        }
+        val toRow = (move.substring(3, 4).toInt()-1)
+
+        val fromSquare = Square(fromCol, fromRow)
+        val toSquare = Square(toCol, toRow)
+
+        return arrayOf(fromSquare, toSquare)
     }
 }
