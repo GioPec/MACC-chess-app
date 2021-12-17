@@ -108,14 +108,38 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             conn.run {
                 requestMethod="POST"
                 val r = JSONObject(InputStreamReader(inputStream).readText())
-                Log.d("info", r.toString())
+                //Log.d("info", r.toString())
                 checkValidity = r.get("valid") as Boolean
-                Log.d("equals", checkValidity.toString())
+                Log.d("Move validity", checkValidity.toString())
                 return checkValidity
             }
         }
         catch (e: Exception){
             Log.e("Move error: ", e.toString())
+        }
+        return null
+    }
+
+    fun getEvaluation():Pair<String, Integer>? {
+
+        var name="https://giacomovenneri.pythonanywhere.com/info"
+        val url = URL(name)
+        val conn = url.openConnection() as HttpsURLConnection
+        var pair: Pair<String, Integer>? = null
+
+        try {
+            conn.run {
+                requestMethod="GET"
+                val r = JSONObject(InputStreamReader(inputStream).readText())
+                var t = r.get("type") as String
+                var v = r.get("value") as Integer
+                pair = Pair(t,v)
+                Log.d("Evaluation", pair.toString())
+                return pair
+            }
+        }
+        catch (e: Exception){
+            Log.e("Info error", e.toString())
         }
         return null
     }
@@ -257,7 +281,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 movingPieceY = event.y
                 invalidate()
             }
-
             MotionEvent.ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
@@ -299,7 +322,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         )
                                     }
                                 }
-
                                 if (movingPiece != null) {
                                     ChessGame.pieceAt(col, row)?.let {
                                         if (it.player != movingPiece?.player) {
@@ -307,6 +329,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         }
                                     }
                                 }
+                                chessDelegate?.updateTurn(movingPiece!!.player)
                             }
                         }
 
@@ -322,7 +345,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         conn.run {
                                             requestMethod = "GET"
                                             stockfishBestMove = InputStreamReader(inputStream).readText().replace("\"", "")
-                                            Log.i("Stockfish best move", stockfishBestMove)
+                                            Log.d("Stockfish best move", stockfishBestMove)
                                             assert(stockfishBestMove.length >= 4 && stockfishBestMove.length <= 5)
                                         }
                                     } catch (e: Exception) {
@@ -390,6 +413,20 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 movingPieceBitmap = null
                 invalidate()
                 ChessGame.resettedGame = false
+
+                // Get position evaluation
+                if (ChessGame.gameInProgress == "STOCKFISH") {
+                    val job = GlobalScope.launch {
+                        val c = async {
+                            val (evaluationType, evaluationValue) = checkNotNull(getEvaluation())
+                            chessDelegate?.updateProgressBar(evaluationType, evaluationValue)
+                        }
+                        c.await()
+                    }
+                    runBlocking {
+                        job.join()
+                    }
+                }
             }
         }
         return true

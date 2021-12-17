@@ -43,7 +43,7 @@ object ChessGame {
                     conn.run {
                         requestMethod = "GET"
                         val r = InputStreamReader(inputStream).readText()
-                        Log.d("Reset", r)
+                        Log.d("RESET", "")
                     }
                 }
                 catch (e: Exception){

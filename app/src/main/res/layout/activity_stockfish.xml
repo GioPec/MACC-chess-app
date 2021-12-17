@@ -27,6 +27,23 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="34dp"
+        android:layout_height="360dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="4dp"
+        android:animationResolution="2000"
+        android:indeterminate="false"
+        android:max="10000"
+        android:progress="5000"
+        android:progressTint="#555555"
+        android:rotation="90"
+        android:scaleX="9.5"
+        android:scaleY="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -64,9 +81,10 @@
         android:id="@+id/textView3"
         android:layout_width="342dp"
         android:layout_height="25dp"
-        android:layout_marginStart="2dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
         android:layout_weight="1"
-        android:letterSpacing="1.1"
+        android:letterSpacing="1.07"
         android:text="a b c d e f g h"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.507"
