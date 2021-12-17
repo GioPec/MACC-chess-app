@@ -3,25 +3,18 @@ package com.goldenthumb.android.chess
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.JsonReader
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
-import kotlin.math.min
-import com.android.volley.toolbox.RequestFuture
-import kotlinx.coroutines.*
-import org.json.JSONArray
 import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.Main
+import kotlin.math.min
 
 class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val scaleFactor = 1.0f

@@ -6,7 +6,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
 import java.io.InputStreamReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
@@ -34,6 +33,7 @@ object ChessGame {
 
     fun resetStockfishGame() {
         resettedGame = true
+        gameInProgress = ""
         val job = GlobalScope.launch {
             val reset = async {
                 var name = "https://giacomovenneri.pythonanywhere.com/reset/"

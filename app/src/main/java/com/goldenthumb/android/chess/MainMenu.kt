@@ -1,5 +1,7 @@
 package com.goldenthumb.android.chess
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -13,6 +15,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 
+
 class MainMenu : AppCompatActivity()  {
 
     private lateinit var StockfishStatus: TextView
@@ -24,8 +27,8 @@ class MainMenu : AppCompatActivity()  {
         setContentView(R.layout.activity_main_menu)
 
         resumeButton = findViewById<Button>(R.id.resume_button)
-        Log.i("info", ChessGame.gameInProgress)
-        Log.i("info", ChessGame.resettedGame.toString())
+        Log.d("Game in progress", ChessGame.gameInProgress)
+        Log.d("Resetted game", ChessGame.resettedGame.toString())
         if (ChessGame.gameInProgress=="" || ChessGame.resettedGame) resumeButton?.setVisibility(View.GONE)
         else resumeButton?.setVisibility(View.VISIBLE)  //TODO: fix
 
@@ -37,31 +40,44 @@ class MainMenu : AppCompatActivity()  {
         val queue = Volley.newRequestQueue(this)
         val url = "https://giacomovenneri.pythonanywhere.com/hello/"
 
-        val stringRequest = StringRequest(Request.Method.GET, url,
+        val stringRequest = StringRequest(
+                Request.Method.GET, url,
 
                 Response.Listener<String> { response ->
-                    response.subSequence(1,3)
+                    response.subSequence(1, 3)
 
-                    if (response.subSequence(1,3).equals("OK")) {
+                    if (response.subSequence(1, 3).equals("OK")) {
                         StockfishStatus.setText("Chess API is online!")
-                    }
-                    else {
+                    } else {
                         StockfishStatus.setText("Chess API is offline! ")
                     }
-                }
-                ,Response.ErrorListener { error ->
-                    StockfishStatus.setText("Chess API"+error)
+                },
+                Response.ErrorListener { error ->
+                    StockfishStatus.setText("Chess API" + error)
                     StockfishStatus.setTextColor(Color.RED)
                 },
 
-        )
+                )
         queue.add(stringRequest)
     }
 
-    /* TODO: ask confirmation to start new game when one is already in progress
-    this should help with popup. https://stackoverflow.com/a/2478662/14126301 */
-
     fun startGameAgainstStockfish(view: View) {
+        //create interface
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> confirmStockfish()
+                DialogInterface.BUTTON_NEGATIVE -> {}
+            }
+        }
+        //ask user
+        if (ChessGame.gameInProgress!="") {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
+            builder.setMessage("You already have an active game.\nIf you start a new one " +
+                    "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show()
+        } else confirmStockfish()
+    }
+    private fun confirmStockfish() {
         ChessGame.reset()
         ChessGame.resetStockfishGame()
         ChessGame.gameInProgress="STOCKFISH"
@@ -70,6 +86,22 @@ class MainMenu : AppCompatActivity()  {
     }
 
     fun startGameLocal(view: View) {
+        //create interface
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> confirmLocal()
+                DialogInterface.BUTTON_NEGATIVE -> {}
+            }
+        }
+        //ask user
+        if (ChessGame.gameInProgress!="") {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
+            builder.setMessage("You already have an active game.\nIf you start a new one " +
+                    "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show()
+        } else confirmLocal()
+    }
+    private fun confirmLocal() {
         ChessGame.reset()
         ChessGame.resetStockfishGame()
         ChessGame.gameInProgress="LOCAL"

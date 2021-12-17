@@ -1,10 +1,8 @@
 package com.goldenthumb.android.chess
 
 import android.Manifest
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -30,10 +28,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private lateinit var listenButton: Button
     private lateinit var connectButton: Button
     lateinit var progressBar: ProgressBar
-    private var progressAnimator: ObjectAnimator? = null
     private var printWriter: PrintWriter? = null
     private var serverSocket: ServerSocket? = null
-    private val isEmulator = Build.FINGERPRINT.contains("generic")
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var speechRecognizerIntent: Intent? = null
@@ -244,68 +240,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         }
         else {
             Log.e("Evaluation", type + value.toString())
-        } //TODO
+        }
     }
 
     override fun updateTurn(player: Player) {}
-
-    // Old Stockfish API
-    /*
-    fun sendMoveToStockfish(fen: String) {
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://chess.apurn.com/nextmove"
-
-        // NB: usa StringRequest (anziché JsonObjectRequest), ma con override di body e headers
-        val stringRequest : StringRequest =
-                object : StringRequest(Method.POST, url,
-                        Response.Listener<String> { response ->
-                            Log.d("STOCKFISH SAYS", response.toString())
-                            makeStockfishMove(response)    //fa la mossa del nero
-                        },
-                        Response.ErrorListener { error ->
-                            Log.e("STOCKFISH ERROR!", error.toString())
-                            Toast.makeText(this, "End of match: Stockfish can't make any sense of this position", Toast.LENGTH_LONG).show()
-                            //TODO: catch API errors
-                        }
-                ) {
-                    override fun getBody(): ByteArray? {
-                        var fenba = fen.toByteArray(Charsets.UTF_8)
-                        //Log.i("fenba", fenba.toString(Charsets.UTF_8))
-                        return fenba
-                    }
-                    override fun getHeaders(): MutableMap<String, String> {
-                        val headers = HashMap<String, String>()
-                        headers["Content-Type"] = "text/plain"  //essenziale!!!
-                        return headers
-                    }
-                }
-
-        queue.add(stringRequest)
-    }
-
-    fun makeStockfishMove(move: String) {
-
-        var squares = ChessGame.convertMoveStringToSquares(move)
-
-        if (!ChessGame.canMove(squares[0], squares[1])) {
-            Log.e("error: ", "Stockfish sta cercando di fare una mossa errata! :(")
-            Toast.makeText(this, "Stockfish sta cercando di fare una mossa errata! :(", Toast.LENGTH_LONG).show()
-        }
-
-        //ChessView.checkMoveValidity()
-
-        ChessGame.movePiece(squares[0], squares[1])
-        ChessGame.moveNum++
-        chessView.invalidate()
-
-        ChessGame.waitTurn = false
-
-        Log.d("PGN", ChessGame.pgnBoard())
-        Log.d("FEN", ChessGame.boardToFen())
-
-        Log.d("!", "######################################")
-        Log.d("!", "############# WHITE TURN #############")
-        Log.d("!", "######################################")
-    }
-     */
 }
