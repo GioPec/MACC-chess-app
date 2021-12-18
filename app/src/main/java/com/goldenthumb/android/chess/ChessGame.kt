@@ -33,7 +33,6 @@ object ChessGame {
 
     fun resetStockfishGame() {
         resettedGame = true
-        gameInProgress = ""
         val job = GlobalScope.launch {
             val reset = async {
                 var name = "https://giacomovenneri.pythonanywhere.com/reset/"
@@ -262,9 +261,7 @@ object ChessGame {
     }
 
     fun reset() {
-        //Log.d("!", "######################################")
         Log.d("!", "############# GAME START #############")
-        //Log.d("!", "######################################")
         moveNum=0
         castlingAvailability = "KQkq"
         waitTurn=false

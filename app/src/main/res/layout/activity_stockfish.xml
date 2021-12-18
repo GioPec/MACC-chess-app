@@ -41,7 +41,7 @@
         android:progressTint="#555555"
         android:rotation="90"
         android:scaleX="9.5"
-        android:scaleY="3"
+        android:scaleY="4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

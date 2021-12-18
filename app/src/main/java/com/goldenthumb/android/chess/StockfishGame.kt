@@ -18,7 +18,6 @@ import java.io.PrintWriter
 import java.net.ServerSocket
 import java.util.*
 
-
 class StockfishGame : AppCompatActivity(), ChessDelegate {
     private val socketHost = "127.0.0.1"
     private val socketPort: Int = 50000
@@ -218,8 +217,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
-    override fun movePiece(from: Square, to: Square) {
-    }
+    override fun movePiece(from: Square, to: Square) {}
 
     override fun updateProgressBar(type: String, value: Integer) {
         val movesWeight = 5
@@ -237,6 +235,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         else if (type=="mate"){
             if (value<0) progressBar.setProgress(progressBar.max)
             else if (value>0) progressBar.setProgress(0)
+            //TODO: partita finita
         }
         else {
             Log.e("Evaluation", type + value.toString())
