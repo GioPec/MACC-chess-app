@@ -53,7 +53,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         resetButton.setOnClickListener {
             ChessGame.reset()
-            ChessGame.resetStockfishGame()
             progressBar.setProgress(progressBar.max / 2)
             chessView.invalidate()
             serverSocket?.close()
@@ -180,12 +179,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         editText.setText(move)
 
         var squares = ChessGame.convertMoveStringToSquares(move)
-        assert(ChessGame.canMove(squares[0], squares[1]))
 
         //TODO chiedere conferma della mossa
-        //ChessGame.movePiece(squares[0], squares[1])
-        //ChessGame.moveNum++
-        //chessView.invalidate()
     }
 
     /*

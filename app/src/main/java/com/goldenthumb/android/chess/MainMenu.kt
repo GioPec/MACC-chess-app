@@ -79,7 +79,6 @@ class MainMenu : AppCompatActivity()  {
     }
     private fun confirmStockfish() {
         ChessGame.reset()
-        ChessGame.resetStockfishGame()
         ChessGame.gameInProgress="STOCKFISH"
         startActivity(Intent(this, StockfishGame::class.java))
         resumeButton?.setVisibility(View.VISIBLE)
@@ -103,7 +102,6 @@ class MainMenu : AppCompatActivity()  {
     }
     private fun confirmLocal() {
         ChessGame.reset()
-        ChessGame.resetStockfishGame()
         ChessGame.gameInProgress="LOCAL"
         startActivity(Intent(this, LocalGame::class.java))
         resumeButton?.setVisibility(View.VISIBLE)

@@ -31,7 +31,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
         resetButton.setOnClickListener {
             ChessGame.reset()
-            ChessGame.resetStockfishGame()
             turnTextView.setTextColor(Color.parseColor("#FFFFFF"))
             turnTextView.setBackgroundColor(Color.parseColor("#CCCCCC"))
             turnTextView.setText("White turn")
