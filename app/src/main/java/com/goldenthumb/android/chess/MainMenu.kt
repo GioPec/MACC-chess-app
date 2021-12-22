@@ -11,7 +11,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 
@@ -35,24 +34,24 @@ class MainMenu : AppCompatActivity()  {
         getHelloWorldFromStockfishAPI()
     }
 
-    fun getHelloWorldFromStockfishAPI() {
+    private fun getHelloWorldFromStockfishAPI() {
         val queue = Volley.newRequestQueue(this)
         val url = "https://giacomovenneri.pythonanywhere.com/hello/"
 
         val stringRequest = StringRequest(
                 Request.Method.GET, url,
 
-                Response.Listener<String> { response ->
+                { response ->
                     response.subSequence(1, 3)
 
-                    if (response.subSequence(1, 3).equals("OK")) {
-                        StockfishStatus.setText("Chess API is online!")
+                    if (response.subSequence(1, 3) == "OK") {
+                        StockfishStatus.text = "Chess API is online!"
                     } else {
-                        StockfishStatus.setText("Chess API is offline! ")
+                        StockfishStatus.text = "Chess API is offline! "
                     }
                 },
-                Response.ErrorListener { error ->
-                    StockfishStatus.setText("Chess API" + error)
+                { error ->
+                    StockfishStatus.text = "Chess API" + error
                     StockfishStatus.setTextColor(Color.RED)
                 },
 
@@ -133,7 +132,7 @@ class MainMenu : AppCompatActivity()  {
         when (ChessGame.gameInProgress) {
             "LOCAL" -> startActivity(Intent(this, LocalGame::class.java))
             "STOCKFISH" -> startActivity(Intent(this, StockfishGame::class.java))
-            "ONLINE" -> return //TODO
+            "ONLINE" -> startActivity(Intent(this, OnlineGame::class.java))
             "" -> return
         }
     }

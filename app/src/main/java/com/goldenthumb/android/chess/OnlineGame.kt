@@ -89,6 +89,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
-    override fun updateProgressBar(type: String, value: Integer) {}
+    override fun updateProgressBar(type: String, value: Int) {}
     override fun updateTurn(player: Player) {}
 }

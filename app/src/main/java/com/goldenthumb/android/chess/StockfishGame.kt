@@ -9,13 +9,10 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.MotionEvent
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.io.PrintWriter
-import java.net.ServerSocket
 import java.util.*
 
 class StockfishGame : AppCompatActivity(), ChessDelegate {
@@ -32,18 +29,18 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stockfish)
 
-        chessView = findViewById<ChessView>(R.id.chess_view)
-        resetButton = findViewById<Button>(R.id.reset_button)
-        progressBar = findViewById<ProgressBar>(R.id.progress_bar)
+        chessView = findViewById(R.id.chess_view)
+        resetButton = findViewById(R.id.reset_button)
+        progressBar = findViewById(R.id.progress_bar)
 
-        editText = findViewById<EditText>(R.id.text)
-        button = findViewById<ImageView>(R.id.button)
+        editText = findViewById(R.id.text)
+        button = findViewById(R.id.button)
 
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
             ChessGame.reset()
-            progressBar.setProgress(progressBar.max / 2)
+            progressBar.progress = progressBar.max / 2
             chessView.invalidate()
         }
 
@@ -78,8 +75,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
                 override fun onBeginningOfSpeech() {
                     Log.e("AUDIO", "onBeginningOfSpeech!")
-                    editText.setText("");
-                    editText.setHint("Listening...");
+                    editText.setText("")
+                    editText.hint = "Listening..."
                 }
 
                 override fun onRmsChanged(p0: Float) {
@@ -95,7 +92,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 }
 
                 override fun onError(p0: Int) {
-                    Log.e("AUDIO", "onError!" + p0.toString())
+                    Log.e("AUDIO", "onError!$p0")
                 }
 
             })
@@ -103,29 +100,27 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             Log.e("AUDIO", "Recognition not available!")
         }
 
-        button.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        button.setImageResource(R.drawable.ic_mic_black_on)
-                        speechRecognizer!!.startListening(speechRecognizerIntent)
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        speechRecognizer!!.stopListening()
-                    }
+        button.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    button.setImageResource(R.drawable.ic_mic_black_on)
+                    speechRecognizer!!.startListening(speechRecognizerIntent)
                 }
-                //return v?.onTouchEvent(event) ?: true
-                return true
+                MotionEvent.ACTION_UP -> {
+                    speechRecognizer!!.stopListening()
+                }
             }
-        })
+            //return v?.onTouchEvent(event) ?: true
+            true
+        }
     }
 
     private fun parseMove(bundle: Bundle) {
         button.setImageResource(R.drawable.ic_mic_black_off)
-        var data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+        val data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
 
         var move = data!![0]
-        move = move.toLowerCase().filterNot { it.isWhitespace() }
+        move = move.toLowerCase(Locale.ROOT).filterNot { it.isWhitespace() }
         assert(move.length == 4)
         assert(move[0] in "abcdefgh")
         assert(move[1] in "12345678")
@@ -133,8 +128,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         assert(move[3] in "12345678")
 
         editText.setText(move)
-
-        var squares = ChessGame.convertMoveStringToSquares(move)
 
         //TODO chiedere conferma della mossa
     }
@@ -156,11 +149,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     override fun movePiece(from: Square, to: Square) {}
 
-    override fun updateProgressBar(type: String, value: Integer) {
+    override fun updateProgressBar(type: String, value: Int) {
         val movesWeight = 5
         if (type=="cp") {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                progressBar.setProgress(progressBar.max/2 - value.toInt()*movesWeight, true)
+                progressBar.setProgress(progressBar.max/2 - value*movesWeight, true)
             }
             /* Alternative method:
         progressAnimator = ObjectAnimator.ofInt(progressBar, "progress",
@@ -170,9 +163,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             Log.d("Progress bar", progressBar.progress.toString())
         }
         else if (type=="mate"){
-            if (value<0) progressBar.setProgress(progressBar.max)
-            else if (value>0) progressBar.setProgress(0)
-            //TODO: partita finita
+            if (value<0) progressBar.progress = progressBar.max
+            else if (value>0) progressBar.progress = 0
         }
         else {
             Log.e("Evaluation", type + value.toString())

@@ -50,7 +50,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     /////////// CHESS RULES FUNCTIONS //////////////////////////////////////////////////////////////
 
-    fun convertRowColFromIntToString(move: Int, type:String): String {
+    private fun convertRowColFromIntToString(move: Int, type:String): String {
         //assert(move>=0 && move<=7)
         var converted = ""
         if (type.equals("column")) {
@@ -80,19 +80,19 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return converted
     }
 
-    fun checkMoveValidity(fromCol:Int, fromRow:Int, toCol:Int, toRow:Int, prom:String=""):Boolean? {
+    private fun checkMoveValidity(fromCol:Int, fromRow:Int, toCol:Int, toRow:Int, prom:String=""):Boolean? {
 
-        var usableFromColumn = convertRowColFromIntToString(fromCol,"column");
-        var usableFromRow = convertRowColFromIntToString(fromRow,"row");
-        var usableToCol = convertRowColFromIntToString(toCol,"column");
-        var usableToRow = convertRowColFromIntToString(toRow,"row");
+        val usableFromColumn = convertRowColFromIntToString(fromCol,"column")
+        val usableFromRow = convertRowColFromIntToString(fromRow,"row")
+        val usableToCol = convertRowColFromIntToString(toCol,"column")
+        val usableToRow = convertRowColFromIntToString(toRow,"row")
 
-        var name="https://giacomovenneri.pythonanywhere.com/?move=" +
+        val name="https://giacomovenneri.pythonanywhere.com/?move=" +
                 "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom
 
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
-        var checkValidity = false;
+        var checkValidity: Boolean
 
         try {
             conn.run {
@@ -110,19 +110,19 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return null
     }
 
-    fun getEvaluation():Pair<String, Integer>? {
+    private fun getEvaluation():Pair<String, Int>? {
 
-        var name="https://giacomovenneri.pythonanywhere.com/info"
+        val name = "https://giacomovenneri.pythonanywhere.com/info"
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
-        var pair: Pair<String, Integer>? = null
+        var pair: Pair<String, Int>?
 
         try {
             conn.run {
                 requestMethod="GET"
                 val r = JSONObject(InputStreamReader(inputStream).readText())
-                var t = r.get("type") as String
-                var v = r.get("value") as Integer
+                val t = r.get("type") as String
+                val v = r.get("value") as Int
                 pair = Pair(t,v)
                 Log.d("Evaluation", pair.toString())
                 return pair
@@ -134,13 +134,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return null
     }
 
-    fun promotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
-            if (movingPiece!!.player.equals(Player.WHITE) && fromRow==6 && row==7) {
+    private fun promotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
+        if (movingPiece!!.chessman == Chessman.PAWN) {
+            if (movingPiece.player == Player.WHITE && fromRow==6 && row==7) {
                 ChessGame.piecesBox.remove(movingPiece)
 
                 ChessGame.addPiece(
-                    movingPiece!!.copy(
+                    movingPiece.copy(
                         chessman = Chessman.QUEEN,
                         resID = R.drawable.chess_qlt60,
                         col = col,
@@ -148,14 +148,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     )
                 )
                 return "Q"
-                invalidate()
 
             }
-            else if (movingPiece!!.player.equals(Player.BLACK) && fromRow==1 && row==0) {
+            else if (movingPiece.player == Player.BLACK && fromRow==1 && row==0) {
                 ChessGame.piecesBox.remove(movingPiece)
 
                 ChessGame.addPiece(
-                    movingPiece!!.copy(
+                    movingPiece.copy(
                         chessman = Chessman.QUEEN,
                         resID = R.drawable.chess_qdt60,
                         col = col,
@@ -163,31 +162,30 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     )
                 )
                 return "q"
-                invalidate()
             }
         }
         return ""
     }
 
-    fun castle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-        if (movingPiece!!.chessman.equals(Chessman.KING)) {
-            if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==6 && row==0) {
+    private fun castle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
+        if (movingPiece!!.chessman == Chessman.KING) {
+            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==6 && row==0) {
                 return "whiteshort"
             }
-            if (movingPiece!!.player.equals(Player.WHITE) && fromCol==4 && fromRow==0 && col==2 && row==0) {
+            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==2 && row==0) {
                 return "whitelong"
             }
-            if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==6 && row==7) {
+            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==6 && row==7) {
                 return "blackshort"
             }
-            if (movingPiece!!.player.equals(Player.BLACK) && fromCol==4 && fromRow==7 && col==2 && row==7) {
+            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==2 && row==7) {
                 return "blacklong"
             }
         }
         return ""
     }
 
-    fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
+    private fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
         if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
             if(fromCol!=col){
                 if(ChessGame.pieceAt(col, row)==null){
@@ -281,26 +279,26 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             MotionEvent.ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
-                if (fromCol != col || fromRow != row) {
+                var moveIsValid = false
+                if (movingPiece!=null && (fromCol != col || fromRow != row)) {
 
                     if (ChessGame.gameInProgress == "LOCAL" || ChessGame.gameInProgress == "ONLINE") {
 
-                        var promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
+                        val promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
 
-                        var moveIsValid: Boolean? = null
                         val job = GlobalScope.launch {
                             val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
-                            moveIsValid = c1.await()
+                            moveIsValid = c1.await()==true
                         }
 
                         runBlocking {
                             job.join()
 
-                            if (moveIsValid!!) {
+                            if (moveIsValid) {
 
                                 removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
 
-                                var castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
+                                val castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
                                 when (castleCheck) {
                                     "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                     "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
@@ -309,7 +307,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                 }
 
                                 ChessGame.piecesBox.remove(movingPiece)
-                                if (promotionCheck.equals("")) {
+                                if (promotionCheck == "") {
                                     movingPiece?.let {
                                         ChessGame.addPiece(
                                                 it.copy(
@@ -333,45 +331,41 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                     else if (ChessGame.gameInProgress == "STOCKFISH") {
 
-                        var checkValidity = false
                         var response = ""
                         var mate = ""
-                        var promotionCheck = ""
-                        val job = GlobalScope.launch(Dispatchers.IO) {
-                            withContext(Dispatchers.IO) {
-                                val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
-                                val usableFromRow = convertRowColFromIntToString(fromRow, "row")
-                                val usableToCol = convertRowColFromIntToString(col, "column")
-                                val usableToRow = convertRowColFromIntToString(row, "row")
-                                Log.i("promotion", movingPiece.toString())
-                                promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
+                        val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+                        val usableFromRow = convertRowColFromIntToString(fromRow, "row")
+                        val usableToCol = convertRowColFromIntToString(col, "column")
+                        val usableToRow = convertRowColFromIntToString(row, "row")
+                        val promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
 
-                                val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
-                                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
-                                val url = URL(name)
-                                val conn = url.openConnection() as HttpsURLConnection
-                                try {
-                                    conn.run {
-                                        requestMethod = "POST"
-                                        val r = JSONObject(InputStreamReader(inputStream).readText())
-                                        Log.d("Stockfish response", r.toString())
-                                        checkValidity = r.get("valid") as Boolean
-                                        response = r.get("response") as String
-                                        mate = r.get("mate") as String
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("Move error: ", e.toString())
+                        val job = GlobalScope.launch(Dispatchers.IO) { run {
+                            val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
+                                    "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                            val url = URL(name)
+                            val conn = url.openConnection() as HttpsURLConnection
+                            try {
+                                conn.run {
+                                    requestMethod = "POST"
+                                    val r = JSONObject(InputStreamReader(inputStream).readText())
+                                    Log.d("Stockfish response", r.toString())
+                                    moveIsValid = r.get("valid") as Boolean
+                                    response = r.get("response") as String
+                                    mate = r.get("mate") as String
                                 }
+                            } catch (e: Exception) {
+                                Log.e("Move error: ", e.toString())
                             }
+                        }
                         }
 
                         runBlocking {
                             job.join()
-                            if (checkValidity) {
+                            if (moveIsValid) {
 
                                 // Player move
                                 removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
-                                var castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
+                                val castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
                                 when (castleCheck) {
                                     "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                     "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
@@ -400,20 +394,19 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                                 // Stockfish response
                                 else {
-                                    var squares = ChessGame.convertMoveStringToSquares(response)
+                                    val squares = ChessGame.convertMoveStringToSquares(response)
                                     movingPiece = ChessGame.pieceAt(squares[0])
 
-                                    var promotionCheck = promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                    val promotionCheck = promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
                                     removeEnpassantPawn(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    var castleCheck = castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    when (castleCheck) {
+                                    when (castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)) {
                                         "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                         "whitelong" -> ChessGame.movePiece(0,0,3,0)
                                         "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
                                         "blacklong" -> ChessGame.movePiece(0,7,3,7)
                                     }
                                     ChessGame.piecesBox.remove(movingPiece)
-                                    if (promotionCheck.equals("")) {
+                                    if (promotionCheck == "") {
                                         movingPiece?.let {
                                             ChessGame.addPiece(
                                                     it.copy(
@@ -445,13 +438,12 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 ChessGame.resettedGame = false
 
                 // Get position evaluation
-                if (ChessGame.gameInProgress == "STOCKFISH") {
+                if (ChessGame.gameInProgress == "STOCKFISH" && moveIsValid) {
                     val job = GlobalScope.launch {
-                        val c = async {
+                        withContext(Dispatchers.Default) {
                             val (evaluationType, evaluationValue) = checkNotNull(getEvaluation())
                             chessDelegate?.updateProgressBar(evaluationType, evaluationValue)
                         }
-                        c.await()
                     }
                     runBlocking {
                         job.join()

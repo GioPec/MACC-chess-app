@@ -2,14 +2,10 @@ package com.goldenthumb.android.chess
 
 import android.graphics.Color
 import android.util.Log
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.InputStreamReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
-import kotlin.math.abs
 
 object ChessGame {
 
@@ -95,9 +91,8 @@ object ChessGame {
     private fun resetStockfishGame() {
         resettedGame = true
         stockfishGameEnded = false
-        val job = GlobalScope.launch {
-            val reset = async {
-                var name = "https://giacomovenneri.pythonanywhere.com/reset/"
+        val job = GlobalScope.launch(Dispatchers.IO) { run {
+                val name = "https://giacomovenneri.pythonanywhere.com/reset/"
                 val url = URL(name)
                 val conn = url.openConnection() as HttpsURLConnection
                 try {
@@ -106,12 +101,10 @@ object ChessGame {
                         val r = InputStreamReader(inputStream).readText()
                         Log.d("RESET", "")
                     }
-                }
-                catch (e: Exception){
+                } catch (e: Exception) {
                     Log.e("Reset error", e.toString())
                 }
             }
-            reset.await()
         }
         runBlocking {
             job.join()
