@@ -19,16 +19,9 @@ import java.net.ServerSocket
 import java.util.*
 
 class StockfishGame : AppCompatActivity(), ChessDelegate {
-    private val socketHost = "127.0.0.1"
-    private val socketPort: Int = 50000
-    private val socketGuestPort: Int = 50001 // used for socket server on emulator
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
-    private lateinit var listenButton: Button
-    private lateinit var connectButton: Button
     lateinit var progressBar: ProgressBar
-    private var printWriter: PrintWriter? = null
-    private var serverSocket: ServerSocket? = null
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var speechRecognizerIntent: Intent? = null
@@ -38,12 +31,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stockfish)
-        //resetStockfish()
 
         chessView = findViewById<ChessView>(R.id.chess_view)
         resetButton = findViewById<Button>(R.id.reset_button)
-        listenButton = findViewById<Button>(R.id.listen_button)
-        connectButton = findViewById<Button>(R.id.connect_button)
         progressBar = findViewById<ProgressBar>(R.id.progress_bar)
 
         editText = findViewById<EditText>(R.id.text)
@@ -55,8 +45,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             ChessGame.reset()
             progressBar.setProgress(progressBar.max / 2)
             chessView.invalidate()
-            serverSocket?.close()
-            listenButton.isEnabled = true
         }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -130,38 +118,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 return true
             }
         })
-
-        /*
-        listenButton.setOnClickListener {
-            listenButton.isEnabled = false
-            val port = if (isEmulator) socketGuestPort else socketPort
-            Toast.makeText(this, "listening on $port", Toast.LENGTH_SHORT).show()
-            Executors.newSingleThreadExecutor().execute {
-                ServerSocket(port).let { srvSkt ->
-                    serverSocket = srvSkt
-                    try {
-                        val socket = srvSkt.accept()
-                        receiveMove(socket)
-                    } catch (e: SocketException) {
-                        // ignored, socket closed
-                    }
-                }
-            }
-        }
-        connectButton.setOnClickListener {
-            Log.d("LOG", "socket client connecting ...")
-            Executors.newSingleThreadExecutor().execute {
-                try {
-                    val socket = Socket(socketHost, socketPort)
-                    receiveMove(socket)
-                } catch (e: ConnectException) {
-                    runOnUiThread {
-                        Toast.makeText(this, "connection failed", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-        */
     }
 
     private fun parseMove(bundle: Bundle) {
@@ -182,20 +138,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         //TODO chiedere conferma della mossa
     }
-
-    /*
-    private fun receiveMove(socket: Socket) {
-        val scanner = Scanner(socket.getInputStream())
-        printWriter = PrintWriter(socket.getOutputStream(), true)
-        while (scanner.hasNextLine()) {
-            val move = scanner.nextLine().split(",").map { it.toInt() }
-            runOnUiThread {
-                ChessGame.movePiece(Square(move[0], move[1]), Square(move[2], move[3]))
-                chessView.invalidate()
-            }
-        }
-    }
-    */
 
     private fun checkPermission() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 1)

@@ -21,6 +21,10 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity android:name=".OnlineGame"
+            android:screenOrientation="portrait">
+        </activity>
+
         <activity android:name=".MainMenu"
             android:screenOrientation="portrait">
             <intent-filter> <!-- decides the starting activity -->

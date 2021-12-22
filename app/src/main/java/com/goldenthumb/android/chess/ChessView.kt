@@ -6,10 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.InputStreamReader
 import java.net.URL
@@ -272,16 +269,21 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                movingPieceX = event.x
-                movingPieceY = event.y
-                invalidate()
+                if (true    //TODO controllo mossa pezzi neri
+                        //ChessGame.gameInProgress == "LOCAL" ||
+                        //(((ChessGame.gameInProgress != "LOCAL" && movingPiece?.player?.equals(Player.WHITE)==true)
+                ) {
+                    movingPieceX = event.x
+                    movingPieceY = event.y
+                    invalidate()
+                }
             }
             MotionEvent.ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
                 if (fromCol != col || fromRow != row) {
 
-                    if (ChessGame.gameInProgress == "LOCAL") {
+                    if (ChessGame.gameInProgress == "LOCAL" || ChessGame.gameInProgress == "ONLINE") {
 
                         var promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
 
@@ -329,39 +331,38 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         }
                     }
 
-                    if (ChessGame.gameInProgress == "STOCKFISH") {
+                    else if (ChessGame.gameInProgress == "STOCKFISH") {
 
                         var checkValidity = false
                         var response = ""
                         var mate = ""
                         var promotionCheck = ""
-                        val job = GlobalScope.launch {
-                            val c1 = async {
-                                val usableFromColumn = convertRowColFromIntToString(fromCol,"column")
-                                val usableFromRow = convertRowColFromIntToString(fromRow,"row")
-                                val usableToCol = convertRowColFromIntToString(col,"column")
-                                val usableToRow = convertRowColFromIntToString(row,"row")
+                        val job = GlobalScope.launch(Dispatchers.IO) {
+                            withContext(Dispatchers.IO) {
+                                val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+                                val usableFromRow = convertRowColFromIntToString(fromRow, "row")
+                                val usableToCol = convertRowColFromIntToString(col, "column")
+                                val usableToRow = convertRowColFromIntToString(row, "row")
+                                Log.i("promotion", movingPiece.toString())
                                 promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
 
-                                val name="https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
+                                val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
                                         "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
                                 val url = URL(name)
                                 val conn = url.openConnection() as HttpsURLConnection
                                 try {
                                     conn.run {
-                                        requestMethod="POST"
+                                        requestMethod = "POST"
                                         val r = JSONObject(InputStreamReader(inputStream).readText())
                                         Log.d("Stockfish response", r.toString())
                                         checkValidity = r.get("valid") as Boolean
                                         response = r.get("response") as String
                                         mate = r.get("mate") as String
                                     }
-                                }
-                                catch (e: Exception){
+                                } catch (e: Exception) {
                                     Log.e("Move error: ", e.toString())
                                 }
                             }
-                            c1.await()
                         }
 
                         runBlocking {
@@ -436,6 +437,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                             }
                         }
                     }
+
                 }
                 movingPiece = null
                 movingPieceBitmap = null

@@ -15,7 +15,6 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 
-
 class MainMenu : AppCompatActivity()  {
 
     private lateinit var StockfishStatus: TextView
@@ -104,6 +103,29 @@ class MainMenu : AppCompatActivity()  {
         ChessGame.reset()
         ChessGame.gameInProgress="LOCAL"
         startActivity(Intent(this, LocalGame::class.java))
+        resumeButton?.setVisibility(View.VISIBLE)
+    }
+
+    fun startGameOnline(view: View) {
+        //create interface
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> confirmOnline()
+                DialogInterface.BUTTON_NEGATIVE -> {}
+            }
+        }
+        //ask user
+        if (ChessGame.gameInProgress!="") {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
+            builder.setMessage("You already have an active game.\nIf you start a new one " +
+                    "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show()
+        } else confirmOnline()
+    }
+    private fun confirmOnline() {
+        ChessGame.reset()
+        ChessGame.gameInProgress="ONLINE"
+        startActivity(Intent(this, OnlineGame::class.java))
         resumeButton?.setVisibility(View.VISIBLE)
     }
 
