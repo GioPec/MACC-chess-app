@@ -1,6 +1,9 @@
 package com.goldenthumb.android.chess
 
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.util.Log
 import kotlinx.coroutines.*
 import java.io.InputStreamReader
@@ -9,9 +12,13 @@ import javax.net.ssl.HttpsURLConnection
 
 object ChessGame {
 
+    var myUsername = ""
+    var waitingForAdversary: Boolean = true
     var stockfishGameEnded: Boolean = false
     var gameInProgress: String = "" //LOCAL, STOCKFISH, ONLINE
     var resettedGame: Boolean = false
+    val sensorListener:SensorEventListener? = null
+    var firstMove = true
 
     var piecesBox = mutableSetOf<ChessPiece>()
 
@@ -64,6 +71,7 @@ object ChessGame {
 
     fun reset() {
         resetStockfishGame()
+        firstMove=true
         Log.d("!", "############# GAME START #############")
         clear()
         for (i in 0 until 2) {

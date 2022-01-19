@@ -3,92 +3,79 @@ package com.goldenthumb.android.chess
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.*
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.google.firebase.database.ktx.getValue
 import java.io.PrintWriter
-import java.net.ConnectException
 import java.net.ServerSocket
 import java.net.Socket
-import java.net.SocketException
 import java.util.*
-import java.util.concurrent.Executors
 
 class OnlineGame : AppCompatActivity(), ChessDelegate {
-    private val socketHost = "127.0.0.1"
-    private val socketPort: Int = 50000
-    private val socketGuestPort: Int = 50001 // used for socket server on emulator
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var database: FirebaseDatabase
+    private lateinit var myRef: DatabaseReference
+
     private lateinit var chessView: ChessView
-    private lateinit var resetButton: Button
-    private lateinit var listenButton: Button
-    private lateinit var connectButton: Button
-    private var printWriter: PrintWriter? = null
-    private var serverSocket: ServerSocket? = null
-    private val isEmulator = Build.FINGERPRINT.contains("generic")
+    private lateinit var challengeButton: Button
+    private lateinit var challengeUsername: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
 
-        chessView = findViewById<ChessView>(R.id.chess_view)
-        resetButton = findViewById<Button>(R.id.reset_button)
-        listenButton = findViewById<Button>(R.id.listen_button)
-        connectButton = findViewById<Button>(R.id.connect_button)
+        mAuth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
+        myRef = database.reference
+
+        chessView = findViewById(R.id.chess_view)
+        challengeButton = findViewById(R.id.challenge_button)
+        challengeUsername = findViewById(R.id.challenge_username)
 
         chessView.chessDelegate = this
 
+        /*
         resetButton.setOnClickListener {
             ChessGame.reset()
             chessView.invalidate()
             serverSocket?.close()
             listenButton.isEnabled = true
         }
-
-        listenButton.setOnClickListener {
-            listenButton.isEnabled = false
-            val port = if (isEmulator) socketGuestPort else socketPort
-            Toast.makeText(this, "listening on $port", Toast.LENGTH_SHORT).show()
-            Executors.newSingleThreadExecutor().execute {
-                ServerSocket(port).let { srvSkt ->
-                    serverSocket = srvSkt
-                    try {
-                        val socket = srvSkt.accept()
-                        receiveMove(socket)
-                    } catch (e: SocketException) {
-                        Log.e("Listen error", e.toString())
-                    }
-                }
-            }
-        }
-        connectButton.setOnClickListener {
-            Log.d("LOG", "socket client connecting ...")
-            Executors.newSingleThreadExecutor().execute {
-                try {
-                    val socket = Socket(socketHost, socketPort)
-                    receiveMove(socket)
-                } catch (e: ConnectException) {
-                    runOnUiThread {
-                        Toast.makeText(this, "connection failed", Toast.LENGTH_SHORT).show()
-                        Log.e("Connect error", e.toString())
-                    }
-                }
-            }
-        }
-    }
-
-    private fun receiveMove(socket: Socket) {
-        val scanner = Scanner(socket.getInputStream())
-        printWriter = PrintWriter(socket.getOutputStream(), true)
-        while (scanner.hasNextLine()) {
-            val move = scanner.nextLine().split(",").map { it.toInt() }
-            runOnUiThread {
-                ChessGame.movePiece(Square(move[0], move[1]), Square(move[2], move[3]))
-                chessView.invalidate()
-            }
-        }
+         */
     }
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
     override fun updateTurn(player: Player) {}
+
+    fun requestChallenge(view: View) {
+        val adversary = challengeUsername.text.toString()
+        if (adversary==ChessGame.myUsername) {
+            Toast.makeText(applicationContext,"You can't play against yourself! *Facepalm*", Toast.LENGTH_LONG).show()
+            return
+        }
+        myRef.child("Users").addValueEventListener(object: ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                val td = snapshot.value as HashMap<*, *>
+                for (key in td.keys) {
+                    if (key.toString()==adversary) {
+                        val value = td[key] as String
+                        //Log.i("I", "Key is: ${key.toString()}, value is: $value")
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("E", "Failed to read value.", error.toException())
+            }
+        })
+    }
 }

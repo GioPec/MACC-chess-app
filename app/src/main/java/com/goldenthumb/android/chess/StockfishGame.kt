@@ -1,19 +1,34 @@
 package com.goldenthumb.android.chess
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
+import java.io.InputStreamReader
+import java.net.URL
 import java.util.*
+import javax.net.ssl.HttpsURLConnection
 
 class StockfishGame : AppCompatActivity(), ChessDelegate {
     private lateinit var chessView: ChessView
@@ -24,6 +39,69 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private var speechRecognizerIntent: Intent? = null
     private lateinit var editText: EditText
     private lateinit var button: ImageView
+    private lateinit var lightbulbButton: ImageButton
+
+    ///////////////// SHAKE DETECTION //////////////////////////////////////////////////////////////
+
+    private var sensorManager: SensorManager? = null
+    private var acceleration = 0f
+    private var currentAcceleration = 0f
+    private var lastAcceleration = 0f
+
+    private val sensorListener: SensorEventListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+            lastAcceleration = currentAcceleration
+            currentAcceleration = kotlin.math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+            val delta: Float = currentAcceleration - lastAcceleration
+            acceleration = acceleration * 0.9f + delta
+            //Log.i("listener", "acceleration = $acceleration")
+
+            if (!ChessGame.firstMove && acceleration > 6) {
+
+                var bestMove = "THREAD ERROR"
+                val job = GlobalScope.launch(Dispatchers.IO) {
+                    bestMove = askForAdvice()
+                }
+                runBlocking {
+                    job.join()
+                    //Snackbar.make((this@StockfishGame).findViewById(android.R.id.content),
+                    //        "Per aggiungere una nuova segnalazione, tieni premuto sulla mappa", Snackbar.LENGTH_INDEFINITE)
+                    Toast.makeText(applicationContext,"$bestMove",Toast.LENGTH_LONG).show() //TODO
+                    lightbulbButton.tag = "off"
+                    lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
+                    unregisterListener()
+                }
+            }
+        }
+        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+    }
+
+    fun unregisterListener() {
+        sensorManager!!.unregisterListener(sensorListener)
+        Log.i("Listener", "unregistered")
+    }
+    fun registerListener() {
+        sensorManager?.registerListener(ChessGame.sensorListener, sensorManager!!.getDefaultSensor(
+                Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        )
+        Log.i("Listener", "registered")
+    }
+
+    override fun onResume() {
+        sensorManager?.registerListener(sensorListener, sensorManager!!.getDefaultSensor(
+                Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        )
+        super.onResume()
+    }
+    override fun onPause() {
+        sensorManager!!.unregisterListener(sensorListener)
+        super.onPause()
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +113,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         editText = findViewById(R.id.text)
         button = findViewById(R.id.button)
+        lightbulbButton = findViewById(R.id.imageButton)
+        lightbulbButton.tag = "on"
+        lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
 
         chessView.chessDelegate = this
 
@@ -42,7 +123,20 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             ChessGame.reset()
             progressBar.progress = progressBar.max / 2
             chessView.invalidate()
+            lightbulbButton.tag = "on"
+            lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        Objects.requireNonNull(sensorManager)!!.registerListener(sensorListener, sensorManager!!
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
+        acceleration = 10f
+        currentAcceleration = SensorManager.GRAVITY_EARTH
+        lastAcceleration = SensorManager.GRAVITY_EARTH
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             checkPermission()
@@ -172,4 +266,27 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     }
 
     override fun updateTurn(player: Player) {}
+
+    private fun askForAdvice():String {
+        //if (lightbulbButton.tag =="off") return
+
+        val url = URL("https://giacomovenneri.pythonanywhere.com/bestmove")
+        val conn = url.openConnection() as HttpsURLConnection
+        var bestMove = ""
+
+        try {
+            conn.run {
+                requestMethod="GET"
+                val r = JSONObject(InputStreamReader(inputStream).readText())
+                bestMove = r.get("move") as String
+            }
+        }
+        catch (e: Exception) {
+            Log.e("Request error: ", e.toString())
+            bestMove = "ERROR"
+        }
+        finally {
+            return bestMove
+        }
+    }
 }

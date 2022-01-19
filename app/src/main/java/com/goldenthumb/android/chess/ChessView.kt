@@ -255,6 +255,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         event ?: return false
 
         if (ChessGame.stockfishGameEnded) return false
+        if (ChessGame.gameInProgress=="ONLINE" && ChessGame.waitingForAdversary) return false
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -331,6 +332,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                     else if (ChessGame.gameInProgress == "STOCKFISH") {
 
+                        ChessGame.firstMove=false
                         var response = ""
                         var mate = ""
                         val usableFromColumn = convertRowColFromIntToString(fromCol, "column")

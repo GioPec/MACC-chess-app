@@ -27,6 +27,14 @@
 
         <activity android:name=".MainMenu"
             android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".Registration"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".Login"
+            android:screenOrientation="portrait">
             <intent-filter> <!-- decides the starting activity -->
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
