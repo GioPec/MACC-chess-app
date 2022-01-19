@@ -3,4 +3,6 @@
     <string name="reset_button">Reset</string>
     <string name="listen_button">Listen</string>
     <string name="connect_button">Connect</string>
+    <string name="register"><u>Register</u></string>
+    <string name="login"><u>Login</u></string>
 </resources>

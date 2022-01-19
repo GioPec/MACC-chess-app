@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "884571719139",
+    "project_id": "macc-chess-dcd2a",
+    "storage_bucket": "macc-chess-dcd2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884571719139:android:27a5debd6a0eec3e0cccd6",
+        "android_client_info": {
+          "package_name": "com.goldenthumb.android.chess"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "884571719139-t0smtan71fgva2qerhb01953i5v335du.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgc_C5p49o89USP2rCt4Zltuzo-0FiUEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884571719139-t0smtan71fgva2qerhb01953i5v335du.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
