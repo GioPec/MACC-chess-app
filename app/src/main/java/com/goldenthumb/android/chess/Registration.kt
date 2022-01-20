@@ -64,11 +64,11 @@ class Registration : AppCompatActivity()  {
                     if (currentUser != null) {
 
                         myRef.child("Users").child(splitString(currentUser.email.toString())).setValue("")
-                                .addOnSuccessListener {
-                                    Log.i("Firebase DB write", "Success")
-                                }.addOnFailureListener {
-                                    Log.e("Firebase DB write", "$it")
-                                }
+                            .addOnSuccessListener {
+                                Log.i("Firebase DB write", "Success")
+                            }.addOnFailureListener {
+                                Log.e("Firebase DB write", "$it")
+                            }
                     }
 
                     startActivity(Intent(this, Login::class.java))

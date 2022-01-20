@@ -64,8 +64,9 @@ class Login : AppCompatActivity()  {
     override fun onStart() {
         super.onStart()
         /* !!!
-        Uncomment following line to skip login */
-        //loadMain()
+        Uncomment following lines to skip login */
+        ChessGame.myUsername = splitString(FirebaseAuth.getInstance().currentUser?.email.toString())
+        loadMain()
     }
 
     private fun loadMain(){

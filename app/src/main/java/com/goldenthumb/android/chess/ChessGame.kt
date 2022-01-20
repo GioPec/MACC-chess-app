@@ -12,8 +12,11 @@ import javax.net.ssl.HttpsURLConnection
 
 object ChessGame {
 
+    var myOnlineColor = "" //WHITE, BLACK
     var myUsername = ""
     var waitingForAdversary: Boolean = true
+    var adversary: String = ""
+    var challengeAlreadyNotified = false
     var stockfishGameEnded: Boolean = false
     var gameInProgress: String = "" //LOCAL, STOCKFISH, ONLINE
     var resettedGame: Boolean = false
