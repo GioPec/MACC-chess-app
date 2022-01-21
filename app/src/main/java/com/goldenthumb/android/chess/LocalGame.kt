@@ -41,7 +41,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
 
-    override fun updateTurn(player: Player) {
+    override fun updateTurn(player: Player, move: String) {
         Log.d("player", player.toString())
         ChessGame.firstMove=false
         if (player == Player.WHITE) {

@@ -27,6 +27,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private var isAlreadySentToAdv = false
 
+    private var myLastMove = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
@@ -51,6 +53,13 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         }
 
         chessView.chessDelegate = this
+
+        val b:Bundle = intent.extras!!
+        val maybeColor = b.getString("color")
+        if (maybeColor!="") {
+            ChessGame.myOnlineColor=maybeColor!!
+            startOnlineGame(ChessGame.myOnlineColor)
+        }
 
         /*
         resetButton.setOnClickListener {
@@ -99,7 +108,20 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
-    override fun updateTurn(player: Player) {}
+    override fun updateTurn(player: Player, move: String) {
+        myLastMove = move
+        var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+        if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
+        dbRef.child("currentMatch").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val match = snapshot.value as String
+                val newMatch = if (match == "accepted") move else "$match|$move"
+                dbRef.child("currentMatch").setValue(newMatch)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+        ChessGame.waitingForAdversary = true
+    }
 
     fun requestChallenge(view: View) {
         ChessGame.adversary = challengeUsername.text.toString()
@@ -157,13 +179,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     challengeButton.visibility = View.INVISIBLE
                     challengeUsername.visibility = View.INVISIBLE
                     startOnlineGame("WHITE")
-                } //TODO
+                }
                 else if (isAccepted=="refused") {
                     challengeUsername.setText("")
                     ChessGame.adversary = ""
                     myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").setValue(null)
-                } //TODO
-                //myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").removeEventListener()
+                }
             }
             override fun onCancelled(error: DatabaseError) {
                 Log.e("E", "Failed to read value.", error.toException())
@@ -175,5 +196,21 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
         if (color=="WHITE") ChessGame.waitingForAdversary = false
         ChessGame.gameInProgress = "ONLINE"
+
+        var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+        if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
+        dbRef.child("currentMatch").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val match = snapshot.value as String
+                val lastMatchMove = match.split("|").last()
+                //Log.i("I", "onDataChange: $lastMatchMove")
+                //Log.i("I", "onDataChange: $myLastMove")
+                if (lastMatchMove!=myLastMove) {
+
+                    ChessGame.waitingForAdversary = false
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 }

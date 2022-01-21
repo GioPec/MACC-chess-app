@@ -71,12 +71,12 @@ class MainMenu : AppCompatActivity()  {
                                                         .setValue("accepted")
                                                 ChessGame.myOnlineColor = "BLACK"
                                                 ChessGame.adversary = adversaryUsername
-                                                confirmOnline()
+                                                confirmOnline("BLACK")
                                             }
                                             DialogInterface.BUTTON_NEGATIVE -> {
                                                 myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("currentMatch")
                                                         .setValue("refused")
-                                            }//TODO
+                                            }
                                         }
                                     }
                                     val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
@@ -171,7 +171,7 @@ class MainMenu : AppCompatActivity()  {
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
-                DialogInterface.BUTTON_POSITIVE -> confirmOnline()
+                DialogInterface.BUTTON_POSITIVE -> confirmOnline("")
                 DialogInterface.BUTTON_NEGATIVE -> {}
             }
         }
@@ -181,13 +181,17 @@ class MainMenu : AppCompatActivity()  {
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show()
-        } else confirmOnline()
+        } else confirmOnline("")
     }
-    private fun confirmOnline() {
+    private fun confirmOnline(c:String) {
         ChessGame.reset()
         ChessGame.gameInProgress="ONLINE"
-        startActivity(Intent(this, OnlineGame::class.java))
-        resumeButton?.visibility = View.VISIBLE
+
+        val intent = Intent(this, OnlineGame::class.java)
+        intent.putExtra("color", c)
+
+        startActivity(intent)
+        //resumeButton?.visibility = View.VISIBLE
     }
 
     fun resumeGame(view: View) {

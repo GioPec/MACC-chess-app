@@ -268,10 +268,15 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                if (true    //TODO controllo mossa pezzi neri
-                        //ChessGame.gameInProgress == "LOCAL" ||
-                        //(((ChessGame.gameInProgress != "LOCAL" && movingPiece?.player?.equals(Player.WHITE)==true)
+                var myOnlineColorNum = Player.BLACK
+                if (ChessGame.myOnlineColor == "WHITE") myOnlineColorNum = Player.WHITE
+                if (
+                        ChessGame.gameInProgress == "LOCAL" ||
+                        (ChessGame.gameInProgress == "STOCKFISH" && movingPiece?.player?.equals(Player.WHITE) == true) ||
+                        (ChessGame.gameInProgress == "ONLINE" && movingPiece?.player?.equals(myOnlineColorNum) == true)
                 ) {
+                    //Log.i("I", "onTouchEvent: ${ChessGame.gameInProgress == "ONLINE"}")
+                    //Log.i("I", "onTouchEvent: ${movingPiece?.player?.equals(myOnlineColorNum) == true}")
                     movingPieceX = event.x
                     movingPieceY = event.y
                     invalidate()
@@ -325,7 +330,14 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         }
                                     }
                                 }
-                                chessDelegate?.updateTurn(movingPiece!!.player)
+                                if (ChessGame.gameInProgress == "ONLINE") {
+                                    val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+                                    val usableFromRow = convertRowColFromIntToString(fromRow, "row")
+                                    val usableToCol = convertRowColFromIntToString(col, "column")
+                                    val usableToRow = convertRowColFromIntToString(row, "row")
+                                    val move = usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                                    chessDelegate?.updateTurn(movingPiece!!.player, move)
+                                }
                             }
                         }
                     }
