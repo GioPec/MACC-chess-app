@@ -184,7 +184,7 @@ object ChessGame {
 
         assert(move.length >= 4)  //è 5 in caso di promozione! (es: e2f1q)
         var fromCol = 0
-        var firstChar = move.substring(0, 1)
+        val firstChar = move.substring(0, 1)
         when (firstChar) {
             "a" -> fromCol = 0
             "b" -> fromCol = 1
@@ -198,7 +198,7 @@ object ChessGame {
         val fromRow = (move.substring(1, 2).toInt()-1)
 
         var toCol = 0
-        var thirdChar = move.substring(2, 3)
+        val thirdChar = move.substring(2, 3)
         when (thirdChar) {
             "a" -> toCol = 0
             "b" -> toCol = 1
@@ -215,5 +215,68 @@ object ChessGame {
         val toSquare = Square(toCol, toRow)
 
         return arrayOf(fromSquare, toSquare)
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun promotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
+        if (movingPiece!!.chessman == Chessman.PAWN) {
+            if (movingPiece.player == Player.WHITE && fromRow==6 && row==7) {
+                ChessGame.piecesBox.remove(movingPiece)
+
+                ChessGame.addPiece(
+                        movingPiece.copy(
+                                chessman = Chessman.QUEEN,
+                                resID = R.drawable.chess_qlt60,
+                                col = col,
+                                row = row
+                        )
+                )
+                return "Q"
+
+            }
+            else if (movingPiece.player == Player.BLACK && fromRow==1 && row==0) {
+                ChessGame.piecesBox.remove(movingPiece)
+
+                ChessGame.addPiece(
+                        movingPiece.copy(
+                                chessman = Chessman.QUEEN,
+                                resID = R.drawable.chess_qdt60,
+                                col = col,
+                                row = row
+                        )
+                )
+                return "q"
+            }
+        }
+        return ""
+    }
+
+    fun castle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
+        if (movingPiece!!.chessman == Chessman.KING) {
+            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==6 && row==0) {
+                return "whiteshort"
+            }
+            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==2 && row==0) {
+                return "whitelong"
+            }
+            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==6 && row==7) {
+                return "blackshort"
+            }
+            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==2 && row==7) {
+                return "blacklong"
+            }
+        }
+        return ""
+    }
+
+    fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
+        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
+            if(fromCol!=col){
+                if(ChessGame.pieceAt(col, row)==null){
+                    ChessGame.piecesBox.remove(ChessGame.pieceAt(col,fromRow))
+                }
+            }
+        }
     }
 }

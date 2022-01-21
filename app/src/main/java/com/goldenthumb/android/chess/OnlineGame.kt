@@ -201,16 +201,59 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
         dbRef.child("currentMatch").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val match = snapshot.value as String
-                val lastMatchMove = match.split("|").last()
-                //Log.i("I", "onDataChange: $lastMatchMove")
-                //Log.i("I", "onDataChange: $myLastMove")
-                if (lastMatchMove!=myLastMove) {
-
-                    ChessGame.waitingForAdversary = false
-                }
+                try {
+                    val match = snapshot.value as String
+                    val lastMatchMove = match.split("|").last()
+                    Log.i("I", "onDataChange: $lastMatchMove")
+                    Log.i("I", "onDataChange: $myLastMove")
+                    if (lastMatchMove!=myLastMove && lastMatchMove!="accepted") {
+                        playAdversaryMove(lastMatchMove)
+                        ChessGame.waitingForAdversary = false
+                    }
+                } catch (e: Exception) {}
             }
             override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+    private fun playAdversaryMove(move: String) {
+        val squares = ChessGame.convertMoveStringToSquares(move)
+        val fromRow = squares[0].row
+        val fromCol = squares[0].col
+        val row = squares[1].row
+        val col = squares[1].col
+        val movingPiece = ChessGame.pieceAt(fromCol, fromRow)
+
+        val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
+
+        ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
+
+        val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
+        when (castleCheck) {
+            "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
+            "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
+            "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
+            "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
+        }
+
+        ChessGame.piecesBox.remove(movingPiece)
+        if (promotionCheck == "") {
+            movingPiece?.let {
+                ChessGame.addPiece(
+                    it.copy(
+                            col = col,
+                            row = row
+                    )
+                )
+            }
+        }
+        if (movingPiece != null) {
+            ChessGame.pieceAt(col, row)?.let {
+                if (it.player != movingPiece?.player) {
+                    ChessGame.piecesBox.remove(it)
+                }
+            }
+        }
+        chessView.invalidate()
     }
 }
