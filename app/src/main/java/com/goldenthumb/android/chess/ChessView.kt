@@ -100,6 +100,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val r = JSONObject(InputStreamReader(inputStream).readText())
                 //Log.d("info", r.toString())
                 checkValidity = r.get("valid") as Boolean
+                ChessGame.isOnlineMate = r.get("mate") as String
                 Log.d("Move validity", checkValidity.toString())
                 return checkValidity
             }

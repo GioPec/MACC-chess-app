@@ -69,7 +69,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                     job.join()
                     //Snackbar.make((this@StockfishGame).findViewById(android.R.id.content),
                     //        "Per aggiungere una nuova segnalazione, tieni premuto sulla mappa", Snackbar.LENGTH_INDEFINITE)
-                    Toast.makeText(applicationContext,"$bestMove",Toast.LENGTH_LONG).show() //TODO
+                    Toast.makeText(applicationContext,"$bestMove",Toast.LENGTH_LONG).show()
                     lightbulbButton.tag = "off"
                     lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
                     unregisterListener()

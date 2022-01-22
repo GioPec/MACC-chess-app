@@ -32,6 +32,14 @@ class MainMenu : AppCompatActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
 
+        ///
+        ChessGame.waitingForAdversary = true
+        ChessGame.gameInProgress = ""
+        ChessGame.myOnlineColor = ""
+        ChessGame.adversary = ""
+        ChessGame.isOnlineMate = "false"
+        ///
+
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
         myRef = database.reference
@@ -60,7 +68,6 @@ class MainMenu : AppCompatActivity()  {
                         for (cm in username.keys) {
                             if (cm.toString() == "currentMatch") {
                                 val adversaryUsername = key as String
-                                Log.i("I", username[cm] as String)
                                 if (!ChessGame.challengeAlreadyNotified || (username[cm] as String)=="") {
                                     ChessGame.challengeAlreadyNotified = true
                                     ////////////////////////////////////////////////////////////////////

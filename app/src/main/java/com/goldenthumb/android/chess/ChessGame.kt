@@ -13,6 +13,7 @@ import javax.net.ssl.HttpsURLConnection
 object ChessGame {
 
     var myOnlineColor = "" //WHITE, BLACK
+    var isOnlineMate = "false"
     var myUsername = ""
     var waitingForAdversary: Boolean = true
     var adversary: String = ""
