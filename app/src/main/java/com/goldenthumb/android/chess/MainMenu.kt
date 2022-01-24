@@ -23,6 +23,7 @@ class MainMenu : AppCompatActivity()  {
 
     private lateinit var stockfishStatus: TextView
     var resumeButton: Button? = null
+    var number = 0
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
@@ -61,6 +62,7 @@ class MainMenu : AppCompatActivity()  {
             override fun onDataChange(snapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
+                if (ChessGame.gameInProgress=="ONLINE") return
                 try {
                     val td = snapshot.value as HashMap<*, *>
                     for (key in td.keys) {
@@ -70,7 +72,15 @@ class MainMenu : AppCompatActivity()  {
                                 val adversaryUsername = key as String
                                 if (!ChessGame.challengeAlreadyNotified || (username[cm] as String)=="") {
                                     ChessGame.challengeAlreadyNotified = true
+
                                     ////////////////////////////////////////////////////////////////////
+
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                        val notifyMe = Notifications()
+                                        notifyMe.notify(applicationContext, "$adversaryUsername has challenged you!", number)
+                                        number++
+                                    }
+
                                     val dialogClickListener = DialogInterface.OnClickListener { _, which ->
                                         when (which) {
                                             DialogInterface.BUTTON_POSITIVE -> {
@@ -90,6 +100,7 @@ class MainMenu : AppCompatActivity()  {
                                     builder.setMessage("You have been challenged by $adversaryUsername!\nAccept?")
                                         .setPositiveButton("Yes", dialogClickListener)
                                         .setNegativeButton("No", dialogClickListener).show()
+
                                     ////////////////////////////////////////////////////////////////////
                                 }
                             }

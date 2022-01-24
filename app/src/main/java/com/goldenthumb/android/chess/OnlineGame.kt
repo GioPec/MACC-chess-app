@@ -1,11 +1,15 @@
 package com.goldenthumb.android.chess
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -22,16 +26,29 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     private lateinit var challengeButton: Button
     private lateinit var challengeUsername: EditText
     private lateinit var drawResignButtons: ConstraintLayout
+    private lateinit var drawButton: Button
+    private lateinit var resignButton: Button
+    private lateinit var progressBar: ProgressBar
 
     private var myLastMove = ""
 
     private var ignoreFirstSave = false
 
+    private var isDrawRefused = false
+    private var isWaitingForDrawResult = 0
+
+    private var hasAlreadyBeenNotified = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
 
+        ChessGame.gameInProgress=""
+
         ignoreFirstSave = false
+        isDrawRefused = false
+        isWaitingForDrawResult = 0
+        hasAlreadyBeenNotified = false
 
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
@@ -41,6 +58,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         challengeButton = findViewById(R.id.challenge_button)
         challengeUsername = findViewById(R.id.challenge_username)
         drawResignButtons = findViewById(R.id.drawResignButtons)
+        drawButton = findViewById(R.id.draw_button)
+        resignButton = findViewById(R.id.resign_button)
+        progressBar = findViewById(R.id.progress_bar)
+        drawButton.isEnabled = true
+        resignButton.isEnabled = true
+        progressBar.visibility = View.INVISIBLE
 
         if (ChessGame.myOnlineColor == "") {
             challengeButton.visibility = View.VISIBLE
@@ -61,15 +84,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             ChessGame.myOnlineColor=maybeColor!!
             startOnlineGame(ChessGame.myOnlineColor)
         }
-
-        /*
-        resetButton.setOnClickListener {
-            ChessGame.reset()
-            chessView.invalidate()
-            serverSocket?.close()
-            listenButton.isEnabled = true
-        }
-         */
     }
 
     override fun onStop () {
@@ -78,39 +92,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
-/*
-        //ChessGame.challengeAlreadyNotified = false
-        ChessGame.waitingForAdversary = true
-        ChessGame.gameInProgress = ""
-        val localAdversary = ChessGame.adversary
-        val localmyOnlineColor = ChessGame.myOnlineColor
-        ChessGame.myOnlineColor = ""
-        ChessGame.adversary = ""
-
-        if (localmyOnlineColor=="BLACK") {
-
-            val date = Calendar.getInstance().timeInMillis.toString()
-            var match : String
-
-            myRef.child("Users").child(ChessGame.myUsername).child(localAdversary).addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val td = snapshot.value as HashMap<*, *>
-                    for (key in td.keys) {
-                        if (key.toString() == "currentMatch") {
-
-                            match = td[key] as String
-                            myRef.child("Users").child(ChessGame.myUsername).child(localAdversary).child("savedMatches").child(date).setValue(match)
-                            myRef.child("Users").child(localAdversary).child(ChessGame.myUsername).child("savedMatches").child(date).setValue(match)
-                            myRef.child("Users").child(ChessGame.myUsername).child(localAdversary).child("currentMatch").setValue(null)
-                        }
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {}
-            })
-        }
-
-        val intent = Intent(this, MainMenu::class.java)
-        startActivity(intent)*/
     }
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
@@ -142,9 +123,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             }
             override fun onCancelled(error: DatabaseError) {}
         })
-        ChessGame.waitingForAdversary = true
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
+        ChessGame.waitingForAdversary = true
+        drawButton.isEnabled = false
+        resignButton.isEnabled = false
     }
 
     fun requestChallenge(view: View) {
@@ -153,6 +135,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             Toast.makeText(applicationContext,"You can't play against yourself! *Facepalm*", Toast.LENGTH_LONG).show()
             return
         }
+
         myRef.child("Users").addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -172,6 +155,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                             }.addOnFailureListener {
                                 Toast.makeText(applicationContext, "Challenge error! :(\nTry again", Toast.LENGTH_LONG).show()
                             }
+
+                        progressBar.visibility = View.VISIBLE
                     }
                 }
                 if (!found) toast("User not found!")
@@ -184,30 +169,39 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private fun listenForChallengeAccepted() {
 
-        myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").addValueEventListener(object: ValueEventListener {
+        myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                val isAccepted = try {
-                    snapshot.value as String
-                } catch (e: Exception) {val isAccepted = ""}
-                if (!(isAccepted=="accepted" || isAccepted=="refused")) return
-                Toast.makeText(applicationContext,"Challenge has been $isAccepted by ${ChessGame.adversary}", Toast.LENGTH_LONG).show()
+                var isAccepted = ""
+                try {
+                    isAccepted = snapshot.value as String
+                } catch (e: Exception) {
+                    Log.e("E", "onDataChange: $isAccepted")
+                }
+                if (!(isAccepted == "accepted" || isAccepted == "refused")) return
 
-                if (isAccepted=="accepted") {
+                if (!hasAlreadyBeenNotified) {
+                    Toast.makeText(applicationContext, "Challenge has been $isAccepted by ${ChessGame.adversary}", Toast.LENGTH_LONG).show()
+                    hasAlreadyBeenNotified = true
+                }
+
+                if (isAccepted == "accepted") {
                     ChessGame.myOnlineColor = "WHITE"
                     challengeButton.visibility = View.INVISIBLE
                     challengeUsername.visibility = View.INVISIBLE
                     drawResignButtons.visibility = View.VISIBLE
+                    progressBar.visibility = View.INVISIBLE
                     startOnlineGame("WHITE")
-                }
-                else if (isAccepted=="refused") {
+                } else if (isAccepted == "refused") {
                     challengeUsername.setText("")
-                    ChessGame.adversary = ""
+                    progressBar.visibility = View.INVISIBLE
                     myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").setValue(null)
+                    resetFlags()
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 Log.e("E", "Failed to read value.", error.toException())
             }
@@ -219,8 +213,18 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         listenSavedMatches()
 
         Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
+        drawResignButtons.visibility = View.VISIBLE
         ChessGame.gameInProgress = "ONLINE"
-        if (color=="WHITE") ChessGame.waitingForAdversary = false
+
+        if (color=="WHITE") {
+            drawButton.isEnabled = true
+            resignButton.isEnabled = true
+            ChessGame.waitingForAdversary = false
+        }
+        else {
+            drawButton.isEnabled = false
+            resignButton.isEnabled = false
+        }
 
         var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
         if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
@@ -233,9 +237,33 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     val match = snapshot.value as String
                     val lastMatchMove = match.split("|").last()
 
-                    if (lastMatchMove != myLastMove && lastMatchMove != "accepted" && lastMatchMove != "refused" && lastMatchMove != "") {
+                    //I have just *refused* a draw, and I need to ignore this event
+                    if (isDrawRefused) {
+                        isDrawRefused = false
+                        return
+                    }
+                    //I have just *proposed* a draw, and I need to ignore this event
+                    else if (isWaitingForDrawResult==1 && lastMatchMove=="½-½") {
+                        isWaitingForDrawResult = 2
+                        return
+                    }
+                    else if (isWaitingForDrawResult==2 && lastMatchMove!="½-½") {
+                        isWaitingForDrawResult = 0
+                        toast("Draw proposal has been refused! Keep playing")
+                        drawButton.isEnabled = true
+                        resignButton.isEnabled = true
+                        return
+                    }
+                    //draw check
+                    else if (lastMatchMove=="½-½") {
+                        alertDraw()
+                    }
+
+                    else if (lastMatchMove != myLastMove && lastMatchMove != "accepted" && lastMatchMove != "refused" && lastMatchMove != "") {
                         playAdversaryMove(lastMatchMove)
                         ChessGame.waitingForAdversary = false
+                        drawButton.isEnabled = true
+                        resignButton.isEnabled = true
                     }
                 } catch (e: Exception) {Log.e("E", e.toString())}
             }
@@ -244,6 +272,36 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         })
 
         ////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    private fun alertDraw() {
+        //create interface
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> win("draw")
+                DialogInterface.BUTTON_NEGATIVE -> refuseDraw()
+            }
+        }
+        //ask user
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this@OnlineGame)
+        builder.setMessage("Your adversary proposed a draw. Accept?").setPositiveButton("Yes", dialogClickListener)
+            .setNegativeButton("No", dialogClickListener).show()
+    }
+    private fun refuseDraw() {
+        isDrawRefused = true
+        var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+        if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
+        dbRef.child("currentMatch").addListenerForSingleValueEvent(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val match = snapshot.value as String
+                val newMatch = match.substring(0, match.length - 4)
+                Log.i("I", "onDataChange: $newMatch")
+                dbRef.child("currentMatch").setValue(newMatch)
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     private fun playAdversaryMove(move: String) {
@@ -287,47 +345,36 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         chessView.invalidate()
     }
 
-/*    fun proposeDraw(view: View) {
+    fun proposeDraw(view: View) {
         if (!ChessGame.waitingForAdversary) {
-            myLastMove = move
+
+            isWaitingForDrawResult = 1
+            drawButton.isEnabled = false
+            resignButton.isEnabled = false
+
             var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
             if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
             dbRef.child("currentMatch").addListenerForSingleValueEvent(object : ValueEventListener {
 
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    var match = snapshot.value as String
-                    var newMatch = if (match == "accepted") move else "$match|$move"
+                    val match = snapshot.value as String
+                    val newMatch = if (match == "accepted") "|½-½" else "$match|½-½"
                     dbRef.child("currentMatch").setValue(newMatch)
 
-                    /////////////////////////
-
-                    if (ChessGame.isOnlineMate=="true") {
-                        if (ChessGame.myOnlineColor=="BLACK") {
-                            match = snapshot.value as String
-                            newMatch = "$match|0-1"
-                            dbRef.child("currentMatch").setValue(newMatch)
-                        }
-                        else if (ChessGame.myOnlineColor=="WHITE") {
-                            match = snapshot.value as String
-                            newMatch = "$match|1-0"
-                            dbRef.child("currentMatch").setValue(newMatch)
-                        }
-                        Toast.makeText(applicationContext,"You won!", Toast.LENGTH_LONG).show()
-                        ChessGame.waitingForAdversary = true
-                    }
+                    toast("Draw proposal sent")
                 }
                 override fun onCancelled(error: DatabaseError) {}
             })
         }
-    }*/
+    }
+
     fun resign(view: View) {
         if (!ChessGame.waitingForAdversary) {
-            if (ChessGame.gameInProgress=="ONLINE") {
-                if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
+            if (ChessGame.gameInProgress == "ONLINE") {
+                if (ChessGame.myOnlineColor == "WHITE") win("BLACK") else win("WHITE")
             }
         }
     }
-
 
     //////////////////
 
@@ -341,8 +388,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 .addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
-                Log.i("I", "listenSavedMatches: ***INSIDE listenSavedMatches***")
-
                 if (!ignoreFirstSave) {
                     ignoreFirstSave = true
                     return
@@ -355,8 +400,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
                 val result = match.split("|").last()
 
+                //draw
+                if (result=="½-½") {
+                    toast("Draw")
+                }
                 //victory
-                if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK") || (result=="1-0" && ChessGame.myOnlineColor=="WHITE")) {
+                else if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK") || (result=="1-0" && ChessGame.myOnlineColor=="WHITE")) {
                     toast("You won!")
                 }
                 //loss
@@ -364,14 +413,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     toast("You lost!")
                 }
 
-                //reset flags
-                ChessGame.waitingForAdversary = true
-                ChessGame.gameInProgress = ""
-                ChessGame.myOnlineColor = ""
-                ChessGame.adversary = ""
-                ChessGame.isOnlineMate
-                ignoreFirstSave = false
-                myLastMove = ""
+                resetFlags()
+
                 drawResignButtons.visibility = View.INVISIBLE
 
             }
@@ -379,11 +422,29 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         })
     }
 
+    private fun resetFlags() {
+        ChessGame.waitingForAdversary = true
+        ChessGame.gameInProgress = ""
+        ChessGame.myOnlineColor = ""
+        ChessGame.adversary = ""
+        ChessGame.isOnlineMate = "false"
+        ignoreFirstSave = false
+        myLastMove = ""
+        isDrawRefused = false
+        isWaitingForDrawResult = 0
+        hasAlreadyBeenNotified = false
+        progressBar.visibility = View.INVISIBLE
+    }
+
     private fun win(color:String) {
 
+        if (ChessGame.gameInProgress!="ONLINE") return
+        Log.i("I", "win: ${ChessGame.gameInProgress}")
+
         //toast di notifica vittoria
-        if (color == ChessGame.myOnlineColor) Toast.makeText(applicationContext, "You won!", Toast.LENGTH_LONG).show()
-        else Toast.makeText(applicationContext, "You lost!", Toast.LENGTH_LONG).show()
+        if (color == ChessGame.myOnlineColor) toast("You won!")
+        else if (color!="draw") toast("You lost!")
+        else (toast("Draw"))
 
         //get match until now
         var match = ""
@@ -417,6 +478,5 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
             override fun onCancelled(error: DatabaseError) {}
         })
-
     }
 }
