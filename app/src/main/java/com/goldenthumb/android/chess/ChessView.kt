@@ -242,6 +242,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                             if (moveIsValid) {
 
+                                chessDelegate?.moveGreenSquares(Square(fromRow,fromCol),Square(row,col))
+
                                 ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
 
                                 val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)

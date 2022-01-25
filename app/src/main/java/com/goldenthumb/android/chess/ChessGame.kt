@@ -26,6 +26,8 @@ object ChessGame {
 
     var piecesBox = mutableSetOf<ChessPiece>()
 
+    var chessPointsFloatArray = FloatArray(1000) { 0f } //MAGIC NUMBER
+
     val lightColor: Int = Color.parseColor("#F2E6D6") //"#EEEEEE"
     val darkColor: Int = Color.parseColor("#D8B27E")  //"#BBBBBB"
 

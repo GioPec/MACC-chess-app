@@ -6,12 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/light_brown">
 
 
     <LinearLayout
         android:id="@+id/linearLayout1"
-        android:layout_width="900px"
+        android:layout_width="328dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -100,7 +101,7 @@
         android:text="8 7 6 5 4 3 2 1"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout1"
         app:layout_constraintTop_toTopOf="parent"
-        app:lineHeight="112px" />
+        app:lineHeight="41dp" />
 
     <RelativeLayout
         android:layout_width="307dp"
@@ -133,18 +134,17 @@
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="45dp"
-        android:layout_height="63dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="36dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:clickable="false"
         android:longClickable="false"
         android:scaleType="fitXY"
         android:tag="on"
-        app:background="@drawable/light_bulb_on"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1"
-        />
-        <!--android:onClick="askForAdvice"-->
+        app:background="@drawable/hint_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <!--android:onClick="askForAdvice"-->
 
 
 

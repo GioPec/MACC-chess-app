@@ -74,7 +74,7 @@ class Login : AppCompatActivity()  {
 
         if (currentUser!=null) {
 
-            var intent = Intent(this, MainMenu::class.java)
+            val intent = Intent(this, MainMenu::class.java)
             intent.putExtra("email", currentUser.email)
             intent.putExtra("uid", currentUser.uid)
             startActivity(intent)

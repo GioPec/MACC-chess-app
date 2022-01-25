@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -19,7 +20,7 @@ import com.google.firebase.database.*
 import java.lang.Exception
 import java.util.HashMap
 
-class MainMenu : AppCompatActivity()  {
+class MainMenu : AppCompatActivity() {
 
     private lateinit var stockfishStatus: TextView
     var resumeButton: Button? = null
@@ -54,6 +55,15 @@ class MainMenu : AppCompatActivity()  {
 
         stockfishStatus = findViewById(R.id.stockfishStatus)
         getHelloWorldFromStockfishAPI()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_profile -> {
+            // User chose the "Profile" item, show the app profile page
+
+            true
+        }
+        else -> false
     }
 
     private fun listenForChallenges() {
@@ -125,9 +135,9 @@ class MainMenu : AppCompatActivity()  {
                     response.subSequence(1, 3)
 
                     if (response.subSequence(1, 3) == "OK") {
-                        stockfishStatus.text = "Chess API is online!"
+                        stockfishStatus.text = "Server is online!"
                     } else {
-                        stockfishStatus.text = "Chess API is offline! "
+                        stockfishStatus.text = "Server is offline! :("
                     }
                 },
                 { error ->

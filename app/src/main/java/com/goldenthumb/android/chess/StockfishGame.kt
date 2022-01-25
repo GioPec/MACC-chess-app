@@ -67,11 +67,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 }
                 runBlocking {
                     job.join()
-                    //Snackbar.make((this@StockfishGame).findViewById(android.R.id.content),
-                    //        "Per aggiungere una nuova segnalazione, tieni premuto sulla mappa", Snackbar.LENGTH_INDEFINITE)
-                    Toast.makeText(applicationContext,"$bestMove",Toast.LENGTH_LONG).show()
+                    Toast.makeText(applicationContext, bestMove,Toast.LENGTH_LONG).show()
                     lightbulbButton.tag = "off"
-                    lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
+                    lightbulbButton.setBackgroundResource(R.drawable.hint_off)
                     unregisterListener()
                 }
             }
@@ -81,18 +79,18 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     fun unregisterListener() {
         sensorManager!!.unregisterListener(sensorListener)
-        Log.i("Listener", "unregistered")
+        //Log.i("Listener", "unregistered")
     }
     fun registerListener() {
         sensorManager?.registerListener(ChessGame.sensorListener, sensorManager!!.getDefaultSensor(
-                Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+                Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
         )
-        Log.i("Listener", "registered")
+        //Log.i("Listener", "registered")
     }
 
     override fun onResume() {
         sensorManager?.registerListener(sensorListener, sensorManager!!.getDefaultSensor(
-                Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+                Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
         )
         super.onResume()
     }
@@ -115,7 +113,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         button = findViewById(R.id.button)
         lightbulbButton = findViewById(R.id.imageButton)
         lightbulbButton.tag = "on"
-        lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+        lightbulbButton.setBackgroundResource(R.drawable.hint_on)
 
         chessView.chessDelegate = this
 
@@ -124,7 +122,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             progressBar.progress = progressBar.max / 2
             chessView.invalidate()
             lightbulbButton.tag = "on"
-            lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+            lightbulbButton.setBackgroundResource(R.drawable.hint_on)
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,6 +264,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     }
 
     override fun updateTurn(player: Player, move: String) {}
+
+    override fun moveGreenSquares(from: Square, to: Square) {}
 
     private fun askForAdvice():String {
         //if (lightbulbButton.tag =="off") return

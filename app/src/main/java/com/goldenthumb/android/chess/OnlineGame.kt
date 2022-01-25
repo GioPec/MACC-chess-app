@@ -39,6 +39,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private var hasAlreadyBeenNotified = false
 
+    private lateinit var listenerForChallengeAccepted : ValueEventListener
+    private lateinit var listenerSavedMatches : ValueEventListener
+    private lateinit var listenerOnlineGame : ValueEventListener
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
@@ -92,11 +96,14 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
+
+        removeListeners()
     }
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
+    override fun moveGreenSquares(from: Square, to: Square) {}
 
     override fun updateTurn(player: Player, move: String) {
         myLastMove = move
@@ -130,6 +137,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     }
 
     fun requestChallenge(view: View) {
+
         ChessGame.adversary = challengeUsername.text.toString()
         if (ChessGame.adversary==ChessGame.myUsername) {
             Toast.makeText(applicationContext,"You can't play against yourself! *Facepalm*", Toast.LENGTH_LONG).show()
@@ -169,7 +177,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private fun listenForChallengeAccepted() {
 
-        myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").addValueEventListener(object : ValueEventListener {
+        listenerForChallengeAccepted = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("currentMatch").addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
@@ -210,6 +218,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private fun startOnlineGame(color:String) {
 
+        //remove listenerForChallengeAccepted
+        if (ChessGame.myOnlineColor=="WHITE") {
+            myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+                    .child("currentMatch").removeEventListener(listenerForChallengeAccepted) }
+
+        //listen for changes in saved matches in db
         listenSavedMatches()
 
         Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
@@ -231,7 +245,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
         ////////////////////// listen for adversary moves //////////////////////////////////////////
 
-        dbRef.child("currentMatch").addValueEventListener(object : ValueEventListener {
+        listenerOnlineGame = dbRef.child("currentMatch").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val match = snapshot.value as String
@@ -376,15 +390,13 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         }
     }
 
-    //////////////////
-
     private fun toast(msg:String) {
         Toast.makeText(applicationContext, msg, Toast.LENGTH_LONG).show()
     }
 
     private fun listenSavedMatches() {
 
-        myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches")
+        listenerSavedMatches = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches")
                 .addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -423,6 +435,9 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     }
 
     private fun resetFlags() {
+
+        removeListeners()
+
         ChessGame.waitingForAdversary = true
         ChessGame.gameInProgress = ""
         ChessGame.myOnlineColor = ""
@@ -434,6 +449,24 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         isWaitingForDrawResult = 0
         hasAlreadyBeenNotified = false
         progressBar.visibility = View.INVISIBLE
+    }
+    private fun removeListeners() {
+
+        try {
+            myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+                    .child("currentMatch").removeEventListener(listenerForChallengeAccepted)
+        } catch (e: Exception) {}
+
+        try {
+            myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
+                    .child("savedMatches").removeEventListener(listenerSavedMatches)
+        } catch (e: Exception) {}
+
+        try {
+            var dbRef = myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
+            if (ChessGame.myOnlineColor=="BLACK") dbRef = myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary)
+            dbRef.child("currentMatch").removeEventListener(listenerOnlineGame)
+        } catch (e: Exception) {}
     }
 
     private fun win(color:String) {
