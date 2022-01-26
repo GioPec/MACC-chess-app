@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -57,10 +58,16 @@ class MainMenu : AppCompatActivity() {
         getHelloWorldFromStockfishAPI()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_profile -> {
             // User chose the "Profile" item, show the app profile page
-
+            startActivity(Intent(this, Profile::class.java))
             true
         }
         else -> false

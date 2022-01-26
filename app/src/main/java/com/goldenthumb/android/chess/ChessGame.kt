@@ -78,7 +78,7 @@ object ChessGame {
     fun reset() {
         resetStockfishGame()
         firstMove=true
-        Log.d("!", "############# GAME START #############")
+        Log.d("!", "############# RESET #############")
         clear()
         for (i in 0 until 2) {
             addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60))

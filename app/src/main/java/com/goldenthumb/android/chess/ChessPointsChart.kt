@@ -28,7 +28,7 @@ class ChessPointsChart(context: Context?, attrs: AttributeSet?) : View(context, 
         val l = IntArray(12)
         for (i in l.indices) {
             l[i] = Random.nextInt(max - min + 1) + min // storing random integers in an array
-            println(l[i]) // printing each array element
+            //println(l[i]) // printing each array element
         }
 
         val numberOfMatches = l.size
