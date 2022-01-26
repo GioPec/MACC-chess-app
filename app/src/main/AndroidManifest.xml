@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.goldenthumb.android.chess">
+    package="com.macc.android.chess">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -18,32 +18,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         -->
 
-        <activity android:name=".LocalGame"
+        <activity android:name="com.macc.android.chess.LocalGame"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".StockfishGame"
+        <activity android:name="com.macc.android.chess.StockfishGame"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".OnlineGame"
+        <activity android:name="com.macc.android.chess.OnlineGame"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".MainMenu"
+        <activity android:name="com.macc.android.chess.MainMenu"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".Registration"
+        <activity android:name="com.macc.android.chess.Registration"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".Profile"
+        <activity android:name="com.macc.android.chess.Profile"
             android:screenOrientation="portrait">
 
         </activity>
 
-        <activity android:name=".Login"
+        <activity android:name="com.macc.android.chess.Login"
             android:screenOrientation="portrait">
             <intent-filter> <!-- decides the starting activity -->
                 <action android:name="android.intent.action.MAIN" />

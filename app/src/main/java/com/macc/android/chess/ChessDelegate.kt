@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 interface ChessDelegate {
     fun pieceAt(square: Square) : ChessPiece?

@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.goldenthumb.android.chess.ChessView
+        <com.macc.android.chess.ChessView
             android:id="@+id/chess_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

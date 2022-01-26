@@ -1,9 +1,7 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.graphics.Color
-import android.hardware.Sensor
 import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.util.Log
 import kotlinx.coroutines.*
 import java.io.InputStreamReader

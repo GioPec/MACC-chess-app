@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess;
+package com.macc.android.chess;
 
 import android.content.Context;
 import android.graphics.Canvas
@@ -7,7 +7,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet;
 import android.view.View
-import com.goldenthumb.android.chess.ChessGame.chessPointsFloatArray
+import com.macc.android.chess.ChessGame.chessPointsFloatArray
 import kotlin.random.Random
 
 class ChessPointsChart(context: Context?, attrs: AttributeSet?) : View(context, attrs) {

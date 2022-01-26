@@ -1,9 +1,7 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.View

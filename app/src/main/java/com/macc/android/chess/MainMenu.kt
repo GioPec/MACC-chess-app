@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.DialogInterface
@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest

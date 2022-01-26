@@ -61,7 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4">
 
-        <com.goldenthumb.android.chess.ChessPointsChart
+        <com.macc.android.chess.ChessPointsChart
             android:id="@+id/chess_points_chart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

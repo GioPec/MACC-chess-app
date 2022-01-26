@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.graphics.Color
 import android.os.Bundle
