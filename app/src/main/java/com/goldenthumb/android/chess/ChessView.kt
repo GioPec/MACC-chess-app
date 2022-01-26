@@ -100,6 +100,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val r = JSONObject(InputStreamReader(inputStream).readText())
                 //Log.d("info", r.toString())
                 checkValidity = r.get("valid") as Boolean
+                ChessGame.isOnlineMate = r.get("mate") as String
                 Log.d("Move validity", checkValidity.toString())
                 return checkValidity
             }
@@ -132,67 +133,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             Log.e("Info error", e.toString())
         }
         return null
-    }
-
-    private fun promotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-        if (movingPiece!!.chessman == Chessman.PAWN) {
-            if (movingPiece.player == Player.WHITE && fromRow==6 && row==7) {
-                ChessGame.piecesBox.remove(movingPiece)
-
-                ChessGame.addPiece(
-                    movingPiece.copy(
-                        chessman = Chessman.QUEEN,
-                        resID = R.drawable.chess_qlt60,
-                        col = col,
-                        row = row
-                    )
-                )
-                return "Q"
-
-            }
-            else if (movingPiece.player == Player.BLACK && fromRow==1 && row==0) {
-                ChessGame.piecesBox.remove(movingPiece)
-
-                ChessGame.addPiece(
-                    movingPiece.copy(
-                        chessman = Chessman.QUEEN,
-                        resID = R.drawable.chess_qdt60,
-                        col = col,
-                        row = row
-                    )
-                )
-                return "q"
-            }
-        }
-        return ""
-    }
-
-    private fun castle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-        if (movingPiece!!.chessman == Chessman.KING) {
-            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==6 && row==0) {
-                return "whiteshort"
-            }
-            if (movingPiece.player == Player.WHITE && fromCol==4 && fromRow==0 && col==2 && row==0) {
-                return "whitelong"
-            }
-            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==6 && row==7) {
-                return "blackshort"
-            }
-            if (movingPiece.player == Player.BLACK && fromCol==4 && fromRow==7 && col==2 && row==7) {
-                return "blacklong"
-            }
-        }
-        return ""
-    }
-
-    private fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
-        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
-            if(fromCol!=col){
-                if(ChessGame.pieceAt(col, row)==null){
-                    ChessGame.piecesBox.remove(ChessGame.pieceAt(col,fromRow))
-                }
-            }
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,10 +208,15 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                if (true    //TODO controllo mossa pezzi neri
-                        //ChessGame.gameInProgress == "LOCAL" ||
-                        //(((ChessGame.gameInProgress != "LOCAL" && movingPiece?.player?.equals(Player.WHITE)==true)
+                var myOnlineColorNum = Player.BLACK
+                if (ChessGame.myOnlineColor == "WHITE") myOnlineColorNum = Player.WHITE
+                if (
+                        ChessGame.gameInProgress == "LOCAL" ||
+                        (ChessGame.gameInProgress == "STOCKFISH" && movingPiece?.player?.equals(Player.WHITE) == true) ||
+                        (ChessGame.gameInProgress == "ONLINE" && movingPiece?.player?.equals(myOnlineColorNum) == true)
                 ) {
+                    //Log.i("I", "onTouchEvent: ${ChessGame.gameInProgress == "ONLINE"}")
+                    //Log.i("I", "onTouchEvent: ${movingPiece?.player?.equals(myOnlineColorNum) == true}")
                     movingPieceX = event.x
                     movingPieceY = event.y
                     invalidate()
@@ -285,7 +230,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                     if (ChessGame.gameInProgress == "LOCAL" || ChessGame.gameInProgress == "ONLINE") {
 
-                        val promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
+                        val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
 
                         val job = GlobalScope.launch {
                             val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
@@ -297,9 +242,11 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                             if (moveIsValid) {
 
-                                removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
+                                chessDelegate?.moveGreenSquares(Square(fromRow,fromCol),Square(row,col))
 
-                                val castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
+                                ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
+
+                                val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
                                 when (castleCheck) {
                                     "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                     "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
@@ -325,7 +272,14 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         }
                                     }
                                 }
-                                chessDelegate?.updateTurn(movingPiece!!.player)
+                                if (ChessGame.gameInProgress == "ONLINE") {
+                                    val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+                                    val usableFromRow = convertRowColFromIntToString(fromRow, "row")
+                                    val usableToCol = convertRowColFromIntToString(col, "column")
+                                    val usableToRow = convertRowColFromIntToString(row, "row")
+                                    val move = usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                                    chessDelegate?.updateTurn(movingPiece!!.player, move)
+                                }
                             }
                         }
                     }
@@ -339,7 +293,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         val usableFromRow = convertRowColFromIntToString(fromRow, "row")
                         val usableToCol = convertRowColFromIntToString(col, "column")
                         val usableToRow = convertRowColFromIntToString(row, "row")
-                        val promotionCheck = promotion(movingPiece, fromRow, fromCol, row, col)
+                        val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
 
                         val job = GlobalScope.launch(Dispatchers.IO) { run {
                             val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
@@ -366,8 +320,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                             if (moveIsValid) {
 
                                 // Player move
-                                removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
-                                val castleCheck = castle(movingPiece, fromRow, fromCol, row, col)
+                                ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
+                                val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
                                 when (castleCheck) {
                                     "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                     "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
@@ -399,9 +353,9 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     val squares = ChessGame.convertMoveStringToSquares(response)
                                     movingPiece = ChessGame.pieceAt(squares[0])
 
-                                    val promotionCheck = promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    removeEnpassantPawn(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    when (castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)) {
+                                    val promotionCheck = ChessGame.promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                    ChessGame.removeEnpassantPawn(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
+                                    when (ChessGame.castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)) {
                                         "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
                                         "whitelong" -> ChessGame.movePiece(0,0,3,0)
                                         "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)

@@ -5,4 +5,5 @@
     <string name="connect_button">Connect</string>
     <string name="register"><u>Register</u></string>
     <string name="login"><u>Login</u></string>
+    <string name="default_web_client_id_" translatable="false">884571719139-t0smtan71fgva2qerhb01953i5v335du.apps.googleusercontent.com</string>
 </resources>

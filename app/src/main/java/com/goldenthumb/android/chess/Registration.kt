@@ -44,7 +44,9 @@ class Registration : AppCompatActivity()  {
     }
 
     fun register(view: View) {
-        registerToFireBase(emailView.text.toString(), passwordView.text.toString())
+        if (emailView.text.toString()!="" && passwordView.text.toString()!="")
+            registerToFireBase(emailView.text.toString(), passwordView.text.toString())
+        else toast("Error: empty fields")
     }
 
     private fun registerToFireBase(email:String, password:String) {
@@ -64,11 +66,11 @@ class Registration : AppCompatActivity()  {
                     if (currentUser != null) {
 
                         myRef.child("Users").child(splitString(currentUser.email.toString())).setValue("")
-                                .addOnSuccessListener {
-                                    Log.i("Firebase DB write", "Success")
-                                }.addOnFailureListener {
-                                    Log.e("Firebase DB write", "$it")
-                                }
+                            .addOnSuccessListener {
+                                Log.i("Firebase DB write", "Success")
+                            }.addOnFailureListener {
+                                Log.e("Firebase DB write", "$it")
+                            }
                     }
 
                     startActivity(Intent(this, Login::class.java))
@@ -85,5 +87,9 @@ class Registration : AppCompatActivity()  {
     private fun splitString(str:String):String {
         val split = str.split("@")
         return split[0]
+    }
+
+    private fun toast(msg:String) {
+        Toast.makeText(applicationContext, msg, Toast.LENGTH_LONG).show()
     }
 }
