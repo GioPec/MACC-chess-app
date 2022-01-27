@@ -22,6 +22,9 @@ object ChessGame {
     val sensorListener:SensorEventListener? = null
     var firstMove = true
 
+    var fromSquareHighlight: Square? = null
+    var toSquareHighlight: Square? = null
+
     var piecesBox = mutableSetOf<ChessPiece>()
 
     var chessPointsFloatArray = FloatArray(1000) { 0f } //MAGIC NUMBER
@@ -76,6 +79,8 @@ object ChessGame {
     fun reset() {
         resetStockfishGame()
         firstMove=true
+        fromSquareHighlight = null
+        toSquareHighlight = null
         Log.d("!", "############# RESET #############")
         clear()
         for (i in 0 until 2) {

@@ -263,8 +263,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     override fun updateTurn(player: Player, move: String) {}
 
-    override fun moveGreenSquares(from: Square, to: Square) {}
-
     private fun askForAdvice():String {
         //if (lightbulbButton.tag =="off") return
 

@@ -101,7 +101,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
-    override fun moveGreenSquares(from: Square, to: Square) {}
 
     override fun updateTurn(player: Player, move: String) {
         myLastMove = move
@@ -324,6 +323,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         val col = squares[1].col
         val movingPiece = ChessGame.pieceAt(fromCol, fromRow)
 
+        //HIGHLIGHT
+        ChessGame.fromSquareHighlight = Square(fromCol, 7-fromRow)
+        ChessGame.toSquareHighlight = Square(col, 7-row)
+
         val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
 
         ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
@@ -354,6 +357,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 }
             }
         }
+
         chessView.invalidate()
     }
 

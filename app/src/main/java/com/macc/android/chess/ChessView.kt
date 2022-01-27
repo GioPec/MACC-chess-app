@@ -2,6 +2,8 @@ package com.macc.android.chess
 
 import android.content.Context
 import android.graphics.*
+import android.media.MediaPlayer
+import android.media.MediaPlayer.OnCompletionListener
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -34,6 +36,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     )
     private val bitmaps = mutableMapOf<Int, Bitmap>()
     private val paint = Paint()
+    private val paintHighlight = Paint()
 
     private var movingPieceBitmap: Bitmap? = null
     private var movingPiece: ChessPiece? = null
@@ -50,7 +53,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     /////////// CHESS RULES FUNCTIONS //////////////////////////////////////////////////////////////
 
-    private fun convertRowColFromIntToString(move: Int, type:String): String {
+    private fun convertRowColFromIntToString(move: Int, type: String): String {
         //assert(move>=0 && move<=7)
         var converted = ""
         if (type.equals("column")) {
@@ -80,12 +83,12 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return converted
     }
 
-    private fun checkMoveValidity(fromCol:Int, fromRow:Int, toCol:Int, toRow:Int, prom:String=""):Boolean? {
+    private fun checkMoveValidity(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int, prom: String = ""):Boolean? {
 
-        val usableFromColumn = convertRowColFromIntToString(fromCol,"column")
-        val usableFromRow = convertRowColFromIntToString(fromRow,"row")
-        val usableToCol = convertRowColFromIntToString(toCol,"column")
-        val usableToRow = convertRowColFromIntToString(toRow,"row")
+        val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+        val usableFromRow = convertRowColFromIntToString(fromRow, "row")
+        val usableToCol = convertRowColFromIntToString(toCol, "column")
+        val usableToRow = convertRowColFromIntToString(toRow, "row")
 
         val name="https://giacomovenneri.pythonanywhere.com/?move=" +
                 "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom
@@ -124,7 +127,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val r = JSONObject(InputStreamReader(inputStream).readText())
                 val t = r.get("type") as String
                 val v = r.get("value") as Int
-                pair = Pair(t,v)
+                pair = Pair(t, v)
                 Log.d("Evaluation", pair.toString())
                 return pair
             }
@@ -133,6 +136,16 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             Log.e("Info error", e.toString())
         }
         return null
+    }
+
+    /////
+
+    private fun playSound() {
+        val mp = MediaPlayer.create(this.context, R.raw.move_loud)
+        mp.setOnCompletionListener(OnCompletionListener {
+            mp.release()
+        })
+        mp.start()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,12 +159,15 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     override fun onDraw(canvas: Canvas?) {
         canvas ?: return
 
-        val chessBoardSide = min(width, height) * scaleFactor
-        cellSide = chessBoardSide / 8f
-        originX = (width - chessBoardSide) / 2f
-        originY = (height - chessBoardSide) / 2f
+        val chessBoardSide = min(width, height)*scaleFactor
+        cellSide = chessBoardSide/8f
+        originX = (width - chessBoardSide)/2f
+        originY = (height - chessBoardSide)/2f
 
         drawChessboard(canvas)
+        paintHighlight.color = Color.parseColor("#A88BC34A")
+        highlightSquares(canvas, ChessGame.fromSquareHighlight)
+        highlightSquares(canvas, ChessGame.toSquareHighlight)
         drawPieces(canvas)
     }
 
@@ -165,27 +181,32 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 }
 
         movingPieceBitmap?.let {
-            canvas.drawBitmap(it, null, RectF(movingPieceX - cellSide/2, movingPieceY - cellSide/2,movingPieceX + cellSide/2,movingPieceY + cellSide/2), paint)
+            canvas.drawBitmap(it, null, RectF(movingPieceX - cellSide / 2, movingPieceY - cellSide / 2, movingPieceX + cellSide / 2, movingPieceY + cellSide / 2), paint)
         }
     }
 
     private fun drawPieceAt(canvas: Canvas, col: Int, row: Int, resID: Int) =
-        canvas.drawBitmap(bitmaps[resID]!!, null, RectF(originX + col * cellSide,originY + (7 - row) * cellSide,originX + (col + 1) * cellSide,originY + ((7 - row) + 1) * cellSide), paint)
+            canvas.drawBitmap(bitmaps[resID]!!, null, RectF(originX+col*cellSide, originY+(7-row)*cellSide, originX+(col+1)*cellSide, originY+((7-row)+1)*cellSide), paint)
 
     private fun loadBitmaps() =
-        imgResIDs.forEach { imgResID ->
-            bitmaps[imgResID] = BitmapFactory.decodeResource(resources, imgResID)
-        }
+            imgResIDs.forEach { imgResID ->
+                bitmaps[imgResID] = BitmapFactory.decodeResource(resources, imgResID)
+            }
 
     private fun drawChessboard(canvas: Canvas) {
         for (row in 0 until 8)
             for (col in 0 until 8)
-                drawSquareAt(canvas, col, row, (col + row) % 2 == 1)
+                drawSquareAt(canvas, col, row, (col+row)%2==1)
     }
 
+    private fun highlightSquares(canvas: Canvas, s: Square?) {
+        try {
+            canvas.drawRect(originX+s!!.col*cellSide, originY+s!!.row*cellSide, originX+(s!!.col+1)*cellSide, originY+(s!!.row+1)*cellSide, paintHighlight)
+        } catch (e: Exception) {println("una sola volta")}
+    }
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor
-        canvas.drawRect(originX + col * cellSide, originY + row * cellSide, originX + (col + 1)* cellSide, originY + (row + 1) * cellSide, paint)
+        canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +247,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
                 var moveIsValid = false
-                if (movingPiece!=null && (fromCol != col || fromRow != row)) {
+                if (movingPiece != null && (fromCol != col || fromRow != row)) {
 
                     if (ChessGame.gameInProgress == "LOCAL" || ChessGame.gameInProgress == "ONLINE") {
 
@@ -234,7 +255,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                         val job = GlobalScope.launch {
                             val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
-                            moveIsValid = c1.await()==true
+                            moveIsValid = c1.await() == true
                         }
 
                         runBlocking {
@@ -242,7 +263,9 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                             if (moveIsValid) {
 
-                                chessDelegate?.moveGreenSquares(Square(fromRow,fromCol),Square(row,col))
+                                //HIGHLIGHTING
+                                ChessGame.fromSquareHighlight = Square(fromCol, 7-fromRow)
+                                ChessGame.toSquareHighlight = Square(col, 7-row)
 
                                 ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
 
@@ -273,20 +296,20 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     }
                                 }
                                 if (ChessGame.gameInProgress == "ONLINE") {
-                                    val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
+                                    val usableFromCol = convertRowColFromIntToString(fromCol, "column")
                                     val usableFromRow = convertRowColFromIntToString(fromRow, "row")
                                     val usableToCol = convertRowColFromIntToString(col, "column")
                                     val usableToRow = convertRowColFromIntToString(row, "row")
-                                    val move = usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                                    val move = usableFromCol + usableFromRow + usableToCol + usableToRow + promotionCheck
                                     chessDelegate?.updateTurn(movingPiece!!.player, move)
                                 }
+
+                                playSound()
                             }
                         }
-                    }
+                    } else if (ChessGame.gameInProgress == "STOCKFISH") {
 
-                    else if (ChessGame.gameInProgress == "STOCKFISH") {
-
-                        ChessGame.firstMove=false
+                        ChessGame.firstMove = false
                         var response = ""
                         var mate = ""
                         val usableFromColumn = convertRowColFromIntToString(fromCol, "column")
@@ -295,24 +318,25 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         val usableToRow = convertRowColFromIntToString(row, "row")
                         val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
 
-                        val job = GlobalScope.launch(Dispatchers.IO) { run {
-                            val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
-                                    "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
-                            val url = URL(name)
-                            val conn = url.openConnection() as HttpsURLConnection
-                            try {
-                                conn.run {
-                                    requestMethod = "POST"
-                                    val r = JSONObject(InputStreamReader(inputStream).readText())
-                                    Log.d("Stockfish response", r.toString())
-                                    moveIsValid = r.get("valid") as Boolean
-                                    response = r.get("response") as String
-                                    mate = r.get("mate") as String
+                        val job = GlobalScope.launch(Dispatchers.IO) {
+                            run {
+                                val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
+                                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                                val url = URL(name)
+                                val conn = url.openConnection() as HttpsURLConnection
+                                try {
+                                    conn.run {
+                                        requestMethod = "POST"
+                                        val r = JSONObject(InputStreamReader(inputStream).readText())
+                                        Log.d("Stockfish response", r.toString())
+                                        moveIsValid = r.get("valid") as Boolean
+                                        response = r.get("response") as String
+                                        mate = r.get("mate") as String
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("Move error: ", e.toString())
                                 }
-                            } catch (e: Exception) {
-                                Log.e("Move error: ", e.toString())
                             }
-                        }
                         }
 
                         runBlocking {
@@ -346,20 +370,20 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         }
                                     }
                                 }
-                                if (mate=="player") ChessGame.stockfishGameEnded = true
+                                if (mate == "player") ChessGame.stockfishGameEnded = true
 
                                 // Stockfish response
                                 else {
                                     val squares = ChessGame.convertMoveStringToSquares(response)
                                     movingPiece = ChessGame.pieceAt(squares[0])
 
-                                    val promotionCheck = ChessGame.promotion(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    ChessGame.removeEnpassantPawn(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)
-                                    when (ChessGame.castle(movingPiece,squares[0].row,squares[0].col,squares[1].row,squares[1].col)) {
+                                    val promotionCheck = ChessGame.promotion(movingPiece, squares[0].row, squares[0].col, squares[1].row, squares[1].col)
+                                    ChessGame.removeEnpassantPawn(movingPiece, squares[0].row, squares[0].col, squares[1].row, squares[1].col)
+                                    when (ChessGame.castle(movingPiece, squares[0].row, squares[0].col, squares[1].row, squares[1].col)) {
                                         "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
-                                        "whitelong" -> ChessGame.movePiece(0,0,3,0)
+                                        "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
                                         "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
-                                        "blacklong" -> ChessGame.movePiece(0,7,3,7)
+                                        "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
                                     }
                                     ChessGame.piecesBox.remove(movingPiece)
                                     if (promotionCheck == "") {
@@ -381,8 +405,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     }
                                     ChessGame.toString()
                                     invalidate()
-                                    if (mate=="stockfish") ChessGame.stockfishGameEnded = true
+                                    if (mate == "stockfish") ChessGame.stockfishGameEnded = true
                                 }
+
+                                playSound()
                             }
                         }
                     }
