@@ -1,21 +1,19 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.Intent
-import android.opengl.Visibility
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.util.*
+import kotlin.math.abs
+import kotlin.math.min
 
 class OnlineGame : AppCompatActivity(), ChessDelegate {
     private lateinit var mAuth: FirebaseAuth
@@ -39,13 +37,27 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private var hasAlreadyBeenNotified = false
 
+    private var myChessPoints = 0
+    private var adversaryChessPoints = 0
+
     private lateinit var listenerForChallengeAccepted : ValueEventListener
     private lateinit var listenerSavedMatches : ValueEventListener
     private lateinit var listenerOnlineGame : ValueEventListener
 
+    private lateinit var numeri : TextView
+    private lateinit var lettere : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
+
+
+        R.string.chess_word
+
+
+
+
+
 
         ChessGame.gameInProgress=""
 
@@ -53,6 +65,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         isDrawRefused = false
         isWaitingForDrawResult = 0
         hasAlreadyBeenNotified = false
+        myChessPoints = 0
+        adversaryChessPoints = 0
 
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
@@ -65,6 +79,16 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         drawButton = findViewById(R.id.draw_button)
         resignButton = findViewById(R.id.resign_button)
         progressBar = findViewById(R.id.progress_bar)
+
+        lettere = findViewById(R.id.textView3)
+        numeri = findViewById(R.id.textView4)
+
+
+        if(ChessGame.myOnlineColor == "BLACK") {
+            lettere.text="h g f e d c b a"
+            numeri.text="1 2 3 4 5 6 7 8"
+        }
+
         drawButton.isEnabled = true
         resignButton.isEnabled = true
         progressBar.visibility = View.INVISIBLE
@@ -88,6 +112,9 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             ChessGame.myOnlineColor=maybeColor!!
             startOnlineGame(ChessGame.myOnlineColor)
         }
+
+
+
     }
 
     override fun onStop () {
@@ -103,7 +130,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
-    override fun moveGreenSquares(from: Square, to: Square) {}
 
     override fun updateTurn(player: Player, move: String) {
         myLastMove = move
@@ -152,6 +178,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 val td = snapshot.value as HashMap<*, *>
                 var found = false
                 for (key in td.keys) {
+                    if (key.toString()=="chessPoints") continue
                     if (key.toString()==ChessGame.adversary) {
                         found = true
                         val au = key as String
@@ -216,6 +243,87 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         })
     }
 
+    private fun CBOC(value: String): String {
+        //assert(move>=0 && move<=7)
+        var converted = ""
+        var letter = ""
+        var word_array=arrayOf("a", "b", "c","d","e","f","g","h")
+        var number_array=arrayOf("1", "2", "3","4","5","6","7","8")
+        var promozione=arrayOf("Q","q")
+
+        if(value.length==4){
+            for(i in 0..value.length-1){
+                letter= value[i].toString()
+                if(letter in word_array || letter in number_array){
+
+                }else{
+                    converted=value;
+                    break
+                }
+                when (letter) {
+                    "1" -> letter = "8"
+                    "2" -> letter = "7"
+                    "3" -> letter = "6"
+                    "4" -> letter = "5"
+                    "5" -> letter = "4"
+                    "6" -> letter = "3"
+                    "7" -> letter = "2"
+                    "8" -> letter = "1"
+                    "a" -> letter = "h"
+                    "b" -> letter = "g"
+                    "c" -> letter = "f"
+                    "d" -> letter = "e"
+                    "e" -> letter = "d"
+                    "f" -> letter = "c"
+                    "g" -> letter = "b"
+                    "h" -> letter = "a"
+                }
+                converted+=letter;
+
+            }
+
+
+        }else if(value.length==5){
+            for(i in 0..value.length-2){
+                letter= value[i].toString()
+                if(letter in word_array || letter in number_array){
+
+                }else{
+                    converted=value;
+                    break
+                }
+                when (letter) {
+                    "1" -> letter = "8"
+                    "2" -> letter = "7"
+                    "3" -> letter = "6"
+                    "4" -> letter = "5"
+                    "5" -> letter = "4"
+                    "6" -> letter = "3"
+                    "7" -> letter = "2"
+                    "8" -> letter = "1"
+                    "a" -> letter = "h"
+                    "b" -> letter = "g"
+                    "c" -> letter = "f"
+                    "d" -> letter = "e"
+                    "e" -> letter = "d"
+                    "f" -> letter = "c"
+                    "g" -> letter = "b"
+                    "h" -> letter = "a"
+                }
+                converted+=letter;
+
+            }
+            //converted+=value[4];
+
+
+        }else{
+            converted=value
+        }
+
+
+        return converted
+    }
+
     private fun startOnlineGame(color:String) {
 
         //remove listenerForChallengeAccepted
@@ -223,8 +331,20 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
                     .child("currentMatch").removeEventListener(listenerForChallengeAccepted) }
 
+        if (ChessGame.myOnlineColor=="BLACK") {
+            ChessGame.reset_black()
+        }
+
+
+
+
+
         //listen for changes in saved matches in db
         listenSavedMatches()
+
+        //get Chess Points
+        readMyChessPoints()
+        readAdversaryChessPoints()
 
         Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
         drawResignButtons.visibility = View.VISIBLE
@@ -249,7 +369,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val match = snapshot.value as String
-                    val lastMatchMove = match.split("|").last()
+                    var lastMatchMove = match.split("|").last()
+
+
+                    if(ChessGame.myOnlineColor == "BLACK"){
+                        lastMatchMove=CBOC(lastMatchMove);
+                    }
 
                     //I have just *refused* a draw, and I need to ignore this event
                     if (isDrawRefused) {
@@ -317,6 +442,25 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+    private fun ICBO(value: Int) : Int {
+        var converted = 777
+
+        when (value) {
+            0 -> converted = 7
+            1 -> converted = 6
+            2 -> converted = 5
+            3 -> converted = 4
+            4 -> converted = 3
+            5 -> converted = 2
+            6 -> converted = 1
+            7 -> converted = 0
+
+
+        }
+
+        return converted
+
+    }
 
     private fun playAdversaryMove(move: String) {
         val squares = ChessGame.convertMoveStringToSquares(move)
@@ -326,17 +470,49 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         val col = squares[1].col
         val movingPiece = ChessGame.pieceAt(fromCol, fromRow)
 
-        val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
+        //HIGHLIGHT
+        ChessGame.fromSquareHighlight = Square(fromCol, 7-fromRow)
+        ChessGame.toSquareHighlight = Square(col, 7-row)
 
-        ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
+        var promotionCheck=""
 
-        val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
-        when (castleCheck) {
-            "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
-            "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
-            "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
-            "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
+        if(ChessGame.myOnlineColor == "BLACK"){
+            promotionCheck = ChessGame.onlinePromotion(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col))
+        }else {
+            promotionCheck = ChessGame.onlinePromotion(movingPiece, fromRow, fromCol, row, col)
         }
+
+
+        var castleCheck =""
+
+
+
+        ChessGame.removeEnpassantPawn(movingPiece, (fromRow), (fromCol), (row), (col))
+
+
+
+        if(ChessGame.myOnlineColor == "BLACK"){
+            castleCheck=ChessGame.castle(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col));
+            when (castleCheck) {
+                "whiteshort" -> ChessGame.movePiece(ICBO(7), ICBO(0), ICBO(5),ICBO( 0))
+                "whitelong" -> ChessGame.movePiece(ICBO(0), ICBO(0),ICBO( 3), ICBO(0))
+                "blackshort" -> ChessGame.movePiece(ICBO(7), ICBO(7), ICBO(5), ICBO(7))
+                "blacklong" -> ChessGame.movePiece(ICBO(0),ICBO( 7), ICBO(3), ICBO(7))
+            }
+
+        }else{
+            castleCheck=ChessGame.castle(movingPiece, (fromRow), (fromCol), (row), (col));
+            when (castleCheck) {
+                "whiteshort" -> ChessGame.movePiece((7), (0), (5),( 0))
+                "whitelong" -> ChessGame.movePiece((0), (0),( 3), (0))
+                "blackshort" -> ChessGame.movePiece((7), (7), (5), (7))
+                "blacklong" -> ChessGame.movePiece((0),( 7), (3), (7))
+            }
+        }
+
+
+
+
 
         ChessGame.piecesBox.remove(movingPiece)
         if (promotionCheck == "") {
@@ -356,6 +532,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 }
             }
         }
+
         chessView.invalidate()
     }
 
@@ -469,6 +646,82 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         } catch (e: Exception) {}
     }
 
+    /////
+    private fun readMyChessPoints() {
+        myRef.child("Users").child(ChessGame.myUsername).child("chessPoints")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                println("My chessPoints = " + snapshot.value)
+                myChessPoints = (snapshot.value as Long).toInt()
+            }
+            override fun onCancelled(error: DatabaseError) {}
+         })
+    }
+    private fun readAdversaryChessPoints() {
+        myRef.child("Users").child(ChessGame.adversary).child("chessPoints")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    println("Adversary chessPoints = " + snapshot.value)
+                    adversaryChessPoints = (snapshot.value as Long).toInt()
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+    private fun updateChessPoints(color: String): Pair<Int, Int> {
+        val pointsDifference = abs((myChessPoints-adversaryChessPoints))
+        println("\n\npointsDifference = $pointsDifference")
+        println("\n\nmyChessPoints = $myChessPoints")
+        println("\n\nadversaryChessPoints = $adversaryChessPoints")
+
+        //if winner is weaker
+        var newPoints = 10
+        var bonusPoints = 0
+        //balanced match
+        if (pointsDifference<10) {
+            println("\n\nbalanced")
+            newPoints += 0
+        }
+        //if winner is weaker
+        else if ((myChessPoints<adversaryChessPoints && (color==ChessGame.myOnlineColor)) || (myChessPoints>adversaryChessPoints && (color!=ChessGame.myOnlineColor))) {
+            bonusPoints = min(10.0, 0.2*pointsDifference).toInt()
+            newPoints += bonusPoints
+            println("\n\nelseif")
+        }
+        //else winner is stronger
+        else {
+            println("\n\nelse")
+            bonusPoints = min(5.0, 0.2*pointsDifference).toInt()
+            newPoints -= bonusPoints
+        }
+        //draw
+        if (color=="draw") newPoints=(newPoints/3.toInt())
+
+        println("\n\nnewPoints = $newPoints")
+        println("\n\nbonusPoints = $bonusPoints")
+
+        var myP=0
+        var advP=0
+
+        //I win
+        if (color==ChessGame.myOnlineColor) {
+            myP = myChessPoints + newPoints
+            advP = adversaryChessPoints - newPoints
+        }
+        //I lose
+        else {
+            myP = myChessPoints - newPoints
+            advP = adversaryChessPoints + newPoints
+        }
+
+        myRef.child("Users").child(ChessGame.myUsername).child("chessPoints").setValue(myP)
+        myRef.child("Users").child(ChessGame.adversary).child("chessPoints").setValue(advP)
+
+        return Pair(myP, advP)
+    }
+    /////
+
     private fun win(color:String) {
 
         if (ChessGame.gameInProgress!="ONLINE") return
@@ -500,15 +753,24 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     match = "$match|1-0"
                 }
 
+                //calculate points
+                val myAdvPoints = updateChessPoints(color)
+                val mp = myAdvPoints.toList()[0]
+                val ap = myAdvPoints.toList()[1]
+
+                var matchMyself = if (color == ChessGame.myOnlineColor) "w|$mp|$match" else "l|$mp|$match"
+                var matchAdversary = if (color != ChessGame.myOnlineColor) "w|$ap|$match" else "l|$ap|$match"
+
+                if (color == "draw") matchMyself = "d|$ap|$match"
+                if (color == "draw") matchAdversary = "d|$ap|$match"
+
                 val date = Calendar.getInstance().timeInMillis.toString()
 
-                //write on adversary
-                myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("savedMatches").child(date).setValue(match)
                 //write on me
-                myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches").child(date).setValue(match)
-
+                myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches").child(date).setValue(matchMyself)
+                //write on adversary
+                myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("savedMatches").child(date).setValue(matchAdversary)
             }
-
             override fun onCancelled(error: DatabaseError) {}
         })
     }

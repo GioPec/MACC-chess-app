@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.content.Intent
 import android.os.Bundle
@@ -118,6 +118,10 @@ class Login : AppCompatActivity()  {
                             //user NOT found in DB, we add it here
                             if (currentUser != null) {
                                 myRef.child("Users").child(ChessGame.myUsername).setValue("")
+
+                                //Init with 100 Chess Points
+                                myRef.child("Users").child(ChessGame.myUsername)
+                                    .child("chessPoints").setValue(100)
                             }
                         }
 
@@ -193,6 +197,7 @@ class Login : AppCompatActivity()  {
             val intent = Intent(this, MainMenu::class.java)
             //intent.putExtra("email", currentUser.email)
             //intent.putExtra("uid", currentUser.uid)
+            ChessGame.myUsername = splitString(mAuth.currentUser!!.email!!) //this should be redundant? or wrong
             startActivity(intent)
             finish()
             return true

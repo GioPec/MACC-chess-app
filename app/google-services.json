@@ -1,18 +1,27 @@
 {
   "project_info": {
     "project_number": "884571719139",
+    "firebase_url": "https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "macc-chess-dcd2a",
     "storage_bucket": "macc-chess-dcd2a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:884571719139:android:27a5debd6a0eec3e0cccd6",
+        "mobilesdk_app_id": "1:884571719139:android:9761ff47cee8216f0cccd6",
         "android_client_info": {
-          "package_name": "com.goldenthumb.android.chess"
+          "package_name": "com.macc.android.chess"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "884571719139-njj5hqtuqcdaj1e2ecm6r0nomcnmviam.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macc.android.chess",
+            "certificate_hash": "fdd294962373e9504fd9cebab6760b021f2c556d"
+          }
+        },
         {
           "client_id": "884571719139-t0smtan71fgva2qerhb01953i5v335du.apps.googleusercontent.com",
           "client_type": 3

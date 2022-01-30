@@ -1,9 +1,8 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 interface ChessDelegate {
     fun pieceAt(square: Square) : ChessPiece?
     fun movePiece(from: Square, to: Square)
     fun updateProgressBar(type: String, value: Int)
     fun updateTurn(player: Player, move: String)
-    fun moveGreenSquares(from: Square, to: Square)
 }

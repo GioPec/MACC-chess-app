@@ -1,4 +1,4 @@
-package com.goldenthumb.android.chess
+package com.macc.android.chess
 
 import android.Manifest
 import android.content.Context
@@ -14,12 +14,10 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.MotionEvent
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -264,8 +262,6 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     }
 
     override fun updateTurn(player: Player, move: String) {}
-
-    override fun moveGreenSquares(from: Square, to: Square) {}
 
     private fun askForAdvice():String {
         //if (lightbulbButton.tag =="off") return

@@ -5,7 +5,7 @@
     <!-- "Mark Favorite", should appear as action button if possible -->
     <item
         android:id="@+id/action_profile"
-        android:icon="@drawable/chess_klt60"
+        android:icon="@drawable/profile"
         android:title="Profile"
         app:showAsAction="always" />
 
