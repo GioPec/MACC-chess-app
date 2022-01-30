@@ -6,4 +6,6 @@
     <string name="register"><u>Register</u></string>
     <string name="login"><u>Login</u></string>
     <string name="default_web_client_id_" translatable="false">884571719139-t0smtan71fgva2qerhb01953i5v335du.apps.googleusercontent.com</string>
+    <string name="chess_word">a b c d e f g h</string>
+    <string name="chess_number">8 7 6 5 4 3 2 1</string>
 </resources>

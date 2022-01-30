@@ -2,13 +2,11 @@ package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -41,9 +39,20 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     private lateinit var listenerSavedMatches : ValueEventListener
     private lateinit var listenerOnlineGame : ValueEventListener
 
+    private lateinit var numeri : TextView
+    private lateinit var lettere : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
+
+
+        R.string.chess_word
+
+
+
+
+
 
         ChessGame.gameInProgress=""
 
@@ -63,6 +72,16 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         drawButton = findViewById(R.id.draw_button)
         resignButton = findViewById(R.id.resign_button)
         progressBar = findViewById(R.id.progress_bar)
+
+        lettere = findViewById(R.id.textView3)
+        numeri = findViewById(R.id.textView4)
+
+
+        if(ChessGame.myOnlineColor == "BLACK") {
+            lettere.text="h g f e d c b a"
+            numeri.text="1 2 3 4 5 6 7 8"
+        }
+
         drawButton.isEnabled = true
         resignButton.isEnabled = true
         progressBar.visibility = View.INVISIBLE
@@ -86,6 +105,9 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             ChessGame.myOnlineColor=maybeColor!!
             startOnlineGame(ChessGame.myOnlineColor)
         }
+
+
+
     }
 
     override fun onStop () {
@@ -213,12 +235,101 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         })
     }
 
+    private fun CBOC(value: String): String {
+        //assert(move>=0 && move<=7)
+        var converted = ""
+        var letter = ""
+        var word_array=arrayOf("a", "b", "c","d","e","f","g","h")
+        var number_array=arrayOf("1", "2", "3","4","5","6","7","8")
+        var promozione=arrayOf("Q","q")
+
+        if(value.length==4){
+            for(i in 0..value.length-1){
+                letter= value[i].toString()
+                if(letter in word_array || letter in number_array){
+
+                }else{
+                    converted=value;
+                    break
+                }
+                when (letter) {
+                    "1" -> letter = "8"
+                    "2" -> letter = "7"
+                    "3" -> letter = "6"
+                    "4" -> letter = "5"
+                    "5" -> letter = "4"
+                    "6" -> letter = "3"
+                    "7" -> letter = "2"
+                    "8" -> letter = "1"
+                    "a" -> letter = "h"
+                    "b" -> letter = "g"
+                    "c" -> letter = "f"
+                    "d" -> letter = "e"
+                    "e" -> letter = "d"
+                    "f" -> letter = "c"
+                    "g" -> letter = "b"
+                    "h" -> letter = "a"
+                }
+                converted+=letter;
+
+            }
+
+
+        }else if(value.length==5){
+            for(i in 0..value.length-2){
+                letter= value[i].toString()
+                if(letter in word_array || letter in number_array){
+
+                }else{
+                    converted=value;
+                    break
+                }
+                when (letter) {
+                    "1" -> letter = "8"
+                    "2" -> letter = "7"
+                    "3" -> letter = "6"
+                    "4" -> letter = "5"
+                    "5" -> letter = "4"
+                    "6" -> letter = "3"
+                    "7" -> letter = "2"
+                    "8" -> letter = "1"
+                    "a" -> letter = "h"
+                    "b" -> letter = "g"
+                    "c" -> letter = "f"
+                    "d" -> letter = "e"
+                    "e" -> letter = "d"
+                    "f" -> letter = "c"
+                    "g" -> letter = "b"
+                    "h" -> letter = "a"
+                }
+                converted+=letter;
+
+            }
+            //converted+=value[4];
+
+
+        }else{
+            converted=value
+        }
+
+
+        return converted
+    }
+
     private fun startOnlineGame(color:String) {
 
         //remove listenerForChallengeAccepted
         if (ChessGame.myOnlineColor=="WHITE") {
             myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername)
                     .child("currentMatch").removeEventListener(listenerForChallengeAccepted) }
+
+        if (ChessGame.myOnlineColor=="BLACK") {
+            ChessGame.reset_black()
+        }
+
+
+
+
 
         //listen for changes in saved matches in db
         listenSavedMatches()
@@ -246,7 +357,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val match = snapshot.value as String
-                    val lastMatchMove = match.split("|").last()
+                    var lastMatchMove = match.split("|").last()
+
+
+                    if(ChessGame.myOnlineColor == "BLACK"){
+                        lastMatchMove=CBOC(lastMatchMove);
+                    }
 
                     //I have just *refused* a draw, and I need to ignore this event
                     if (isDrawRefused) {
@@ -314,6 +430,25 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+    private fun ICBO(value: Int) : Int {
+        var converted = 777
+
+        when (value) {
+            0 -> converted = 7
+            1 -> converted = 6
+            2 -> converted = 5
+            3 -> converted = 4
+            4 -> converted = 3
+            5 -> converted = 2
+            6 -> converted = 1
+            7 -> converted = 0
+
+
+        }
+
+        return converted
+
+    }
 
     private fun playAdversaryMove(move: String) {
         val squares = ChessGame.convertMoveStringToSquares(move)
@@ -327,17 +462,45 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         ChessGame.fromSquareHighlight = Square(fromCol, 7-fromRow)
         ChessGame.toSquareHighlight = Square(col, 7-row)
 
-        val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
+        var promotionCheck=""
 
-        ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
-
-        val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
-        when (castleCheck) {
-            "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
-            "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
-            "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
-            "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
+        if(ChessGame.myOnlineColor == "BLACK"){
+            promotionCheck = ChessGame.onlinePromotion(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col))
+        }else {
+            promotionCheck = ChessGame.onlinePromotion(movingPiece, fromRow, fromCol, row, col)
         }
+
+
+        var castleCheck =""
+
+
+
+        ChessGame.removeEnpassantPawn(movingPiece, (fromRow), (fromCol), (row), (col))
+
+
+
+        if(ChessGame.myOnlineColor == "BLACK"){
+            castleCheck=ChessGame.castle(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col));
+            when (castleCheck) {
+                "whiteshort" -> ChessGame.movePiece(ICBO(7), ICBO(0), ICBO(5),ICBO( 0))
+                "whitelong" -> ChessGame.movePiece(ICBO(0), ICBO(0),ICBO( 3), ICBO(0))
+                "blackshort" -> ChessGame.movePiece(ICBO(7), ICBO(7), ICBO(5), ICBO(7))
+                "blacklong" -> ChessGame.movePiece(ICBO(0),ICBO( 7), ICBO(3), ICBO(7))
+            }
+
+        }else{
+            castleCheck=ChessGame.castle(movingPiece, (fromRow), (fromCol), (row), (col));
+            when (castleCheck) {
+                "whiteshort" -> ChessGame.movePiece((7), (0), (5),( 0))
+                "whitelong" -> ChessGame.movePiece((0), (0),( 3), (0))
+                "blackshort" -> ChessGame.movePiece((7), (7), (5), (7))
+                "blacklong" -> ChessGame.movePiece((0),( 7), (3), (7))
+            }
+        }
+
+
+
+
 
         ChessGame.piecesBox.remove(movingPiece)
         if (promotionCheck == "") {
