@@ -61,13 +61,13 @@ class Profile : AppCompatActivity() {
             //////////////////////////////////
 
             val n = matchResult.size - 1 // total number of textviews to add
-            val theArray = mutableListOf<Any>(n)
+/*            val theArray = mutableListOf<Any>(n)
 
             for (i in 0..n) {
                 theArray[i] = arrayOf(matchResult[i], matchMoves[i], matchDate[i], matchAdversary[i])
                 println(theArray)
             }
-            //theArray.sortBy { Comparable(it) }  //???
+            theArray.sortBy { Comparable(it) }  //???*/
             //////////////////////////////////
 
 
