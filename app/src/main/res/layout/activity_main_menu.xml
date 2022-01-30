@@ -10,28 +10,29 @@
         android:id="@+id/imageView"
         android:layout_width="137dp"
         android:layout_height="117dp"
+        android:layout_marginTop="64dp"
         app:layout_constraintBottom_toTopOf="@+id/textView5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/icon" />
 
     <TextView
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
         android:text="CHESS"
         android:textColor="@color/brown"
         android:textSize="46sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/imageView" />
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="65dp"
         android:layout_marginTop="20dp"
         android:onClick="startGameOnline"
         android:text="Play 1vs1 online"
@@ -42,8 +43,8 @@
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="65dp"
         android:layout_marginTop="32dp"
         android:onClick="startGameAgainstStockfish"
         android:text="Play against stockfish"
@@ -57,6 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="65dp"
         android:layout_marginTop="32dp"
+        android:backgroundTint="@color/brown_2"
         android:onClick="resumeGame"
         android:text="Resume game"
         android:visibility="visible"
@@ -67,8 +69,8 @@
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="65dp"
         android:layout_marginTop="20dp"
         android:onClick="startGameLocal"
         android:text="Play 1vs1 local"

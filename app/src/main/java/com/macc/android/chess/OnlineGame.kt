@@ -14,6 +14,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.util.*
+import kotlin.math.abs
+import kotlin.math.min
 
 class OnlineGame : AppCompatActivity(), ChessDelegate {
     private lateinit var mAuth: FirebaseAuth
@@ -37,6 +39,9 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     private var hasAlreadyBeenNotified = false
 
+    private var myChessPoints = 0
+    private var adversaryChessPoints = 0
+
     private lateinit var listenerForChallengeAccepted : ValueEventListener
     private lateinit var listenerSavedMatches : ValueEventListener
     private lateinit var listenerOnlineGame : ValueEventListener
@@ -51,6 +56,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         isDrawRefused = false
         isWaitingForDrawResult = 0
         hasAlreadyBeenNotified = false
+        myChessPoints = 0
+        adversaryChessPoints = 0
 
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
@@ -149,6 +156,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 val td = snapshot.value as HashMap<*, *>
                 var found = false
                 for (key in td.keys) {
+                    if (key.toString()=="chessPoints") continue
                     if (key.toString()==ChessGame.adversary) {
                         found = true
                         val au = key as String
@@ -222,6 +230,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
         //listen for changes in saved matches in db
         listenSavedMatches()
+
+        //get Chess Points
+        readMyChessPoints()
+        readAdversaryChessPoints()
 
         Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
         drawResignButtons.visibility = View.VISIBLE
@@ -471,6 +483,82 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         } catch (e: Exception) {}
     }
 
+    /////
+    private fun readMyChessPoints() {
+        myRef.child("Users").child(ChessGame.myUsername).child("chessPoints")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                println("My chessPoints = " + snapshot.value)
+                myChessPoints = (snapshot.value as Long).toInt()
+            }
+            override fun onCancelled(error: DatabaseError) {}
+         })
+    }
+    private fun readAdversaryChessPoints() {
+        myRef.child("Users").child(ChessGame.adversary).child("chessPoints")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    println("Adversary chessPoints = " + snapshot.value)
+                    adversaryChessPoints = (snapshot.value as Long).toInt()
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+    private fun updateChessPoints(color: String): Pair<Int, Int> {
+        val pointsDifference = abs((myChessPoints-adversaryChessPoints))
+        println("\n\npointsDifference = $pointsDifference")
+        println("\n\nmyChessPoints = $myChessPoints")
+        println("\n\nadversaryChessPoints = $adversaryChessPoints")
+
+        //if winner is weaker
+        var newPoints = 10
+        var bonusPoints = 0
+        //balanced match
+        if (pointsDifference<10) {
+            println("\n\nbalanced")
+            newPoints += 0
+        }
+        //if winner is weaker
+        else if ((myChessPoints<adversaryChessPoints && (color==ChessGame.myOnlineColor)) || (myChessPoints>adversaryChessPoints && (color!=ChessGame.myOnlineColor))) {
+            bonusPoints = min(10.0, 0.2*pointsDifference).toInt()
+            newPoints += bonusPoints
+            println("\n\nelseif")
+        }
+        //else winner is stronger
+        else {
+            println("\n\nelse")
+            bonusPoints = min(5.0, 0.2*pointsDifference).toInt()
+            newPoints -= bonusPoints
+        }
+        //draw
+        if (color=="draw") newPoints=(newPoints/3.toInt())
+
+        println("\n\nnewPoints = $newPoints")
+        println("\n\nbonusPoints = $bonusPoints")
+
+        var myP=0
+        var advP=0
+
+        //I win
+        if (color==ChessGame.myOnlineColor) {
+            myP = myChessPoints + newPoints
+            advP = adversaryChessPoints - newPoints
+        }
+        //I lose
+        else {
+            myP = myChessPoints - newPoints
+            advP = adversaryChessPoints + newPoints
+        }
+
+        myRef.child("Users").child(ChessGame.myUsername).child("chessPoints").setValue(myP)
+        myRef.child("Users").child(ChessGame.adversary).child("chessPoints").setValue(advP)
+
+        return Pair(myP, advP)
+    }
+    /////
+
     private fun win(color:String) {
 
         if (ChessGame.gameInProgress!="ONLINE") return
@@ -502,15 +590,24 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     match = "$match|1-0"
                 }
 
+                //calculate points
+                val myAdvPoints = updateChessPoints(color)
+                val mp = myAdvPoints.toList()[0]
+                val ap = myAdvPoints.toList()[1]
+
+                var matchMyself = if (color == ChessGame.myOnlineColor) "w|$mp|$match" else "l|$mp|$match"
+                var matchAdversary = if (color != ChessGame.myOnlineColor) "w|$ap|$match" else "l|$ap|$match"
+
+                if (color == "draw") matchMyself = "d|$ap|$match"
+                if (color == "draw") matchAdversary = "d|$ap|$match"
+
                 val date = Calendar.getInstance().timeInMillis.toString()
 
-                //write on adversary
-                myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("savedMatches").child(date).setValue(match)
                 //write on me
-                myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches").child(date).setValue(match)
-
+                myRef.child("Users").child(ChessGame.myUsername).child(ChessGame.adversary).child("savedMatches").child(date).setValue(matchMyself)
+                //write on adversary
+                myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("savedMatches").child(date).setValue(matchAdversary)
             }
-
             override fun onCancelled(error: DatabaseError) {}
         })
     }

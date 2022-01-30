@@ -14,7 +14,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     private lateinit var resetButton: Button
     private lateinit var listenButton: Button
     private lateinit var connectButton: Button
-    private lateinit var turnTextView: TextView
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,15 +24,12 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         resetButton = findViewById(R.id.reset_button)
         listenButton = findViewById(R.id.listen_button)
         connectButton = findViewById(R.id.connect_button)
-        turnTextView = findViewById(R.id.turn)
 
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
             ChessGame.reset()
-            turnTextView.setTextColor(Color.parseColor("#FFFFFF"))
-            turnTextView.setBackgroundColor(Color.parseColor("#CCCCCC"))
-            turnTextView.text = "White turn"
+            ChessGame.resettedGame = true
             chessView.invalidate()
             listenButton.isEnabled = true
         }
@@ -45,15 +41,5 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     override fun updateTurn(player: Player, move: String) {
         Log.d("player", player.toString())
         ChessGame.firstMove=false
-        if (player == Player.WHITE) {
-            turnTextView.setTextColor(Color.parseColor("#999999"))
-            turnTextView.setBackgroundColor(Color.parseColor("#333333"))
-            turnTextView.text = "Black turn"
-        }
-        else {
-            turnTextView.setTextColor(Color.parseColor("#FFFFFF"))
-            turnTextView.setBackgroundColor(Color.parseColor("#CCCCCC"))
-            turnTextView.text = "White turn"
-        }
     }
 }
