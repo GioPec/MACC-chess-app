@@ -71,6 +71,9 @@ class Registration : AppCompatActivity()  {
                             }.addOnFailureListener {
                                 Log.e("Firebase DB write", "$it")
                             }
+                        //Init with 100 Chess Points
+                        myRef.child("Users").child(splitString(currentUser.email.toString()))
+                                .child("chessPoints").setValue(100)
                     }
 
                     startActivity(Intent(this, Login::class.java))

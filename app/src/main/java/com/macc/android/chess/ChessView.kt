@@ -260,7 +260,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun highlightSquares(canvas: Canvas, s: Square?) {
         try {
             canvas.drawRect(originX+s!!.col*cellSide, originY+s!!.row*cellSide, originX+(s!!.col+1)*cellSide, originY+(s!!.row+1)*cellSide, paintHighlight)
-        } catch (e: Exception) {println("una sola volta")}
+        } catch (e: Exception) {}
     }
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor

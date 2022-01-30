@@ -27,7 +27,10 @@ object ChessGame {
 
     var piecesBox = mutableSetOf<ChessPiece>()
 
-    var chessPointsFloatArray = FloatArray(1000) { 0f } //MAGIC NUMBER
+    var myChessPoints = 100
+    var chessPointsFloatArray = FloatArray(10000) { 0f } //MAGIC NUMBER
+    var chessPointsList = IntArray(10000) { 0 }
+    var chessPointsListLength = 0
 
     val lightColor: Int = Color.parseColor("#F2E6D6") //"#EEEEEE"
     val darkColor: Int = Color.parseColor("#D8B27E")  //"#BBBBBB"
@@ -81,7 +84,7 @@ object ChessGame {
         firstMove=true
         fromSquareHighlight = null
         toSquareHighlight = null
-        Log.d("!", "############# RESET #############")
+        Log.d("!", "#############\nRESET\n#############")
         clear()
         for (i in 0 until 2) {
             addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60))
