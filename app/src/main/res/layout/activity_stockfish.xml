@@ -5,9 +5,9 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/light_brown"
     android:gravity="center"
-    android:orientation="vertical"
-    android:background="@color/light_brown">
+    android:orientation="vertical">
 
 
     <LinearLayout
@@ -34,7 +34,6 @@
         android:layout_width="34dp"
         android:layout_height="360dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="4dp"
         android:animationResolution="2000"
         android:indeterminate="false"
         android:max="10000"
@@ -42,41 +41,20 @@
         android:progressTint="#555555"
         android:rotation="90"
         android:scaleX="9.5"
-        android:scaleY="4"
+        android:scaleY="4.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout2"
+    <Button
+        android:id="@+id/reset_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Resign"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
-
-        <Button
-            android:id="@+id/listen_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/listen_button"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/connect_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/connect_button"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/reset_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
-            android:text="Resign" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <TextView
         android:id="@+id/textView3"
@@ -108,44 +86,53 @@
         android:layout_height="44dp"
         android:layout_centerInParent="true"
         android:layout_marginTop="20dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
         <ImageView
-            android:id="@+id/button"
+            android:id="@+id/button_old"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:paddingRight="10dp"
             android:src="@drawable/ic_mic_black_off" />
 
-        <EditText
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:hint="Tap and speak to play a move"
-            android:padding="10dp"
-            tools:layout_editor_absoluteY="500dp" />
-
     </RelativeLayout>
 
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
         android:clickable="false"
         android:longClickable="false"
         android:scaleType="fitXY"
         android:tag="on"
-        app:background="@drawable/hint_on"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <!--android:onClick="askForAdvice"-->
+        app:background="@drawable/light_bulb_on"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:background="@color/brown_2"
+        android:backgroundTint="@color/brown_2"
+        android:clickable="true"
+        app:backgroundTint="@color/brown_2"
+        app:fabCustomSize="60dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1"
+        app:maxImageSize="30dp"
+        app:pressedTranslationZ="12dp"
+        app:srcCompat="@drawable/ic_mic_black_off" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

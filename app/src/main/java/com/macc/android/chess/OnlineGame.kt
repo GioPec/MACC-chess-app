@@ -476,43 +476,35 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
         var promotionCheck=""
 
-        if(ChessGame.myOnlineColor == "BLACK"){
+        if (ChessGame.myOnlineColor == "BLACK"){
             promotionCheck = ChessGame.onlinePromotion(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col))
-        }else {
+        } else {
             promotionCheck = ChessGame.onlinePromotion(movingPiece, fromRow, fromCol, row, col)
         }
 
 
-        var castleCheck =""
-
-
+        var castleCheck = ""
 
         ChessGame.removeEnpassantPawn(movingPiece, (fromRow), (fromCol), (row), (col))
 
-
-
-        if(ChessGame.myOnlineColor == "BLACK"){
+        if (ChessGame.myOnlineColor == "BLACK") {
             castleCheck=ChessGame.castle(movingPiece, ICBO(fromRow), ICBO(fromCol), ICBO(row), ICBO(col));
             when (castleCheck) {
-                "whiteshort" -> ChessGame.movePiece(ICBO(7), ICBO(0), ICBO(5),ICBO( 0))
-                "whitelong" -> ChessGame.movePiece(ICBO(0), ICBO(0),ICBO( 3), ICBO(0))
+                "whiteshort" -> ChessGame.movePiece(ICBO(7), ICBO(0), ICBO(5), ICBO(0))
+                "whitelong" -> ChessGame.movePiece( ICBO(0), ICBO(0), ICBO(3), ICBO(0))
                 "blackshort" -> ChessGame.movePiece(ICBO(7), ICBO(7), ICBO(5), ICBO(7))
-                "blacklong" -> ChessGame.movePiece(ICBO(0),ICBO( 7), ICBO(3), ICBO(7))
+                "blacklong" -> ChessGame.movePiece( ICBO(0), ICBO(7), ICBO(3), ICBO(7))
             }
 
-        }else{
+        } else {
             castleCheck=ChessGame.castle(movingPiece, (fromRow), (fromCol), (row), (col));
             when (castleCheck) {
-                "whiteshort" -> ChessGame.movePiece((7), (0), (5),( 0))
+                "whiteshort" -> ChessGame.movePiece((7), (0), (5), (0))
                 "whitelong" -> ChessGame.movePiece((0), (0),( 3), (0))
                 "blackshort" -> ChessGame.movePiece((7), (7), (5), (7))
-                "blacklong" -> ChessGame.movePiece((0),( 7), (3), (7))
+                "blacklong" -> ChessGame.movePiece((0), (7), (3), (7))
             }
         }
-
-
-
-
 
         ChessGame.piecesBox.remove(movingPiece)
         if (promotionCheck == "") {
@@ -525,6 +517,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 )
             }
         }
+
         if (movingPiece != null) {
             ChessGame.pieceAt(col, row)?.let {
                 if (it.player != movingPiece?.player) {

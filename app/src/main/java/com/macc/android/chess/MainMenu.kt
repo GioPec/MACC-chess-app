@@ -48,6 +48,10 @@ class MainMenu : AppCompatActivity() {
         listenForChallenges()
 
         resumeButton = findViewById(R.id.resume_button)
+    }
+
+    override fun onStart() {
+        super.onStart()
         Log.d("Game in progress", ChessGame.gameInProgress)
         Log.d("Resetted game", ChessGame.resettedGame.toString())
         if (ChessGame.gameInProgress=="" || ChessGame.resettedGame) resumeButton?.visibility = View.GONE
@@ -55,8 +59,9 @@ class MainMenu : AppCompatActivity() {
 
         stockfishStatus = findViewById(R.id.stockfishStatus)
         getHelloWorldFromStockfishAPI()
-    }
 
+        //listenForChallenges()
+    }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
@@ -164,7 +169,7 @@ class MainMenu : AppCompatActivity() {
             }
         }
         //ask user
-        if (ChessGame.gameInProgress!="") {
+        if (ChessGame.gameInProgress!="" && !ChessGame.resettedGame) {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
@@ -187,7 +192,7 @@ class MainMenu : AppCompatActivity() {
             }
         }
         //ask user
-        if (ChessGame.gameInProgress!="") {
+        if (ChessGame.gameInProgress!="" && !ChessGame.resettedGame) {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
@@ -210,7 +215,7 @@ class MainMenu : AppCompatActivity() {
             }
         }
         //ask user
-        if (ChessGame.gameInProgress!="") {
+        if (ChessGame.gameInProgress!="" && !ChessGame.resettedGame) {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)

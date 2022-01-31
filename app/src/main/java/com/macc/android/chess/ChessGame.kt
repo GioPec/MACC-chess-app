@@ -62,13 +62,13 @@ object ChessGame {
         }
 
         //promozione
-        if (movingPiece.chessman.equals(Chessman.PAWN)) {
-            if (movingPiece.player.equals(Player.WHITE) && fromRow==6 && toRow==7) {
+        if (movingPiece.chessman==Chessman.PAWN) {
+            if (movingPiece.player==Player.WHITE && fromRow==6 && toRow==7) {
                 piecesBox.remove(movingPiece)
                 addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qlt60, col = toCol, row = toRow))
                 return
             }
-            else if (movingPiece.player.equals(Player.BLACK) && fromRow==1 && toRow==0) {
+            else if (movingPiece.player==Player.BLACK && fromRow==1 && toRow==0) {
                 piecesBox.remove(movingPiece)
                 addPiece(movingPiece.copy(chessman=Chessman.QUEEN, resID = R.drawable.chess_qdt60, col = toCol, row = toRow))
                 return
@@ -112,7 +112,7 @@ object ChessGame {
     fun reset_black() {
         resetStockfishGame()
         firstMove=true
-        Log.d("!", "############# RESET_Black #############")
+        //Log.d("!", "############# RESET_Black #############")
         clear()
         for (i in 0 until 2) {
             addPiece(ChessPiece(0 + i * 7, 0, Player.BLACK, Chessman.ROOK, R.drawable.chess_rdt60))
@@ -136,8 +136,6 @@ object ChessGame {
         addPiece(ChessPiece(3, 0, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60))
         addPiece(ChessPiece(3, 7, Player.WHITE, Chessman.KING, R.drawable.chess_klt60))
     }
-
-
 
     private fun resetStockfishGame() {
         resettedGame = true
@@ -374,8 +372,10 @@ object ChessGame {
         }
         return ""
     }
+
     private fun ICBO(value: Int) : Int {
-        var converted = 777
+
+        var converted = 9
 
         when (value) {
             0 -> converted = 7
@@ -386,48 +386,8 @@ object ChessGame {
             5 -> converted = 2
             6 -> converted = 1
             7 -> converted = 0
-
-
         }
-
         return converted
-
-    }
-
-    fun Onlinecastle(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-
-        if(ChessGame.myOnlineColor=="WHITE") {
-            if (movingPiece!!.chessman == Chessman.KING) {
-                if (movingPiece.player == Player.WHITE && fromCol == 4 && fromRow == 0 && col == 6 && row == 0) {
-                    return "whiteshort"
-                }
-                if (movingPiece.player == Player.WHITE && fromCol == 4 && fromRow == 0 && col == 2 && row == 0) {
-                    return "whitelong"
-                }
-                if (movingPiece.player == Player.BLACK && fromCol == 4 && fromRow == 7 && col == 6 && row == 7) {
-                    return "blackshort"
-                }
-                if (movingPiece.player == Player.BLACK && fromCol == 4 && fromRow == 7 && col == 2 && row == 7) {
-                    return "blacklong"
-                }
-            }
-        }else if(ChessGame.myOnlineColor=="BLACK"){
-            if (movingPiece!!.chessman == Chessman.KING) {
-                if (movingPiece.player == Player.WHITE && ICBO(fromCol) == 4 && ICBO(fromRow) == 0 && ICBO(col) == 6 && ICBO(row) == 0) {
-                    return "whiteshort"
-                }
-                if (movingPiece.player == Player.WHITE && ICBO(fromCol) == 4 && ICBO(fromRow) == 0 && ICBO(col) == 2 && ICBO(row) == 0) {
-                    return "whitelong"
-                }
-                if (movingPiece.player == Player.BLACK && ICBO(fromCol) == 4 && ICBO(fromRow) == 7 && ICBO(col) == 6 && ICBO(row) == 7) {
-                    return "blackshort"
-                }
-                if (movingPiece.player == Player.BLACK && ICBO(fromCol) == 4 && ICBO(fromRow) == 7 && ICBO(col) == 2 && ICBO(row) == 7) {
-                    return "blacklong"
-                }
-            }
-        }
-        return ""
     }
 
     fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
