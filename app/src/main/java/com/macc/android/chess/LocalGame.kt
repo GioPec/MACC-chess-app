@@ -37,6 +37,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}
+    override fun showEvalChart() {}
 
     override fun updateTurn(player: Player, move: String) {
         Log.d("player", player.toString())

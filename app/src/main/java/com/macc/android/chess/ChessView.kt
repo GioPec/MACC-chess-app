@@ -179,6 +179,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val v = r.get("value") as Int
                 pair = Pair(t, v)
                 Log.d("Evaluation", pair.toString())
+                if (t=="cp") ChessGame.evaluationsArray.add(v)
+                //println("ChessGame.evaluationsArray = " + ChessGame.evaluationsArray.toString())
                 return pair
             }
         }
@@ -476,9 +478,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                 playSound()
                             }
                         }
-
-
-
                     }
 
                     else if (ChessGame.gameInProgress == "STOCKFISH") {
@@ -517,6 +516,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                             job.join()
                             if (moveIsValid) {
 
+                                if (mate!="") chessDelegate?.showEvalChart()
+
                                 // Player move
                                 ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
                                 val castleCheck = ChessGame.castle(movingPiece, fromRow, fromCol, row, col)
@@ -530,10 +531,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                 if (promotionCheck.equals("")) {
                                     movingPiece?.let {
                                         ChessGame.addPiece(
-                                                it.copy(
-                                                        col = col,
-                                                        row = row
-                                                )
+                                            it.copy(
+                                                col = col,
+                                                row = row
+                                            )
                                         )
                                     }
                                 }
@@ -563,10 +564,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     if (promotionCheck == "") {
                                         movingPiece?.let {
                                             ChessGame.addPiece(
-                                                    it.copy(
-                                                            col = squares[1].col,
-                                                            row = squares[1].row
-                                                    )
+                                                it.copy(
+                                                    col = squares[1].col,
+                                                    row = squares[1].row
+                                                )
                                             )
                                         }
                                     }
@@ -586,7 +587,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                             }
                         }
                     }
-
                 }
 
                 movingPiece = null

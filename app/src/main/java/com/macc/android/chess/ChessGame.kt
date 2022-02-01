@@ -27,10 +27,18 @@ object ChessGame {
 
     var piecesBox = mutableSetOf<ChessPiece>()
 
+    ///
+
     var myChessPoints = 100
     var chessPointsFloatArray = FloatArray(10000) { 0f } //MAGIC NUMBER
     var chessPointsList = IntArray(10000) { 0 }
     var chessPointsListLength = 0
+
+    ///
+
+    var evaluationsArray = mutableListOf<Int>()
+
+    ///
 
     val lightColor: Int = Color.parseColor("#F2E6D6") //"#EEEEEE"
     val darkColor: Int = Color.parseColor("#D8B27E")  //"#BBBBBB"
@@ -39,7 +47,7 @@ object ChessGame {
         reset()
     }
 
-    fun clear() {
+    private fun clear() {
         piecesBox.clear()
     }
 
@@ -222,8 +230,7 @@ object ChessGame {
 
         assert(move.length >= 4)  //è 5 in caso di promozione! (es: e2f1q)
         var fromCol = 0
-        val firstChar = move.substring(0, 1)
-        when (firstChar) {
+        when (move.substring(0, 1)) {
             "a" -> fromCol = 0
             "b" -> fromCol = 1
             "c" -> fromCol = 2
@@ -263,26 +270,25 @@ object ChessGame {
                 ChessGame.piecesBox.remove(movingPiece)
 
                 ChessGame.addPiece(
-                        movingPiece.copy(
-                                chessman = Chessman.QUEEN,
-                                resID = R.drawable.chess_qlt60,
-                                col = col,
-                                row = row
-                        )
+                    movingPiece.copy(
+                        chessman = Chessman.QUEEN,
+                        resID = R.drawable.chess_qlt60,
+                        col = col,
+                        row = row
+                    )
                 )
                 return "Q"
-
             }
             else if (movingPiece.player == Player.BLACK && fromRow==1 && row==0) {
                 ChessGame.piecesBox.remove(movingPiece)
 
                 ChessGame.addPiece(
-                        movingPiece.copy(
-                                chessman = Chessman.QUEEN,
-                                resID = R.drawable.chess_qdt60,
-                                col = col,
-                                row = row
-                        )
+                    movingPiece.copy(
+                        chessman = Chessman.QUEEN,
+                        resID = R.drawable.chess_qdt60,
+                        col = col,
+                        row = row
+                    )
                 )
                 return "q"
             }
@@ -291,12 +297,12 @@ object ChessGame {
     }
 
     fun onlinePromotion(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int):String {
-        if(ChessGame.myOnlineColor == "BLACK"){
-            if (movingPiece!!.chessman == Chessman.PAWN) {
-                if (movingPiece.player == Player.WHITE && fromRow == (6) && row == (7)) {
-                    ChessGame.piecesBox.remove(movingPiece)
+        if (myOnlineColor == "BLACK") {
+            if (movingPiece!!.chessman==Chessman.PAWN) {
+                if (movingPiece.player==Player.WHITE && fromRow==6 && row==7) {
+                    piecesBox.remove(movingPiece)
 
-                    ChessGame.addPiece(
+                    addPiece(
                         movingPiece.copy(
                             chessman = Chessman.QUEEN,
                             resID = R.drawable.chess_qlt60,
@@ -306,10 +312,10 @@ object ChessGame {
                     )
                     return "Q"
 
-                } else if (movingPiece.player == Player.BLACK && fromRow == (1) && row == (0)) {
-                    ChessGame.piecesBox.remove(movingPiece)
+                } else if (movingPiece.player==Player.BLACK && fromRow==1 && row==0) {
+                    piecesBox.remove(movingPiece)
 
-                    ChessGame.addPiece(
+                    addPiece(
                         movingPiece.copy(
                             chessman = Chessman.QUEEN,
                             resID = R.drawable.chess_qdt60,
@@ -321,10 +327,10 @@ object ChessGame {
                 }
             }
 
-        }else {
-            if (movingPiece!!.chessman == Chessman.PAWN) {
-                if (movingPiece.player == Player.WHITE && fromRow == 6 && row == 7) {
-                    ChessGame.piecesBox.remove(movingPiece)
+        } else {
+            if (movingPiece!!.chessman==Chessman.PAWN) {
+                if (movingPiece.player==Player.WHITE && fromRow == 6 && row == 7) {
+                    piecesBox.remove(movingPiece)
 
                     ChessGame.addPiece(
                         movingPiece.copy(
@@ -336,7 +342,7 @@ object ChessGame {
                     )
                     return "Q"
 
-                } else if (movingPiece.player == Player.BLACK && fromRow == 1 && row == 0) {
+                } else if (movingPiece.player==Player.BLACK && fromRow==1 && row==0) {
                     ChessGame.piecesBox.remove(movingPiece)
 
                     ChessGame.addPiece(
@@ -391,10 +397,10 @@ object ChessGame {
     }
 
     fun removeEnpassantPawn(movingPiece:ChessPiece?, fromRow:Int, fromCol:Int, row:Int, col:Int) {
-        if (movingPiece!!.chessman.equals(Chessman.PAWN)) {
+        if (movingPiece!!.chessman==Chessman.PAWN) {
             if(fromCol!=col){
-                if(ChessGame.pieceAt(col, row)==null){
-                    ChessGame.piecesBox.remove(ChessGame.pieceAt(col,fromRow))
+                if(pieceAt(col, row)==null){
+                    piecesBox.remove(pieceAt(col,fromRow))
                 }
             }
         }

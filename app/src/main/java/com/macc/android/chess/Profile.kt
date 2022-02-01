@@ -42,7 +42,7 @@ class Profile : AppCompatActivity() {
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
         myRef = database.reference
 
-        //TODO: fix this below
+        //TODO: fix this below (chronological order)
 
         getChessPoints()
         getMatchesHistory()

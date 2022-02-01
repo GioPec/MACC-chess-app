@@ -17,6 +17,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -41,6 +42,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private var speechRecognizerIntent: Intent? = null
     private lateinit var button: FloatingActionButton
     private lateinit var lightbulbButton: ImageButton
+
+    private lateinit var evaluationLayout: LinearLayout
+    private lateinit var evaluationChart: EvaluationChart
 
     ///////////////// SHAKE DETECTION //////////////////////////////////////////////////////////////
 
@@ -110,6 +114,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         chessView = findViewById(R.id.chess_view)
         resetButton = findViewById(R.id.reset_button)
         progressBar = findViewById(R.id.progress_bar)
+        evaluationLayout = findViewById(R.id.evaluation_layout)
+        evaluationChart = findViewById(R.id.evaluation_chart)
 
         button = findViewById(R.id.button)
         lightbulbButton = findViewById(R.id.imageButton)
@@ -124,7 +130,14 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             chessView.invalidate()
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+            evaluationChart.invalidate()
+            showEvalChart()
         }
+
+        resetButton.visibility = View.VISIBLE
+        button.visibility = View.VISIBLE
+        lightbulbButton.visibility = View.VISIBLE
+        evaluationLayout.visibility = View.GONE
 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -473,5 +486,17 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             }
         }
         alert("Error", "Your move is invalid", "OK")
+    }
+
+    override fun showEvalChart() {
+        resetButton.visibility = View.INVISIBLE
+        button.visibility = View.INVISIBLE
+        lightbulbButton.visibility = View.INVISIBLE
+
+        evaluationChart.invalidate()
+
+        evaluationLayout.visibility = View.VISIBLE
+
+        //ChessGame.evaluationsArray.clear()
     }
 }
