@@ -40,14 +40,15 @@ class ChessPointsChart(context: Context?, attrs: AttributeSet?) : View(context, 
 */
 
         val numberOfMatches = ChessGame.chessPointsListLength
+
+        if (numberOfMatches<1) return
+
         val maxPoints = ChessGame.chessPointsList.maxOrNull()
         val minPoints = ChessGame.chessPointsList.copyOfRange(0, numberOfMatches).minOrNull() //TODO fix, always gives 0
         //println("numberOfMatches = $numberOfMatches")
         //println("maxPoints = $maxPoints")
         //println("minPoints = $minPoints")
 
-
-        //for ((i, elem) in ChessGame.chessPointsList.withIndex()) {
         for (i in 0 until numberOfMatches) {
             //println("i=$i")
             //println("elem=${ChessGame.chessPointsList[i]}")
@@ -62,7 +63,6 @@ class ChessPointsChart(context: Context?, attrs: AttributeSet?) : View(context, 
 
         paint.color = Color.parseColor("#000000")
         paint.strokeWidth = 10f
-        //paint.style = Paint.Style.FILL TODO maybe
 
         //draw lines
         canvas.drawLines(chessPointsFloatArray, 0, 4 * numberOfMatches, paint)
@@ -90,7 +90,10 @@ class ChessPointsChart(context: Context?, attrs: AttributeSet?) : View(context, 
 
     private fun createCoords(canvas: Canvas?, n: Int, i: Int, size: Int, min: Int, max: Int) {
 
-        val x = canvas!!.width/(size-1)*i
+        var x = 0
+        if (size==1) x = canvas!!.width/2
+        else x = canvas!!.width/(size-1)*i
+
         val y = canvas!!.height-padding - (((canvas!!.height-padding - padding)*(n-min)) / (max-min))
 
         chessPointsFloatArray[2 + 4 * i + 0] = x.toFloat()

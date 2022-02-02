@@ -56,7 +56,8 @@ class Profile : AppCompatActivity() {
             matchesHistoryLayout = findViewById(R.id.matches_history_layout)
 
             username.text = ChessGame.myUsername
-            chessPoints.text = "Chess Points: ${ChessGame.chessPointsList[ChessGame.chessPointsListLength - 1]}"
+            if (ChessGame.chessPointsListLength<1) chessPoints.text = "Chess Points: 100"
+            else chessPoints.text = "Chess Points: ${ChessGame.chessPointsList[ChessGame.chessPointsListLength - 1]}"
 
             //////////////////////////////////
 
@@ -75,7 +76,9 @@ class Profile : AppCompatActivity() {
                 error("Assertion failed")
             }
 
-            val myTextViews = arrayOfNulls<TextView>(n) // create an empty array;
+            if (n<0) return@postDelayed
+
+            //val myTextViews = arrayOfNulls<TextView>(n) // create an empty array;
 
             for (i in 0..n) {
 

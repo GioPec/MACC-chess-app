@@ -346,7 +346,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private fun convertRowColFromIntToString(move: Int, type: String): String {
         //assert(move>=0 && move<=7)
         var converted = ""
-        if (type.equals("column")) {
+        if (type == "column") {
             when (move) {
                 0 -> converted = "a"
                 1 -> converted = "b"
@@ -358,7 +358,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 7 -> converted = "h"
 
             }
-        } else if (type.equals("row")){
+        } else if (type == "row"){
             when (move) {
                 0 -> converted = "1"
                 1 -> converted = "2"
@@ -463,10 +463,10 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                     if (promotionCheckR == "") {
                         movingPieceR?.let {
                             ChessGame.addPiece(
-                                    it.copy(
-                                            col = squaresR[1].col,
-                                            row = squaresR[1].row
-                                    )
+                                it.copy(
+                                    col = squaresR[1].col,
+                                    row = squaresR[1].row
+                                )
                             )
                         }
                     }

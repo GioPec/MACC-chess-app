@@ -61,11 +61,11 @@ class EvaluationChart(context: Context?, attrs: AttributeSet?) : View(context, a
         //paintText.strokeWidth = 3f
         paintText.textSize = 60f
         canvas.drawText("0", 5f, (height/2)+20f, paintText)
-        println(maxEval)
-        println(maxPoints)
+        //println(maxEval)
+        //println(maxPoints)
         val highestEvalHeight = if (kotlin.math.abs(maxEval)==kotlin.math.abs(maxPoints)) 50f else height.toFloat()
-        println(highestEvalHeight)
-        canvas.drawText((maxEval/1000).toString(), 5f, highestEvalHeight, paintText)
+        //println(highestEvalHeight)
+        canvas.drawText((maxEval/100).toString(), 5f, highestEvalHeight, paintText)
     }
 
     private fun drawChessboard(canvas: Canvas) {
@@ -76,6 +76,6 @@ class EvaluationChart(context: Context?, attrs: AttributeSet?) : View(context, a
 
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         bgPaint.color = Color.parseColor("#EEEEEE")
-        canvas.drawRect(Rect(0, 1000 * col, 1000 * row, 0), bgPaint)
+        canvas.drawRect(Rect(0, 1000 * col, 1000 * row, 0), bgPaint)    //TODO: 100
     }
 }

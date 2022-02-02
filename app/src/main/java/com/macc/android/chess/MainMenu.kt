@@ -152,7 +152,7 @@ class MainMenu : AppCompatActivity() {
                     }
                 },
                 { error ->
-                    stockfishStatus.text = "Chess API" + error
+                    stockfishStatus.text = "Chess API $error"
                     stockfishStatus.setTextColor(Color.RED)
                 },
 
