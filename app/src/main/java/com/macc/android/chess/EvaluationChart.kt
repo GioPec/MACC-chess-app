@@ -34,17 +34,18 @@ class EvaluationChart(context: Context?, attrs: AttributeSet?) : View(context, a
         //val evaluationsArray = mutableListOf(100,200,300,400,500,600,700,800,900,-100,-200,-300,-400,-500,-600,-700,-1200)
         val numberOfMoves = ChessGame.evaluationsArray.size
         println(ChessGame.evaluationsArray.toString())
-        println(numberOfMoves.toString())
+        //println(numberOfMoves.toString())
+        if (numberOfMoves<1) return
         val maxPoints = ChessGame.evaluationsArray.maxOrNull()
         val minPoints = ChessGame.evaluationsArray.minOrNull()
         val maxEval = if (kotlin.math.abs(maxPoints!!)> kotlin.math.abs(minPoints!!)) maxPoints else minPoints
-        println(maxEval.toString())
+        //println(maxEval.toString())
         val rectW = width/(numberOfMoves+1)
 
         for (i in 0 until numberOfMoves) {
             val rectHeight = kotlin.math.abs((height/2.0)*(ChessGame.evaluationsArray[i].toFloat() / maxEval.toFloat()))
-            println(ChessGame.evaluationsArray[i].toFloat() / maxEval.toFloat())
-            println(ChessGame.evaluationsArray[i].toString() + "  ###  " + rectHeight.toString())
+            //println(ChessGame.evaluationsArray[i].toFloat() / maxEval.toFloat())
+            //println(ChessGame.evaluationsArray[i].toString() + "  ###  " + rectHeight.toString())
 
             //white
             if (ChessGame.evaluationsArray[i]>0) {

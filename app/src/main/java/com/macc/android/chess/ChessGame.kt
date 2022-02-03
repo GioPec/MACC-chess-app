@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.hardware.SensorEventListener
 import android.util.Log
 import kotlinx.coroutines.*
+import org.json.JSONObject
 import java.io.InputStreamReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
@@ -12,6 +13,9 @@ object ChessGame {
 
     var myOnlineColor = "" //WHITE, BLACK
     var isOnlineMate = "false"
+    var link_online= "https://JaR.pythonanywhere.com"
+    //var link_online= "https://giacomovenneri.pythonanywhere.com"
+
     var myUsername = ""
     var waitingForAdversary: Boolean = true
     var adversary: String = ""
@@ -21,14 +25,13 @@ object ChessGame {
     var resettedGame: Boolean = false
     val sensorListener:SensorEventListener? = null
     var firstMove = true
+    var matchId: Int = 404
     var hintAlreadyUsed = false
 
     var fromSquareHighlight: Square? = null
     var toSquareHighlight: Square? = null
 
     var piecesBox = mutableSetOf<ChessPiece>()
-
-    ///
 
     var myChessPoints = 100
     var chessPointsFloatArray = FloatArray(10000) { 0f } //MAGIC NUMBER
@@ -45,7 +48,7 @@ object ChessGame {
     val darkColor: Int = Color.parseColor("#D8B27E")  //"#BBBBBB"
 
     init {
-        reset()
+        reset(ChessGame.matchId)
     }
 
     private fun clear() {
@@ -88,8 +91,8 @@ object ChessGame {
         addPiece(movingPiece.copy(col = toCol, row = toRow))
     }
 
-    fun reset() {
-        resetStockfishGame()
+    fun reset(id: Int) {
+        resetStockfishGame(id)
         firstMove=true
         fromSquareHighlight = null
         toSquareHighlight = null
@@ -118,8 +121,8 @@ object ChessGame {
         addPiece(ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60))
     }
 
-    fun reset_black() {
-        resetStockfishGame()
+    fun reset_black(id: Int) {
+        //resetStockfishGame(id)
         firstMove=true
         //Log.d("!", "############# RESET_Black #############")
         clear()
@@ -146,18 +149,24 @@ object ChessGame {
         addPiece(ChessPiece(3, 7, Player.WHITE, Chessman.KING, R.drawable.chess_klt60))
     }
 
-    private fun resetStockfishGame() {
+    private fun resetStockfishGame(id: Int) {
         resettedGame = true
         stockfishGameEnded = false
+        //println("resetto"+id)
+
         val job = GlobalScope.launch(Dispatchers.IO) { run {
-                val name = "https://giacomovenneri.pythonanywhere.com/reset/"
+                val id_string=id
+                val name = "https://JaR.pythonanywhere.com/reset?index="+id_string
+                //println("andiamo"+ChessGame.matchId.toString())
                 val url = URL(name)
                 val conn = url.openConnection() as HttpsURLConnection
                 try {
                     conn.run {
                         requestMethod = "GET"
-                        val r = InputStreamReader(inputStream).readText()
-                        Log.d("RESET", "")
+                        val r = JSONObject(InputStreamReader(inputStream).readText())
+                        val reset_need=r.get("errore") as Boolean
+                        val reset_id =r.get("reset_id") as Int
+                        Log.d("RESET", reset_id.toString()+" "+reset_need.toString())
                     }
                 } catch (e: Exception) {
                     Log.e("Reset error", e.toString())
@@ -168,6 +177,38 @@ object ChessGame {
             job.join()
         }
     }
+
+    fun startMatchId() : Int {
+        resettedGame = true
+        stockfishGameEnded = false
+        //println("iniziamoilmatch")
+        var id_match=404
+        val job = GlobalScope.launch(Dispatchers.IO) { run {
+            val name = "https://JaR.pythonanywhere.com"+"/startMatch"
+            val url = URL(name)
+            val conn = url.openConnection() as HttpsURLConnection
+            try {
+                conn.run {
+                    requestMethod = "GET"
+                    //id_match = InputStreamReader(inputStream).readText()
+                    val r = JSONObject(InputStreamReader(inputStream).readText())
+                    //Log.d("info", r.toString())
+                    id_match = r.get("response") as Int
+                    Log.d("matchid", id_match.toString())
+                }
+            } catch (e: Exception) {
+                Log.e("Error on match required", e.toString())
+            }
+        }
+        }
+        runBlocking {
+            job.join()
+
+        }
+        return id_match
+    }
+
+
 
     fun pieceAt(square: Square): ChessPiece? {
         return pieceAt(square.col, square.row)
