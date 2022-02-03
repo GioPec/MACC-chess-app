@@ -135,8 +135,8 @@ class Profile : AppCompatActivity() {
                             for (date in m.keys) {
                                 val dateLong = (date as String).toLong()
                                 val match = m[date] as String
-                                println("### dateLong = $dateLong")
-                                println("### match = $match")
+                                //println("### dateLong = $dateLong")
+                                //println("### match = $match")
                                 if (BuildConfig.DEBUG && match.split("|").size < 2) {
                                     error("Assertion failed")
                                 }
@@ -156,9 +156,9 @@ class Profile : AppCompatActivity() {
                     }
                 }
 
-                println("matchResult = $matchResult")
-                println("matchDate = $matchDate")
-                println("matchMoves = $matchMoves")
+                //println("matchResult = $matchResult")
+                //println("matchDate = $matchDate")
+                //println("matchMoves = $matchMoves")
             }
 
             override fun onCancelled(error: DatabaseError) {}

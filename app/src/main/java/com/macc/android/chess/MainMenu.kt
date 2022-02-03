@@ -220,7 +220,6 @@ class MainMenu : AppCompatActivity() {
             ChessGame.gameInProgress="STOCKFISH"
             startActivity(Intent(this, StockfishGame::class.java))
             resumeButton?.visibility = View.VISIBLE
-            println("siamo dentro siium")
         }else{
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
         }

@@ -110,7 +110,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
         resignButton.setOnClickListener {
             resign(this)
-            println("stamo aresetta")
             ChessGame.reset(ChessGame.matchId)
             ChessGame.matchId=404
             ChessGame.resettedGame = true
@@ -752,10 +751,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         //toast di notifica vittoria
         if (color == ChessGame.myOnlineColor) {
             ChessGame.reset(ChessGame.matchId)
-            toast("You wonzz!")
+            toast("You won!")
         }else if (color!="draw") {
             ChessGame.reset(ChessGame.matchId)
-            toast("You lostXD!")
+            toast("You lost!")
         }else {
             ChessGame.reset(ChessGame.matchId)
             (toast("Draw"))

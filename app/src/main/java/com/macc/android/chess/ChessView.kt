@@ -144,8 +144,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom +
                 "" + "&index=" +id_string
 
-        println("mastolink "+name)
-
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
         var checkValidity: Boolean
@@ -269,9 +267,6 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             //canvas.drawText("shish",originX+1*cellSide,originY+8*cellSide,paint)
             //canvas.drawText("shish", 20f, 60f + padding, paintThin)
             //canvas.drawRect(originX+1*cellSide, originY+8*cellSide, originX+(1+1)*cellSide, originY+(1+1)*cellSide, paint)
-            println("Ciao")
-
-
     }
 
     private fun highlightSquares(canvas: Canvas, s: Square?) {

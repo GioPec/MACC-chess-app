@@ -134,11 +134,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
+            chessView.invalidate()
             ChessGame.hintAlreadyUsed=false
             ChessGame.reset(ChessGame.matchId)
             ChessGame.matchId=404
             progressBar.progress = progressBar.max / 2
-            chessView.invalidate()
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
             evaluationChart.invalidate()
@@ -174,41 +174,23 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
             speechRecognizer!!.setRecognitionListener(object : RecognitionListener {
 
-                override fun onResults(bundle: Bundle) {
-                    parseMove(bundle)
-                }
+                override fun onResults(bundle: Bundle) { parseMove(bundle) }
 
-                override fun onPartialResults(p0: Bundle?) {
-                    Log.e("AUDIO", "onPartialResults!")
-                }
+                override fun onPartialResults(p0: Bundle?) { Log.i("AUDIO", "onPartialResults!")  }
 
-                override fun onEvent(p0: Int, p1: Bundle?) {
-                    Log.e("AUDIO", "onEvent!")
-                }
+                override fun onEvent(p0: Int, p1: Bundle?) { Log.i("AUDIO", "onEvent!")  }
 
-                override fun onReadyForSpeech(p0: Bundle?) {
-                    Log.e("AUDIO", "onReadyForSpeech!")
-                }
+                override fun onReadyForSpeech(p0: Bundle?) { Log.i("AUDIO", "onReadyForSpeech!")  }
 
-                override fun onBeginningOfSpeech() {
-                    Log.i("AUDIO", "onBeginningOfSpeech!")
-                }
+                override fun onBeginningOfSpeech() { Log.i("AUDIO", "onBeginningOfSpeech!")  }
 
-                override fun onRmsChanged(p0: Float) {
-                    Log.i("AUDIO", "audio rmsdb changing...")
-                }
+                override fun onRmsChanged(p0: Float) { Log.i("AUDIO", "audio rmsdb changing...")  }
 
-                override fun onBufferReceived(p0: ByteArray?) {
-                    Log.e("AUDIO", "onBufferReceived!")
-                }
+                override fun onBufferReceived(p0: ByteArray?) { Log.i("AUDIO", "onBufferReceived!")  }
 
-                override fun onEndOfSpeech() {
-                    Log.e("AUDIO", "onEndOfSpeech!")
-                }
+                override fun onEndOfSpeech() { Log.i("AUDIO", "onEndOfSpeech!")  }
 
-                override fun onError(p0: Int) {
-                    Log.e("AUDIO", "onError!$p0")
-                }
+                override fun onError(p0: Int) { Log.e("AUDIO", "onError! $p0")  }
 
             })
         } else {
@@ -298,6 +280,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     override fun movePiece(from: Square, to: Square) {}
 
     override fun updateProgressBar(type: String, value: Int) {
+
         val movesWeight = 5
         if (type=="cp") {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -395,6 +378,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         var moveIsValid = false
 
         ChessGame.firstMove = false
+        resetButton.isEnabled = true
+
         var response = ""
         var mate = ""
         val usableFromColumn = convertRowColFromIntToString(fromCol, "column")

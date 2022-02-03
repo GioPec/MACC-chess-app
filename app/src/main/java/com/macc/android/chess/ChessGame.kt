@@ -152,10 +152,10 @@ object ChessGame {
     private fun resetStockfishGame(id: Int) {
         resettedGame = true
         stockfishGameEnded = false
-        println("resetto"+id)
+        //println("resetto"+id)
 
         val job = GlobalScope.launch(Dispatchers.IO) { run {
-                var id_string=id
+                val id_string=id
                 val name = "https://JaR.pythonanywhere.com/reset?index="+id_string
                 //println("andiamo"+ChessGame.matchId.toString())
                 val url = URL(name)
@@ -164,8 +164,8 @@ object ChessGame {
                     conn.run {
                         requestMethod = "GET"
                         val r = JSONObject(InputStreamReader(inputStream).readText())
-                        var reset_need=r.get("errore") as Boolean
-                        var reset_id =r.get("reset_id") as Int
+                        val reset_need=r.get("errore") as Boolean
+                        val reset_id =r.get("reset_id") as Int
                         Log.d("RESET", reset_id.toString()+" "+reset_need.toString())
                     }
                 } catch (e: Exception) {
@@ -181,7 +181,7 @@ object ChessGame {
     fun startMatchId() : Int {
         resettedGame = true
         stockfishGameEnded = false
-        println("iniziamoilmatch")
+        //println("iniziamoilmatch")
         var id_match=404
         val job = GlobalScope.launch(Dispatchers.IO) { run {
             val name = "https://JaR.pythonanywhere.com"+"/startMatch"
@@ -194,8 +194,7 @@ object ChessGame {
                     val r = JSONObject(InputStreamReader(inputStream).readText())
                     //Log.d("info", r.toString())
                     id_match = r.get("response") as Int
-                    println("signoriiiiii"+id_match.toString())
-                    Log.d("mathid", id_match.toString())
+                    Log.d("matchid", id_match.toString())
                 }
             } catch (e: Exception) {
                 Log.e("Error on match required", e.toString())
