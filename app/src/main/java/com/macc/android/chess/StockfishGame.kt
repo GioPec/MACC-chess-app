@@ -116,7 +116,10 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
-            ChessGame.reset()
+            println("provaprova"+ChessGame.matchId.toString())
+            ChessGame.reset(ChessGame.matchId)
+            ChessGame.matchId=404
+            println("provaprova"+ChessGame.matchId.toString())
             progressBar.progress = progressBar.max / 2
             chessView.invalidate()
             lightbulbButton.tag = "on"
@@ -266,7 +269,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private fun askForAdvice():String {
         //if (lightbulbButton.tag =="off") return
 
-        val url = URL("https://giacomovenneri.pythonanywhere.com/bestmove")
+        val url = URL("https://JaR.pythonanywhere.com"+"/bestmove")
         val conn = url.openConnection() as HttpsURLConnection
         var bestMove = ""
 

@@ -11,12 +11,14 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import org.json.JSONObject
 import java.lang.Exception
 import java.util.HashMap
 
@@ -29,6 +31,9 @@ class MainMenu : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
     private lateinit var myRef: DatabaseReference
+    private lateinit var againistStockfishButton: Button
+    private lateinit var localButton: Button
+    private lateinit var onlineButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,11 +46,17 @@ class MainMenu : AppCompatActivity() {
         ChessGame.adversary = ""
         ChessGame.isOnlineMate = "false"
         ///
+        againistStockfishButton=findViewById(R.id.button2)
+        localButton=findViewById(R.id.button3)
+        onlineButton=findViewById(R.id.button)
+
 
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
         myRef = database.reference
         listenForChallenges()
+
+        Log.d("errore","mainmenu")
 
         resumeButton = findViewById(R.id.resume_button)
         Log.d("Game in progress", ChessGame.gameInProgress)
@@ -55,6 +66,17 @@ class MainMenu : AppCompatActivity() {
 
         stockfishStatus = findViewById(R.id.stockfishStatus)
         getHelloWorldFromStockfishAPI()
+
+
+        againistStockfishButton.setOnClickListener {
+            startGameAgainstStockfish(this,ChessGame.matchId)
+        }
+        localButton.setOnClickListener {
+            startGameLocal(this,ChessGame.matchId)
+        }
+        onlineButton.setOnClickListener {
+            startGameOnline(this,ChessGame.matchId)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -102,9 +124,18 @@ class MainMenu : AppCompatActivity() {
                                             DialogInterface.BUTTON_POSITIVE -> {
                                                 myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("currentMatch")
                                                         .setValue("accepted")
+
+                                                myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("matchId").get().addOnSuccessListener {
+                                                    Log.i("firebase", "Got value ${it.value}")
+                                                    ChessGame.matchId=it.value.toString().toInt()
+                                                    Log.i("firebase2", ChessGame.matchId.toString())
+                                                }.addOnFailureListener{
+                                                    Log.e("firebase", "Error getting data", it)
+                                                }
+
                                                 ChessGame.myOnlineColor = "BLACK"
                                                 ChessGame.adversary = adversaryUsername
-                                                confirmOnline("BLACK")
+                                                confirmOnline("BLACK",ChessGame.matchId)
                                             }
                                             DialogInterface.BUTTON_NEGATIVE -> {
                                                 myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("currentMatch")
@@ -132,15 +163,18 @@ class MainMenu : AppCompatActivity() {
 
     private fun getHelloWorldFromStockfishAPI() {
         val queue = Volley.newRequestQueue(this)
-        val url = "https://giacomovenneri.pythonanywhere.com/hello/"
+        val url = "https://JaR.pythonanywhere.com"+"/hello"
+
 
         val stringRequest = StringRequest(
                 Request.Method.GET, url,
 
                 { response ->
-                    response.subSequence(1, 3)
+                    //response.subSequence(1, 3)
+                    //Log.e("aa",response)
+                    var stato= JSONObject(response)
 
-                    if (response.subSequence(1, 3) == "OK") {
+                    if (stato.get("state") == "OK") {
                         stockfishStatus.text = "Server is online!"
                     } else {
                         stockfishStatus.text = "Server is offline! :("
@@ -149,17 +183,18 @@ class MainMenu : AppCompatActivity() {
                 { error ->
                     stockfishStatus.text = "Chess API" + error
                     stockfishStatus.setTextColor(Color.RED)
+                    Log.e("errore","stamo in errore")
                 },
 
                 )
         queue.add(stringRequest)
     }
 
-    fun startGameAgainstStockfish(view: View) {
+    fun startGameAgainstStockfish(view: MainMenu, id: Int) {
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
-                DialogInterface.BUTTON_POSITIVE -> confirmStockfish()
+                DialogInterface.BUTTON_POSITIVE -> confirmStockfish(id)
                 DialogInterface.BUTTON_NEGATIVE -> {}
             }
         }
@@ -169,20 +204,27 @@ class MainMenu : AppCompatActivity() {
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show()
-        } else confirmStockfish()
+        } else confirmStockfish(id)
     }
-    private fun confirmStockfish() {
-        ChessGame.reset()
-        ChessGame.gameInProgress="STOCKFISH"
-        startActivity(Intent(this, StockfishGame::class.java))
-        resumeButton?.visibility = View.VISIBLE
+    private fun confirmStockfish(id: Int) {
+        ChessGame.reset(id)
+        ChessGame.matchId=ChessGame.startMatchId()
+        println(ChessGame.matchId)
+        if(ChessGame.matchId!=404){
+            ChessGame.gameInProgress="STOCKFISH"
+            startActivity(Intent(this, StockfishGame::class.java))
+            resumeButton?.visibility = View.VISIBLE
+            println("siamo dentro siium")
+        }else{
+            Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+        }
     }
 
-    fun startGameLocal(view: View) {
+    fun startGameLocal(view: MainMenu, id: Int) {
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
-                DialogInterface.BUTTON_POSITIVE -> confirmLocal()
+                DialogInterface.BUTTON_POSITIVE -> confirmLocal(id)
                 DialogInterface.BUTTON_NEGATIVE -> {}
             }
         }
@@ -192,20 +234,28 @@ class MainMenu : AppCompatActivity() {
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show()
-        } else confirmLocal()
+        } else confirmLocal(id)
     }
-    private fun confirmLocal() {
-        ChessGame.reset()
-        ChessGame.gameInProgress="LOCAL"
-        startActivity(Intent(this, LocalGame::class.java))
-        resumeButton?.visibility = View.VISIBLE
+    private fun confirmLocal(id: Int) {
+        ChessGame.reset(id)
+        ChessGame.matchId=ChessGame.startMatchId()
+        println(ChessGame.matchId)
+        if(ChessGame.matchId!=404) {
+            ChessGame.gameInProgress = "LOCAL"
+            startActivity(Intent(this, LocalGame::class.java))
+            resumeButton?.visibility = View.VISIBLE
+        }else{
+            Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+        }
     }
 
-    fun startGameOnline(view: View) {
+    fun startGameOnline(view: MainMenu, id: Int) {
+
+
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
-                DialogInterface.BUTTON_POSITIVE -> confirmOnline("")
+                DialogInterface.BUTTON_POSITIVE -> confirmOnline("",id)
                 DialogInterface.BUTTON_NEGATIVE -> {}
             }
         }
@@ -215,10 +265,10 @@ class MainMenu : AppCompatActivity() {
             builder.setMessage("You already have an active game.\nIf you start a new one " +
                     "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show()
-        } else confirmOnline("")
+        } else confirmOnline("",id)
     }
-    private fun confirmOnline(c:String) {
-        ChessGame.reset()
+    private fun confirmOnline(c:String, id: Int) {
+        //ChessGame.reset(id)
         ChessGame.gameInProgress="ONLINE"
 
         val intent = Intent(this, OnlineGame::class.java)

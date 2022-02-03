@@ -28,7 +28,8 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
-            ChessGame.reset()
+            ChessGame.reset(ChessGame.matchId)
+            ChessGame.matchId=404
             ChessGame.resettedGame = true
             chessView.invalidate()
             listenButton.isEnabled = true

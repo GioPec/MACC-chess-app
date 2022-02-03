@@ -2,7 +2,6 @@ package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -110,10 +109,22 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         val maybeColor = b.getString("color")
         if (maybeColor!="") {
             ChessGame.myOnlineColor=maybeColor!!
-            startOnlineGame(ChessGame.myOnlineColor)
+            startOnlineGame(ChessGame.myOnlineColor, ChessGame.matchId)
         }
 
+        challengeButton.setOnClickListener{
+            requestChallenge(this)
+        }
 
+        resignButton.setOnClickListener {
+            resign(this)
+            println("stamo aresetta")
+            ChessGame.reset(ChessGame.matchId)
+            ChessGame.matchId=404
+            ChessGame.resettedGame = true
+            chessView.invalidate()
+            //listenButton.isEnabled = true
+        }
 
     }
 
@@ -162,44 +173,63 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         resignButton.isEnabled = false
     }
 
-    fun requestChallenge(view: View) {
+    fun requestChallenge(view: OnlineGame) {
+        ChessGame.matchId=ChessGame.startMatchId()
+        println("requestchallenge"+ChessGame.matchId)
+        if(ChessGame.matchId!=404) {
+            ChessGame.adversary = challengeUsername.text.toString()
+            if (ChessGame.adversary == ChessGame.myUsername) {
+                Toast.makeText(
+                    applicationContext,
+                    "You can't play against yourself! *Facepalm*",
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
 
-        ChessGame.adversary = challengeUsername.text.toString()
-        if (ChessGame.adversary==ChessGame.myUsername) {
-            Toast.makeText(applicationContext,"You can't play against yourself! *Facepalm*", Toast.LENGTH_LONG).show()
-            return
-        }
+            myRef.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
 
-        myRef.child("Users").addListenerForSingleValueEvent(object: ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // This method is called once with the initial value and again
+                    // whenever data at this location is updated.
+                    val td = snapshot.value as HashMap<*, *>
+                    var found = false
+                    for (key in td.keys) {
+                        if (key.toString() == "chessPoints") continue
+                        if (key.toString() == ChessGame.adversary) {
+                            found = true
+                            val au = key as String
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                val td = snapshot.value as HashMap<*, *>
-                var found = false
-                for (key in td.keys) {
-                    if (key.toString()=="chessPoints") continue
-                    if (key.toString()==ChessGame.adversary) {
-                        found = true
-                        val au = key as String
+                            myRef.child("Users").child(au).child(ChessGame.myUsername).child("matchId")
+                                .setValue(ChessGame.matchId)
+                            myRef.child("Users").child(au).child(ChessGame.myUsername)
+                                .child("currentMatch").setValue("")
+                                .addOnSuccessListener {
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "Challenge sent to $au!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    listenForChallengeAccepted()
+                                }.addOnFailureListener {
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "Challenge error! :(\nTry again",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
 
-                        myRef.child("Users").child(au).child(ChessGame.myUsername).child("currentMatch").setValue("")
-                            .addOnSuccessListener {
-                                Toast.makeText(applicationContext, "Challenge sent to $au!", Toast.LENGTH_LONG).show()
-                                listenForChallengeAccepted()
-                            }.addOnFailureListener {
-                                Toast.makeText(applicationContext, "Challenge error! :(\nTry again", Toast.LENGTH_LONG).show()
-                            }
-
-                        progressBar.visibility = View.VISIBLE
+                            progressBar.visibility = View.VISIBLE
+                        }
                     }
+                    if (!found) toast("User not found!")
                 }
-                if (!found) toast("User not found!")
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("E", "Failed to read value.", error.toException())
-            }
-        })
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("E", "Failed to read value.", error.toException())
+                }
+            })
+        }
     }
 
     private fun listenForChallengeAccepted() {
@@ -228,7 +258,9 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     challengeUsername.visibility = View.INVISIBLE
                     drawResignButtons.visibility = View.VISIBLE
                     progressBar.visibility = View.INVISIBLE
-                    startOnlineGame("WHITE")
+                    startOnlineGame("WHITE", ChessGame.matchId)
+                    myRef.child("Users").child(ChessGame.adversary).child(ChessGame.myUsername).child("matchId")
+                        .setValue(ChessGame.matchId)
                 } else if (isAccepted == "refused") {
                     challengeUsername.setText("")
                     progressBar.visibility = View.INVISIBLE
@@ -324,7 +356,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         return converted
     }
 
-    private fun startOnlineGame(color:String) {
+    private fun startOnlineGame(color:String, id: Int) {
 
         //remove listenerForChallengeAccepted
         if (ChessGame.myOnlineColor=="WHITE") {
@@ -332,7 +364,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     .child("currentMatch").removeEventListener(listenerForChallengeAccepted) }
 
         if (ChessGame.myOnlineColor=="BLACK") {
-            ChessGame.reset_black()
+            ChessGame.reset_black(id)
         }
 
 
@@ -559,7 +591,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         }
     }
 
-    fun resign(view: View) {
+    fun resign(view: OnlineGame) {
         if (!ChessGame.waitingForAdversary) {
             if (ChessGame.gameInProgress == "ONLINE") {
                 if (ChessGame.myOnlineColor == "WHITE") win("BLACK") else win("WHITE")
@@ -591,14 +623,19 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
                 //draw
                 if (result=="½-½") {
+                    ChessGame.reset(ChessGame.matchId)
                     toast("Draw")
+
                 }
                 //victory
                 else if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK") || (result=="1-0" && ChessGame.myOnlineColor=="WHITE")) {
+
+                    ChessGame.reset(ChessGame.matchId)
                     toast("You won!")
                 }
                 //loss
                 else {
+                    ChessGame.reset(ChessGame.matchId)
                     toast("You lost!")
                 }
 
@@ -728,9 +765,16 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         Log.i("I", "win: ${ChessGame.gameInProgress}")
 
         //toast di notifica vittoria
-        if (color == ChessGame.myOnlineColor) toast("You won!")
-        else if (color!="draw") toast("You lost!")
-        else (toast("Draw"))
+        if (color == ChessGame.myOnlineColor) {
+            ChessGame.reset(ChessGame.matchId)
+            toast("You wonzz!")
+        }else if (color!="draw") {
+            ChessGame.reset(ChessGame.matchId)
+            toast("You lostXD!")
+        }else {
+            ChessGame.reset(ChessGame.matchId)
+            (toast("Draw"))
+        }
 
         //get match until now
         var match = ""

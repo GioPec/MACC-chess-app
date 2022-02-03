@@ -14,6 +14,7 @@ import org.json.JSONObject
 import java.io.InputStreamReader
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
+import kotlin.math.max
 import kotlin.math.min
 
 class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
@@ -132,7 +133,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
 
 
-    private fun checkMoveValidity(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int, prom: String = ""):Boolean? {
+    private fun checkMoveValidity(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int, prom: String = "", id: Int):Boolean? {
 
         var fromRow_2=fromRow
         var fromCol_2=fromCol
@@ -146,9 +147,12 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         var usableToRow = convertRowColFromIntToString(toRow_2, "row")
 
 
+        var id_string=id.toString()
+        val name="https://JaR.pythonanywhere.com"+"/?move=" +
+                "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom +
+                "" + "&index=" +id_string
 
-        val name="https://giacomovenneri.pythonanywhere.com/?move=" +
-                "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + prom
+        println("mastolink "+name)
 
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
@@ -172,9 +176,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return null
     }
 
-    private fun getEvaluation():Pair<String, Int>? {
+    private fun getEvaluation(id: Int):Pair<String, Int>? {
 
-        val name = "https://giacomovenneri.pythonanywhere.com/info"
+        var id_string= id.toString()
+        val name = "https://JaR.pythonanywhere.com"+"/info?index="+id_string
         val url = URL(name)
         val conn = url.openConnection() as HttpsURLConnection
         var pair: Pair<String, Int>?
@@ -218,11 +223,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         canvas ?: return
 
         val chessBoardSide = min(width, height)*scaleFactor
+        //val chessBoardSide = min(width, height)*scaleFactor
         cellSide = chessBoardSide/8f
         originX = (width - chessBoardSide)/2f
         originY = (height - chessBoardSide)/2f
 
         drawChessboard(canvas)
+        drawTextAt(canvas,1,9)
         paintHighlight.color = Color.parseColor("#A88BC34A")
         highlightSquares(canvas, ChessGame.fromSquareHighlight)
         highlightSquares(canvas, ChessGame.toSquareHighlight)
@@ -251,10 +258,26 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 bitmaps[imgResID] = BitmapFactory.decodeResource(resources, imgResID)
             }
 
+
     private fun drawChessboard(canvas: Canvas) {
         for (row in 0 until 8)
             for (col in 0 until 8)
                 drawSquareAt(canvas, col, row, (col+row)%2==1)
+        /*
+        var c=0
+        val paintThin = Paint()
+        val padding = 30f
+        paintThin.color = Color.parseColor("#999999")
+        paintThin.strokeWidth = 3f
+        paintThin.textSize = 60f*/
+        //for ( c in 0 until 8)
+            //paint.color = Color.parseColor("#EEEEEE")
+            //canvas.drawText("shish",originX+1*cellSide,originY+8*cellSide,paint)
+            //canvas.drawText("shish", 20f, 60f + padding, paintThin)
+            //canvas.drawRect(originX+1*cellSide, originY+8*cellSide, originX+(1+1)*cellSide, originY+(1+1)*cellSide, paint)
+            println("Ciao")
+
+
     }
 
     private fun highlightSquares(canvas: Canvas, s: Square?) {
@@ -265,6 +288,18 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor
         canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
+    }
+
+    private fun drawTextAt(canvas: Canvas, col: Int, row: Int) {
+        val paintThin = Paint()
+        val padding = 30f
+        paintThin.color = Color.parseColor("#999999")
+        paintThin.strokeWidth = 3f
+        paintThin.textSize = 60f
+        //originX+col*cellSide, originY+row*cellSide
+        //canvas.drawText("shish",originX+1*cellSide,originY+8*cellSide,paint)
+        canvas.drawText("s", originX+col*cellSide+50f, originY+row*cellSide, paintThin)
+        //canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,15 +346,16 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     if (ChessGame.gameInProgress == "LOCAL") {
 
                         val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
-
-                        val job = GlobalScope.launch {
-                            val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
+                        Log.i("Thread prima di job: ",Thread.currentThread().name )
+                        val job = GlobalScope.launch(Dispatchers.IO) {
+                            Log.i("Thread job: ",Thread.currentThread().name )
+                            val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck, ChessGame.matchId) }
                             moveIsValid = c1.await() == true
                         }
 
                         runBlocking {
                             job.join()
-
+                            Log.i("Thread runblocking: ",Thread.currentThread().name )
                             if (moveIsValid) {
 
                                 //HIGHLIGHTING
@@ -384,8 +420,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
 
 
-                        val job = GlobalScope.launch {
-                            val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck) }
+                        val job = GlobalScope.launch(Dispatchers.IO) {
+                            val c1 = async { checkMoveValidity(fromCol, fromRow, col, row, promotionCheck, ChessGame.matchId) }
                             moveIsValid = c1.await() == true
                         }
 
@@ -518,10 +554,15 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         val usableToRow = convertRowColFromIntToString(row, "row")
                         val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
 
+                        Log.i("Thread before job: ",Thread.currentThread().name )
+
                         val job = GlobalScope.launch(Dispatchers.IO) {
+                            Log.i("Thread job: ",Thread.currentThread().name )
                             run {
-                                val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
-                                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                                var id_string=ChessGame.matchId.toString()
+                                val name = "https://JaR.pythonanywhere.com"+"/stockfish?move=" +
+                                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck+
+                                        "" + "&index=" + id_string
                                 val url = URL(name)
                                 val conn = url.openConnection() as HttpsURLConnection
                                 try {
@@ -541,6 +582,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                         runBlocking {
                             job.join()
+                            Log.i("Thread runblocking: ",Thread.currentThread().name )
                             if (moveIsValid) {
 
                                 // Player move
@@ -621,9 +663,9 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                 // Get position evaluation
                 if (ChessGame.gameInProgress == "STOCKFISH" && moveIsValid) {
-                    val job = GlobalScope.launch {
+                    val job = GlobalScope.launch(Dispatchers.IO) {
                         withContext(Dispatchers.Default) {
-                            val (evaluationType, evaluationValue) = checkNotNull(getEvaluation())
+                            val (evaluationType, evaluationValue) = checkNotNull(getEvaluation(ChessGame.matchId))
                             chessDelegate?.updateProgressBar(evaluationType, evaluationValue)
                         }
                     }
