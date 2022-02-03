@@ -34,7 +34,7 @@
         android:layout_width="300dp"
         android:layout_height="65dp"
         android:layout_marginTop="20dp"
-        android:onClick="startGameOnline"
+
         android:text="Play 1vs1 online"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -46,7 +46,7 @@
         android:layout_width="300dp"
         android:layout_height="65dp"
         android:layout_marginTop="32dp"
-        android:onClick="startGameAgainstStockfish"
+
         android:text="Play against stockfish"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -72,7 +72,7 @@
         android:layout_width="300dp"
         android:layout_height="65dp"
         android:layout_marginTop="20dp"
-        android:onClick="startGameLocal"
+
         android:text="Play 1vs1 local"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
