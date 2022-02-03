@@ -14,12 +14,15 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     private lateinit var resetButton: Button
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
+    var resumeButton: Button? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_game)
 
         chessView = findViewById(R.id.chess_view)
         resetButton = findViewById(R.id.reset_button)
+        resumeButton = findViewById(R.id.resume_button)
+        resumeButton?.visibility = View.VISIBLE
 
         chessView.chessDelegate = this
 

@@ -51,6 +51,10 @@
             </intent-filter>
         </activity>
 
+        <!--
+        <service android:name="com.macc.android.chess.ClosingService"
+            android:stopWithTask="false"/> -->
+
     </application>
 
 </manifest>

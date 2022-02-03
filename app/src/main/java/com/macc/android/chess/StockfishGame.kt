@@ -70,7 +70,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
                 var bestMove = "THREAD ERROR"
                 val job = GlobalScope.launch(Dispatchers.IO) {
-                    bestMove = askForAdvice()
+                    bestMove = askForAdvice(ChessGame.matchId)
                 }
                 runBlocking {
                     job.join()
@@ -108,7 +108,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
+    var resumeButton: Button? = null
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,6 +119,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         progressBar = findViewById(R.id.progress_bar)
         evaluationLayout = findViewById(R.id.evaluation_layout)
         evaluationChart = findViewById(R.id.evaluation_chart)
+        resumeButton = findViewById(R.id.resume_button)
+        resumeButton?.visibility = View.VISIBLE
 
         button = findViewById(R.id.button)
         lightbulbButton = findViewById(R.id.imageButton)
@@ -304,10 +306,10 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     override fun updateTurn(player: Player, move: String) {}
 
-    private fun askForAdvice(): String {
+    private fun askForAdvice(id: Int): String {
         //if (lightbulbButton.tag =="off") return
-
-        val url = URL("https://JaR.pythonanywhere.com"+"/bestmove")
+        var id_string=id.toString()
+        val url = URL("https://JaR.pythonanywhere.com"+"/bestmove?index="+id_string)
         val conn = url.openConnection() as HttpsURLConnection
         var bestMove = ""
 

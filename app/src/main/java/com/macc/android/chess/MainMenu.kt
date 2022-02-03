@@ -216,11 +216,13 @@ class MainMenu : AppCompatActivity() {
         ChessGame.reset(id)
         ChessGame.matchId=ChessGame.startMatchId()
         println(ChessGame.matchId)
+
         if(ChessGame.matchId!=404){
             ChessGame.gameInProgress="STOCKFISH"
             startActivity(Intent(this, StockfishGame::class.java))
-            resumeButton?.visibility = View.VISIBLE
+            //resumeButton?.visibility = View.VISIBLE
         }else{
+           //resumeButton?.visibility = View.GONE
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
         }
     }
@@ -248,7 +250,7 @@ class MainMenu : AppCompatActivity() {
         if(ChessGame.matchId!=404) {
             ChessGame.gameInProgress = "LOCAL"
             startActivity(Intent(this, LocalGame::class.java))
-            resumeButton?.visibility = View.VISIBLE
+            //resumeButton?.visibility = View.VISIBLE
         }else{
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
         }
