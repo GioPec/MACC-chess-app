@@ -12,8 +12,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
-    private lateinit var listenButton: Button
-    private lateinit var connectButton: Button
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,8 +20,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
         chessView = findViewById(R.id.chess_view)
         resetButton = findViewById(R.id.reset_button)
-        listenButton = findViewById(R.id.listen_button)
-        connectButton = findViewById(R.id.connect_button)
 
         chessView.chessDelegate = this
 
@@ -31,7 +27,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
             ChessGame.reset()
             ChessGame.resettedGame = true
             chessView.invalidate()
-            listenButton.isEnabled = true
         }
     }
 

@@ -21,6 +21,7 @@ object ChessGame {
     var resettedGame: Boolean = false
     val sensorListener:SensorEventListener? = null
     var firstMove = true
+    var hintAlreadyUsed = false
 
     var fromSquareHighlight: Square? = null
     var toSquareHighlight: Square? = null

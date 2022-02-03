@@ -66,6 +66,8 @@ class EvaluationChart(context: Context?, attrs: AttributeSet?) : View(context, a
         val highestEvalHeight = if (kotlin.math.abs(maxEval)==kotlin.math.abs(maxPoints)) 50f else height.toFloat()
         //println(highestEvalHeight)
         canvas.drawText((maxEval/100).toString(), 5f, highestEvalHeight, paintText)
+
+        ChessGame.evaluationsArray.clear()
     }
 
     private fun drawChessboard(canvas: Canvas) {

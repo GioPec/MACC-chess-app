@@ -51,14 +51,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_online)
 
-
-        R.string.chess_word
-
-
-
-
-
-
         ChessGame.gameInProgress=""
 
         ignoreFirstSave = false
@@ -112,9 +104,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             ChessGame.myOnlineColor=maybeColor!!
             startOnlineGame(ChessGame.myOnlineColor)
         }
-
-
-
     }
 
     override fun onStop () {
@@ -123,7 +112,6 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
-
         removeListeners()
     }
 

@@ -39,20 +39,6 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
 
         <Button
-            android:id="@+id/listen_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/listen_button"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/connect_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/connect_button"
-            android:visibility="gone" />
-
-        <Button
             android:id="@+id/reset_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -64,7 +64,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             acceleration = acceleration * 0.9f + delta
             //Log.i("listener", "acceleration = $acceleration")
 
-            if (!ChessGame.firstMove && acceleration > 4) {
+            if (!ChessGame.firstMove && acceleration > 4 && !ChessGame.hintAlreadyUsed) {
+
+                ChessGame.hintAlreadyUsed = true
 
                 var bestMove = "THREAD ERROR"
                 val job = GlobalScope.launch(Dispatchers.IO) {
@@ -100,6 +102,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         super.onResume()
     }
     override fun onPause() {
+        ChessGame.firstMove=true
         sensorManager!!.unregisterListener(sensorListener)
         super.onPause()
     }
@@ -119,13 +122,20 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         button = findViewById(R.id.button)
         lightbulbButton = findViewById(R.id.imageButton)
-        lightbulbButton.tag = "on"
-        lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+        if (!ChessGame.hintAlreadyUsed) {
+            lightbulbButton.tag = "on"
+            lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+        }
+        else {
+            lightbulbButton.tag = "off"
+            lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
+        }
 
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
-            ChessGame.reset()
+            ChessGame.hintAlreadyUsed=false
+            //ChessGame.reset()
             progressBar.progress = progressBar.max / 2
             chessView.invalidate()
             lightbulbButton.tag = "on"
@@ -496,6 +506,14 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         evaluationChart.invalidate()
 
         evaluationLayout.visibility = View.VISIBLE
+
+        Toast.makeText(applicationContext,"Game ended!",Toast.LENGTH_LONG).show()
+
+        unregisterListener()
+
+        ChessGame.gameInProgress=""
+        ChessGame.resettedGame = true
+        ChessGame.hintAlreadyUsed = false
 
         //ChessGame.evaluationsArray.clear()
     }
