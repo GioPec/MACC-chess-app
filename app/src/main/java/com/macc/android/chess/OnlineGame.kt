@@ -76,8 +76,11 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
 
         if(ChessGame.myOnlineColor == "BLACK") {
+            ChessGame.lettere= arrayOf("h","g","f","e","d","c","b","a")
+            ChessGame.numeri= arrayOf("1","2","3","4","5","6","7","8")
             lettere.text="h g f e d c b a"
             numeri.text="1 2 3 4 5 6 7 8"
+
         }
 
         drawButton.isEnabled = true

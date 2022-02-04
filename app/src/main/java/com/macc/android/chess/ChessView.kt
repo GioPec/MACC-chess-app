@@ -216,12 +216,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
         val chessBoardSide = min(width, height)*scaleFactor
         //val chessBoardSide = min(width, height)*scaleFactor
-        cellSide = chessBoardSide/8f
+        cellSide = chessBoardSide/8.5f
         originX = (width - chessBoardSide)/2f
         originY = (height - chessBoardSide)/2f
 
         drawChessboard(canvas)
-        drawTextAt(canvas,1,9)
+        drawTextAtDoBis(canvas)
+        drawTextAtDo(canvas)
         paintHighlight.color = Color.parseColor("#A88BC34A")
         highlightSquares(canvas, ChessGame.fromSquareHighlight)
         highlightSquares(canvas, ChessGame.toSquareHighlight)
@@ -233,7 +234,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             for (col in 0 until 8)
                 chessDelegate?.pieceAt(Square(col, row))?.let { piece ->
                     if (piece != movingPiece) {
-                        drawPieceAt(canvas, col, row, piece.resID)
+                        drawPieceAt(canvas, col+0.3f, row+0f, piece.resID)
                     }
                 }
 
@@ -242,7 +243,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         }
     }
 
-    private fun drawPieceAt(canvas: Canvas, col: Int, row: Int, resID: Int) =
+    private fun drawPieceAt(canvas: Canvas, col: Float, row: Float, resID: Int) =
             canvas.drawBitmap(bitmaps[resID]!!, null, RectF(originX+col*cellSide, originY+(7-row)*cellSide, originX+(col+1)*cellSide, originY+((7-row)+1)*cellSide), paint)
 
     private fun loadBitmaps() =
@@ -254,7 +255,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun drawChessboard(canvas: Canvas) {
         for (row in 0 until 8)
             for (col in 0 until 8)
-                drawSquareAt(canvas, col, row, (col+row)%2==1)
+                drawSquareAt(canvas, col+0.3f, row+0f, (col+row)%2==1)
         /*
         var c=0
         val paintThin = Paint()
@@ -271,24 +272,51 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     private fun highlightSquares(canvas: Canvas, s: Square?) {
         try {
-            canvas.drawRect(originX+s!!.col*cellSide, originY+s!!.row*cellSide, originX+(s!!.col+1)*cellSide, originY+(s!!.row+1)*cellSide, paintHighlight)
+            canvas.drawRect(+originX+(s!!.col+0.3f)*cellSide, originY+s!!.row*cellSide, originX+(s!!.col+0.3f+1)*cellSide, originY+(s!!.row+1)*cellSide, paintHighlight)
         } catch (e: Exception) {}
     }
-    private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
+    private fun drawSquareAt(canvas: Canvas, col: Float, row: Float, isDark: Boolean) {
         paint.color = if (isDark) ChessGame.darkColor else ChessGame.lightColor
         canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
+
     }
 
-    private fun drawTextAt(canvas: Canvas, col: Int, row: Int) {
+    private fun drawTextAtDo(canvas: Canvas) {
+        for (col in 0 until 8)
+            drawTextAt(canvas,col+0f,8.5f,ChessGame.lettere[col])
+    }
+    private fun drawTextAtDoBis(canvas: Canvas) {
+        for (row in 0 until 8)
+            drawTextAtBis(canvas,0f,row+0f,ChessGame.numeri[row])
+    }
+
+
+     private fun drawTextAt(canvas: Canvas, col: Float, row: Float, msg:String) {
         val paintThin = Paint()
         val padding = 30f
         paintThin.color = Color.parseColor("#999999")
-        paintThin.strokeWidth = 3f
-        paintThin.textSize = 60f
+        paintThin.strokeWidth = 10f
+        paintThin.textSize = 45f
         //originX+col*cellSide, originY+row*cellSide
         //canvas.drawText("shish",originX+1*cellSide,originY+8*cellSide,paint)
-        canvas.drawText("s", originX+col*cellSide+50f, originY+row*cellSide, paintThin)
+        canvas.drawText(msg, originX+col*cellSide+cellSide/2+10f, originY+row*cellSide-9f, paintThin)
+        //canvas.drawText("s", (originX+col*cellSide+padding+originX+(col+1)*cellSide)/2, (originY+row*cellSide+originY+(row+1)*cellSide)/2, paintThin)
         //canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
+
+    }
+
+    private fun drawTextAtBis(canvas: Canvas, col: Float, row: Float, msg: String) {
+        val paintThin = Paint()
+        val padding = 30f
+        paintThin.color = Color.parseColor("#999999")
+        paintThin.strokeWidth = 4f
+        paintThin.textSize = 50f
+        //originX+col*cellSide, originY+row*cellSide
+        //canvas.drawText("shish",originX+1*cellSide,originY+8*cellSide,paint)
+        canvas.drawText(msg, originX, originY+row*cellSide+cellSide/2+20f, paintThin)
+        //canvas.drawText("s", (originX+col*cellSide+padding+originX+(col+1)*cellSide)/2, (originY+row*cellSide+originY+(row+1)*cellSide)/2, paintThin)
+        //canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

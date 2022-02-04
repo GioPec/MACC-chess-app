@@ -12,7 +12,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout1"
-        android:layout_width="328dp"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -73,6 +73,7 @@
         android:layout_weight="1"
         android:letterSpacing="1.07"
         android:text="@string/chess_word"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,6 +86,7 @@
         android:layout_marginTop="44dp"
         android:layout_marginEnd="6dp"
         android:text="@string/chess_number"
+        android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout1"
         app:layout_constraintTop_toTopOf="parent"
         app:lineHeight="41dp" />

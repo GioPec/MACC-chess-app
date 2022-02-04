@@ -32,6 +32,8 @@ object ChessGame {
     var toSquareHighlight: Square? = null
 
     var piecesBox = mutableSetOf<ChessPiece>()
+    var lettere= arrayOf("a","b","c","d","e","f","g","h")
+    var numeri= arrayOf("8","7","6","5","4","3","2","1")
 
     var myChessPoints = 100
     var chessPointsFloatArray = FloatArray(10000) { 0f } //MAGIC NUMBER

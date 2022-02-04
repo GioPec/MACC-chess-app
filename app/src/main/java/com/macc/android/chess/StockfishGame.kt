@@ -392,8 +392,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         val job = GlobalScope.launch(Dispatchers.IO) {
             run {
-                val name = "https://giacomovenneri.pythonanywhere.com/stockfish/?move=" +
-                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck
+                val name = "https://JaR.pythonanywhere.com/stockfish/?move=" +
+                        "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck+
+                        "" + "&index=" +ChessGame.matchId
                 val url = URL(name)
                 val conn = url.openConnection() as HttpsURLConnection
                 try {
