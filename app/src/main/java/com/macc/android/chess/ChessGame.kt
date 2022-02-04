@@ -3,6 +3,10 @@ package com.macc.android.chess
 import android.graphics.Color
 import android.hardware.SensorEventListener
 import android.util.Log
+import android.widget.Button
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.InputStreamReader
@@ -27,6 +31,7 @@ object ChessGame {
     var firstMove = true
     var matchId: Int = 404
     var hintAlreadyUsed = false
+    var startedmatch =0
 
     var fromSquareHighlight: Square? = null
     var toSquareHighlight: Square? = null
@@ -41,6 +46,11 @@ object ChessGame {
     var chessPointsListLength = 0
 
     ///
+
+    private lateinit var resetButton: Button
+    private lateinit var startButton: Button
+
+
 
     var evaluationsArray = mutableListOf<Int>()
 
@@ -179,6 +189,8 @@ object ChessGame {
             job.join()
         }
     }
+
+
 
     fun startMatchId() : Int {
         resettedGame = true

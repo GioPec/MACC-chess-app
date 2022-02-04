@@ -1,10 +1,14 @@
 package com.macc.android.chess
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -37,6 +41,18 @@ class Profile : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        /**snip  */
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.package.ACTION_LOGOUT")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("onReceive", "Logout in progress")
+                //At this point you should start the login activity and finish this one
+                finish()
+            }
+        }, intentFilter)
 
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://macc-chess-dcd2a-default-rtdb.europe-west1.firebasedatabase.app")
@@ -167,7 +183,13 @@ class Profile : AppCompatActivity() {
 
     fun logout(view: View) {
         FirebaseAuth.getInstance().signOut()
+        mAuth.signOut();
+        /*mGoogleSignInClient.signOut();
+        LoginManager.getInstance().logOut();*/
         startActivity(Intent(this, Login::class.java))
+        val broadcastIntent = Intent()
+        broadcastIntent.action = "com.package.ACTION_LOGOUT"
+        sendBroadcast(broadcastIntent)
     }
 
     private fun getChessPoints() {

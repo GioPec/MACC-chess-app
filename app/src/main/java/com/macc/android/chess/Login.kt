@@ -1,6 +1,9 @@
 package com.macc.android.chess
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -37,6 +40,20 @@ class Login : AppCompatActivity()  {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        /**snip  */
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.package.ACTION_LOGOUT")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("onReceive", "Logout in progress")
+                //At this point you should start the login activity and finish this one
+                finish()
+            }
+        }, intentFilter)
+
+
         setContentView(R.layout.activity_login)
 
         register = findViewById(R.id.textView6)
@@ -57,8 +74,11 @@ class Login : AppCompatActivity()  {
         // set on-click listener
         googleButton.setOnClickListener {
             signIn()
+
         }
     }
+
+
 
     private fun createRequest() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -66,11 +86,19 @@ class Login : AppCompatActivity()  {
             .requestEmail()
             .build()
 
+        val gso1 = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+
+
+
+
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -141,7 +169,15 @@ class Login : AppCompatActivity()  {
     }
 
     private fun signIn() {
+        googleSignInClient.signOut()
         val signInIntent = googleSignInClient.signInIntent
+
+
+
+        //getting the google signin intent
+
+        //getting the google signin intent
+
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 

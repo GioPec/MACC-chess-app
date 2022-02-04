@@ -11,32 +11,107 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.widget.LinearLayout
+import android.content.Intent
+
+import android.content.BroadcastReceiver
+import android.content.Context
+
+import android.content.IntentFilter
+import android.widget.Toast
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import kotlin.properties.Delegates
 
 
 class LocalGame : AppCompatActivity(), ChessDelegate {
 
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
+    private lateinit var startButton: Button
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
     var resumeButton: Button? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        /**snip **/
+        /**snip  */
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.package.ACTION_LOGOUT")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("onReceive", "Logout in progress")
+                //At this point you should start the login activity and finish this one
+                finish()
+            }
+        }, intentFilter)
+        //** snip **//
+
         setContentView(R.layout.activity_local_game)
 
         chessView = findViewById(R.id.chess_view)
         resetButton = findViewById(R.id.reset_button)
+        startButton = findViewById(R.id.start_button)
         resumeButton = findViewById(R.id.resume_button)
-        resumeButton?.visibility = View.VISIBLE
 
+
+        if(resumeButton?.getVisibility() == View.GONE){
+
+        }else{
+
+            print("ciaooMare")
+
+        }
+        print("ciaooMarezzzzzzz")
+
+        if(ChessGame.startedmatch==0){
+            resetButton.setEnabled(false)
+            startButton.setEnabled(true)
+        }else{
+            resetButton.setEnabled(true)
+            startButton.setEnabled(false)
+        }
+        /*println("startedmatch"+startedmatch)
+        startedmatch=startedmatch+1
+        */
+        ChessGame.startedmatch=ChessGame.startedmatch+1
         chessView.chessDelegate = this
+
+
+
+        resumeButton?.visibility = View.VISIBLE
 
         resetButton.setOnClickListener {
             ChessGame.reset(ChessGame.matchId)
             ChessGame.matchId=404
             ChessGame.resettedGame = true
+            resetButton.setEnabled(false)
+            startButton.setEnabled(true)
             chessView.invalidate()
+
         }
+
+        startButton.setOnClickListener {
+            //ChessGame.matchId=ChessGame.startMatchId()
+            println("chenepensi"+ChessGame.matchId)
+            if(ChessGame.matchId!=404) {
+                ChessGame.gameInProgress = "LOCAL"
+                Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
+
+                resetButton.setEnabled(true)
+                startButton.setEnabled(false)
+
+            }else{
+                Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+            }
+
+        }
+
+    /*
+
+
+
+         */
 
 
     }

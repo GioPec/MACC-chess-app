@@ -1,8 +1,7 @@
 package com.macc.android.chess
 
 import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +17,10 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.HashMap
@@ -34,10 +37,23 @@ class MainMenu : AppCompatActivity() {
     private lateinit var againistStockfishButton: Button
     private lateinit var localButton: Button
     private lateinit var onlineButton: Button
+    private lateinit var resetButton: Button
+    private lateinit var startButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
+
+        /**snip  */
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.package.ACTION_LOGOUT")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("onReceive", "Logout in progress")
+                //At this point you should start the login activity and finish this one
+                finish()
+            }
+        }, intentFilter)
 
         ///
         ChessGame.waitingForAdversary = true
@@ -167,6 +183,36 @@ class MainMenu : AppCompatActivity() {
         })
     }
 
+    fun asincStartMatchId() : Int{
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://JaR.pythonanywhere.com"+"/startMatch"
+        ChessGame.resettedGame = true
+        ChessGame.stockfishGameEnded = false
+        //println("iniziamoilmatch")
+        var id_match=404
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+
+            { response ->
+                //response.subSequence(1, 3)
+                //Log.e("aa",response)
+                var stato= JSONObject(response)
+                id_match = stato.get("response") as Int
+                Log.d("matchid", id_match.toString())
+
+            },
+            { error ->
+
+                Log.e("errore","stamo in errore")
+            },
+
+            )
+        queue.add(stringRequest)
+
+        return id_match
+    }
+
     private fun getHelloWorldFromStockfishAPI() {
         val queue = Volley.newRequestQueue(this)
         val url = "https://JaR.pythonanywhere.com"+"/hello"
@@ -245,15 +291,28 @@ class MainMenu : AppCompatActivity() {
     }
     private fun confirmLocal(id: Int) {
         ChessGame.reset(id)
+        GlobalScope.launch(Dispatchers.IO){
+            ChessGame.matchId = asincStartMatchId()
+            Log.i("GANG1_GANG1", "GlobalScopeMAIN:"
+                    +Thread.currentThread().name)
+            withContext(Dispatchers.Main){
+                Log.i("GANG_GANG", "GlobalScopeMAIN:"
+                    +Thread.currentThread().name)
+            }
+        }
+
+        startActivity(Intent(this, LocalGame::class.java))
+        ChessGame.startedmatch=0
+
+        /*
         ChessGame.matchId=ChessGame.startMatchId()
         println(ChessGame.matchId)
         if(ChessGame.matchId!=404) {
             ChessGame.gameInProgress = "LOCAL"
-            startActivity(Intent(this, LocalGame::class.java))
-            //resumeButton?.visibility = View.VISIBLE
+
         }else{
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
-        }
+        }*/
     }
 
     fun startGameOnline(view: MainMenu, id: Int) {
@@ -286,9 +345,16 @@ class MainMenu : AppCompatActivity() {
     }
 
     fun resumeGame(view: View) {
+
         when (ChessGame.gameInProgress) {
-            "LOCAL" -> startActivity(Intent(this, LocalGame::class.java))
-            "STOCKFISH" -> startActivity(Intent(this, StockfishGame::class.java))
+            "LOCAL" -> {
+                startActivity(Intent(this, LocalGame::class.java))
+                println("eskere")}
+
+            "STOCKFISH" -> {startActivity(Intent(this, StockfishGame::class.java))}
+
+
+
             "ONLINE" -> startActivity(Intent(this, OnlineGame::class.java))
             "" -> return
         }

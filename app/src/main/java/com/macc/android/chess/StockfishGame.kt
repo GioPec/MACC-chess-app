@@ -3,9 +3,7 @@ package com.macc.android.chess
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -64,7 +62,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             acceleration = acceleration * 0.9f + delta
             //Log.i("listener", "acceleration = $acceleration")
 
-            if (!ChessGame.firstMove && acceleration > 4 && !ChessGame.hintAlreadyUsed) {
+            if (!ChessGame.firstMove && acceleration > 7 && !ChessGame.hintAlreadyUsed) {
 
                 ChessGame.hintAlreadyUsed = true
 
@@ -112,6 +110,19 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        /**snip  */
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("com.package.ACTION_LOGOUT")
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d("onReceive", "Logout in progress")
+                //At this point you should start the login activity and finish this one
+                finish()
+            }
+        }, intentFilter)
+
+
         setContentView(R.layout.activity_stockfish)
 
         chessView = findViewById(R.id.chess_view)

@@ -44,7 +44,8 @@
         </activity>
 
         <activity android:name="com.macc.android.chess.Login"
-            android:screenOrientation="portrait">
+            android:noHistory="true" android:screenOrientation="portrait">
+
             <intent-filter> <!-- decides the starting activity -->
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
