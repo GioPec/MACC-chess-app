@@ -4,7 +4,10 @@ import android.app.AlertDialog
 import android.content.*
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -120,6 +123,12 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
         challengeButton.setOnClickListener{
             requestChallenge(this)
+            val inputManager: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+
+            inputManager.hideSoftInputFromWindow(
+                currentFocus!!.windowToken,
+                InputMethodManager.HIDE_NOT_ALWAYS
+            )
         }
 
         resignButton.setOnClickListener {
@@ -140,6 +149,19 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
         removeListeners()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.back, menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_back -> {
+            this.finish();
+            true
+        }
+        else -> false
     }
 
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
@@ -234,6 +256,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                     Log.e("E", "Failed to read value.", error.toException())
                 }
             })
+        }else{
+            Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
         }
     }
 

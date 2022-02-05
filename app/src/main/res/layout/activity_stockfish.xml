@@ -12,51 +12,45 @@
 
     <LinearLayout
         android:id="@+id/linearLayout1"
-        android:layout_width="350dp"
+        android:layout_width="340dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.643"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.macc.android.chess.ChessView
             android:id="@+id/chess_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="470dp"
+            android:layout_weight="2"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="0dp" />
 
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight=".20"
+            android:animationResolution="2000"
+            android:indeterminate="false"
+            android:max="10000"
+            android:progress="5000"
+            android:progressBackgroundTint="#EEEEEE"
+            android:progressBackgroundTintMode="screen"
+            android:progressTint="#444444"
+            android:rotation="90"
+            android:scaleX="9.5"
+            android:scaleY="4.5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="34dp"
-        android:layout_height="360dp"
-        android:layout_marginTop="16dp"
-        android:animationResolution="2000"
-        android:indeterminate="false"
-        android:max="10000"
-        android:progress="5000"
-        android:progressBackgroundTint="#EEEEEE"
-        android:progressBackgroundTintMode="screen"
-        android:progressTint="#444444"
-        android:rotation="90"
-        android:scaleX="9.5"
-        android:scaleY="4.5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/reset_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Resign"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <TextView
         android:id="@+id/textView3"
@@ -95,53 +89,15 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:id="@+id/button_old"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:paddingRight="10dp"
-            android:src="@drawable/ic_mic_black_off" />
 
     </RelativeLayout>
 
-    <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="45dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="16dp"
-        android:clickable="false"
-        android:longClickable="false"
-        android:scaleType="fitXY"
-        android:tag="on"
-        app:background="@drawable/light_bulb_on"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:background="@color/brown_2"
-        android:backgroundTint="@color/brown_2"
-        android:clickable="true"
-        app:backgroundTint="@color/brown_2"
-        app:fabCustomSize="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1"
-        app:maxImageSize="30dp"
-        app:pressedTranslationZ="12dp"
-        app:srcCompat="@drawable/ic_mic_black_off" />
 
     <LinearLayout
         android:id="@+id/evaluation_layout"
         android:layout_width="328dp"
         android:layout_height="200dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="70dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -149,12 +105,80 @@
 
         <com.macc.android.chess.EvaluationChart
             android:id="@+id/evaluation_chart"
-            android:layout_width="wrap_content"
+
+            android:layout_width="0dp"
+            android:layout_weight=".55"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="0dp" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.718"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
+
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_weight=".55"
+            android:text="@string/reset_button" />
+
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_weight="0.55"
+            android:text="Start new game" />
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".40"
+            android:background="@color/brown_2"
+            android:backgroundTint="@color/brown_2"
+            android:clickable="true"
+            app:backgroundTint="@color/brown_2"
+            app:fabCustomSize="60dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout1"
+            app:maxImageSize="30dp"
+            app:pressedTranslationZ="12dp"
+            app:srcCompat="@drawable/ic_mic_black_off" />
+
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="0dp"
+            android:layout_weight=".25"
+            android:clickable="false"
+            android:longClickable="false"
+            android:scaleType="fitXY"
+            android:tag="on"
+            app:background="@drawable/light_bulb_on"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
+
+    </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -17,6 +17,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 
 import android.content.IntentFilter
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -92,7 +94,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         }
 
         startButton.setOnClickListener {
-            //ChessGame.matchId=ChessGame.startMatchId()
+            ChessGame.matchId=ChessGame.startMatchId()
             println("chenepensi"+ChessGame.matchId)
             if(ChessGame.matchId!=404) {
                 ChessGame.gameInProgress = "LOCAL"
@@ -106,13 +108,6 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
             }
 
         }
-
-    /*
-
-
-
-         */
-
 
     }
 
@@ -128,6 +123,21 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         canvas.drawText("s", +50f, 50f, paintThin)
         //canvas.drawRect(originX+col*cellSide, originY+row*cellSide, originX+(col+1)*cellSide, originY+(row+1)*cellSide, paint)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.back, menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_back -> {
+            this.finish();
+            true
+        }
+        else -> false
+    }
+
+
 
     override fun movePiece(from: Square, to: Square) {}
     override fun updateProgressBar(type: String, value: Int) {}

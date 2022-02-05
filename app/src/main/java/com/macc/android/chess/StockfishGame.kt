@@ -14,6 +14,8 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -34,6 +36,7 @@ import javax.net.ssl.HttpsURLConnection
 class StockfishGame : AppCompatActivity(), ChessDelegate {
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
+    private lateinit var startButton: Button
     lateinit var progressBar: ProgressBar
 
     private var speechRecognizer: SpeechRecognizer? = null
@@ -84,6 +87,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     fun unregisterListener() {
         sensorManager!!.unregisterListener(sensorListener)
+
+
         //Log.i("Listener", "unregistered")
     }
     fun registerListener() {
@@ -127,6 +132,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         chessView = findViewById(R.id.chess_view)
         resetButton = findViewById(R.id.reset_button)
+        startButton = findViewById(R.id.start_button)
         progressBar = findViewById(R.id.progress_bar)
         evaluationLayout = findViewById(R.id.evaluation_layout)
         evaluationChart = findViewById(R.id.evaluation_chart)
@@ -144,6 +150,16 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
         }
 
+
+        if(ChessGame.stockmatch==0){
+            resetButton.setEnabled(false)
+            startButton.setEnabled(true)
+        }else{
+            resetButton.setEnabled(true)
+            startButton.setEnabled(false)
+        }
+        ChessGame.stockmatch=ChessGame.stockmatch+1
+
         chessView.chessDelegate = this
 
         resetButton.setOnClickListener {
@@ -154,8 +170,40 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             progressBar.progress = progressBar.max / 2
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+            resetButton.setEnabled(false)
+            startButton.setEnabled(true)
             evaluationChart.invalidate()
             showEvalChart()
+            chessView.invalidate()
+
+        }
+
+        startButton.setOnClickListener {
+            ChessGame.matchId=ChessGame.startMatchId()
+            ChessGame.hintAlreadyUsed=false
+            ChessGame.firstMove = true
+            lightbulbButton.tag = "on"
+            lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
+            println("chenepensi"+ChessGame.matchId)
+            sensorManager!!.registerListener(sensorListener,sensorManager!!.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+            )
+            if(ChessGame.matchId!=404) {
+                ChessGame.gameInProgress = "STOCKFISH"
+                Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
+
+                resetButton.setEnabled(true)
+                startButton.setEnabled(false)
+
+            }else{
+                Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+            }
+            button.visibility = View.VISIBLE
+            lightbulbButton.visibility = View.VISIBLE
+            evaluationLayout.visibility = View.GONE
+
+            chessView.invalidate()
+
         }
 
         resetButton.visibility = View.VISIBLE
@@ -403,10 +451,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         val job = GlobalScope.launch(Dispatchers.IO) {
             run {
-                val name = "https://JaR.pythonanywhere.com/stockfish/?move=" +
+                val name = "https://JaR.pythonanywhere.com/stockfish?move=" +
                         "" + usableFromColumn + usableFromRow + usableToCol + usableToRow + promotionCheck+
                         "" + "&index=" +ChessGame.matchId
                 val url = URL(name)
+                println("bode"+usableFromRow + usableToCol + usableToRow + promotionCheck)
                 val conn = url.openConnection() as HttpsURLConnection
                 try {
                     conn.run {
@@ -425,6 +474,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         runBlocking {
             job.join()
+            println("bode"+moveIsValid)
             if (moveIsValid) {
 
                 // Player move
@@ -493,13 +543,29 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 }
 
                 //playSound()
+            }else{
+                alert("Error", "Your move is invalid", "OK")
             }
         }
-        alert("Error", "Your move is invalid", "OK")
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.back, menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_back -> {
+            this.finish();
+            true
+        }
+        else -> false
     }
 
     override fun showEvalChart() {
-        resetButton.visibility = View.INVISIBLE
+        //resetButton.visibility = View.INVISIBLE
+        //startButton.visibility = View.INVISIBLE
         button.visibility = View.INVISIBLE
         lightbulbButton.visibility = View.INVISIBLE
 

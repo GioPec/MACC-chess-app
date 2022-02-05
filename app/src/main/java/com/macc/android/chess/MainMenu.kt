@@ -17,10 +17,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.HashMap
@@ -182,8 +179,8 @@ class MainMenu : AppCompatActivity() {
             }
         })
     }
-
-    fun asincStartMatchId() : Int{
+    /*
+    suspend fun asincStartMatchId() : Int{
         val queue = Volley.newRequestQueue(this)
         val url = "https://JaR.pythonanywhere.com"+"/startMatch"
         ChessGame.resettedGame = true
@@ -191,27 +188,29 @@ class MainMenu : AppCompatActivity() {
         //println("iniziamoilmatch")
         var id_match=404
 
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
+            val stringRequest = StringRequest(
+                Request.Method.GET, url,
 
-            { response ->
-                //response.subSequence(1, 3)
-                //Log.e("aa",response)
-                var stato= JSONObject(response)
-                id_match = stato.get("response") as Int
-                Log.d("matchid", id_match.toString())
+                { response ->
+                    //response.subSequence(1, 3)
+                    //Log.e("aa",response)
+                    var stato = JSONObject(response)
+                    id_match = stato.get("response") as Int
+                    Log.d("matchid", id_match.toString())
 
-            },
-            { error ->
+                },
+                { error ->
 
-                Log.e("errore","stamo in errore")
-            },
+                    Log.e("errore", "stamo in errore")
+                },
 
-            )
-        queue.add(stringRequest)
+                )
+            queue.add(stringRequest)
+
+
 
         return id_match
-    }
+    }*/
 
     private fun getHelloWorldFromStockfishAPI() {
         val queue = Volley.newRequestQueue(this)
@@ -260,17 +259,17 @@ class MainMenu : AppCompatActivity() {
     }
     private fun confirmStockfish(id: Int) {
         ChessGame.reset(id)
+        startActivity(Intent(this, StockfishGame::class.java))
+        ChessGame.stockmatch=0
+        ChessGame.hintAlreadyUsed=false
+        ChessGame.firstMove = true
+        /*
         ChessGame.matchId=ChessGame.startMatchId()
-        println(ChessGame.matchId)
-
         if(ChessGame.matchId!=404){
             ChessGame.gameInProgress="STOCKFISH"
-            startActivity(Intent(this, StockfishGame::class.java))
-            //resumeButton?.visibility = View.VISIBLE
         }else{
-           //resumeButton?.visibility = View.GONE
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
-        }
+        }*/
     }
 
     fun startGameLocal(view: MainMenu, id: Int) {
@@ -291,16 +290,6 @@ class MainMenu : AppCompatActivity() {
     }
     private fun confirmLocal(id: Int) {
         ChessGame.reset(id)
-        GlobalScope.launch(Dispatchers.IO){
-            ChessGame.matchId = asincStartMatchId()
-            Log.i("GANG1_GANG1", "GlobalScopeMAIN:"
-                    +Thread.currentThread().name)
-            withContext(Dispatchers.Main){
-                Log.i("GANG_GANG", "GlobalScopeMAIN:"
-                    +Thread.currentThread().name)
-            }
-        }
-
         startActivity(Intent(this, LocalGame::class.java))
         ChessGame.startedmatch=0
 
@@ -309,15 +298,12 @@ class MainMenu : AppCompatActivity() {
         println(ChessGame.matchId)
         if(ChessGame.matchId!=404) {
             ChessGame.gameInProgress = "LOCAL"
-
         }else{
             Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
         }*/
     }
 
     fun startGameOnline(view: MainMenu, id: Int) {
-
-
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
@@ -333,6 +319,7 @@ class MainMenu : AppCompatActivity() {
                     .setNegativeButton("No", dialogClickListener).show()
         } else confirmOnline("",id)
     }
+
     private fun confirmOnline(c:String, id: Int) {
         //ChessGame.reset(id)
         ChessGame.gameInProgress="ONLINE"
@@ -360,3 +347,7 @@ class MainMenu : AppCompatActivity() {
         }
     }
 }
+
+
+
+

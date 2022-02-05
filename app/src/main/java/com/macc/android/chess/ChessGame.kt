@@ -32,6 +32,7 @@ object ChessGame {
     var matchId: Int = 404
     var hintAlreadyUsed = false
     var startedmatch =0
+    var stockmatch=0
 
     var fromSquareHighlight: Square? = null
     var toSquareHighlight: Square? = null
