@@ -70,7 +70,7 @@ class Profile : AppCompatActivity() {
 
             username = findViewById(R.id.username)
             chessPoints = findViewById(R.id.chess_points)
-            logoutButton = findViewById(R.id.logout_button)
+            //logoutButton = findViewById(R.id.logout_button)
             matchesHistoryLayout = findViewById(R.id.matches_history_layout)
 
             username.text = ChessGame.myUsername
@@ -134,6 +134,10 @@ class Profile : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.back, menu)
+
+        val inflater2 = menuInflater
+        inflater2.inflate(R.menu.setting, menu)
+
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -141,6 +145,11 @@ class Profile : AppCompatActivity() {
             this.finish();
             true
         }
+        R.id.action_setting -> {
+            startActivity(Intent(this, Impostazioni::class.java))
+            true
+        }
+
         else -> false
     }
 
@@ -196,16 +205,7 @@ class Profile : AppCompatActivity() {
         })
     }
 
-    fun logout(view: View) {
-        FirebaseAuth.getInstance().signOut()
-        mAuth.signOut();
-        /*mGoogleSignInClient.signOut();
-        LoginManager.getInstance().logOut();*/
-        startActivity(Intent(this, Login::class.java))
-        val broadcastIntent = Intent()
-        broadcastIntent.action = "com.package.ACTION_LOGOUT"
-        sendBroadcast(broadcastIntent)
-    }
+
 
     private fun getChessPoints() {
 

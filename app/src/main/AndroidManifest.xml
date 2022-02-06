@@ -3,59 +3,50 @@
     package="com.macc.android.chess">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Chess"
         android:icon="@drawable/icon"
-        android:roundIcon="@drawable/icon">
-
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/icon"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Chess">
+        <activity
+            android:name=".Impostazioni"
+            android:exported="false" />
         <!--
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         -->
-
-        <activity android:name="com.macc.android.chess.LocalGame"
+        <activity
+            android:name=".LocalGame"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".StockfishGame"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".OnlineGame"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".MainMenu"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".Registration"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".Profile"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".Login"
+            android:noHistory="true"
             android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.macc.android.chess.StockfishGame"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.macc.android.chess.OnlineGame"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.macc.android.chess.MainMenu"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.macc.android.chess.Registration"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name="com.macc.android.chess.Profile"
-            android:screenOrientation="portrait">
-
-        </activity>
-
-        <activity android:name="com.macc.android.chess.Login"
-            android:noHistory="true" android:screenOrientation="portrait">
-
             <intent-filter> <!-- decides the starting activity -->
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!--
-        <service android:name="com.macc.android.chess.ClosingService"
-            android:stopWithTask="false"/> -->
-
     </application>
 
 </manifest>
