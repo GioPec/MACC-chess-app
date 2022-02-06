@@ -33,6 +33,7 @@ import java.net.URL
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
+
 class StockfishGame : AppCompatActivity(), ChessDelegate {
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
@@ -562,6 +563,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         }
         else -> false
     }
+
+
 
     override fun showEvalChart() {
         //resetButton.visibility = View.INVISIBLE

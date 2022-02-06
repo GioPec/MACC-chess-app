@@ -2,6 +2,7 @@ package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.*
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -28,6 +29,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
     private lateinit var drawResignButtons: ConstraintLayout
     private lateinit var drawButton: Button
     private lateinit var resignButton: Button
+
     private lateinit var progressBar: ProgressBar
 
     private var myLastMove = ""
@@ -83,6 +85,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         drawResignButtons = findViewById(R.id.drawResignButtons)
         drawButton = findViewById(R.id.draw_button)
         resignButton = findViewById(R.id.resign_button)
+
         progressBar = findViewById(R.id.progress_bar)
 
         lettere = findViewById(R.id.textView3)
@@ -140,7 +143,11 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             //listenButton.isEnabled = true
         }
 
+
+
     }
+
+
 
     override fun onStop () {
         super.onStop()

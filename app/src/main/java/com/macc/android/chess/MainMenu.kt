@@ -2,6 +2,7 @@ package com.macc.android.chess
 
 import android.app.AlertDialog
 import android.content.*
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +18,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.HashMap
@@ -36,6 +36,7 @@ class MainMenu : AppCompatActivity() {
     private lateinit var onlineButton: Button
     private lateinit var resetButton: Button
     private lateinit var startButton: Button
+    private lateinit var whatsAppButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +84,7 @@ class MainMenu : AppCompatActivity() {
 
         stockfishStatus = findViewById(R.id.stockfishStatus)
         getHelloWorldFromStockfishAPI()
+        whatsAppButton = findViewById(R.id.button_WhatsApp)
 
 
         againistStockfishButton.setOnClickListener {
@@ -95,6 +97,9 @@ class MainMenu : AppCompatActivity() {
             startGameOnline(this,ChessGame.matchId)
         }
 
+        whatsAppButton.setOnClickListener{
+            onClickWhatsApp(this,"Hi! Challenge me on ChessApp!!!, My Username is: "+ChessGame.myUsername)
+        }
 
         //listenForChallenges()
     }
@@ -111,6 +116,24 @@ class MainMenu : AppCompatActivity() {
             true
         }
         else -> false
+    }
+
+    fun onClickWhatsApp(view: MainMenu, msg: String) {
+        val pm = packageManager
+        try {
+            val waIntent = Intent(Intent.ACTION_SEND)
+            waIntent.type = "text/plain"
+            val text = msg
+            val info = pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA)
+            //Check if package exists or not. If not then code
+            //in catch block will be called
+            waIntent.setPackage("com.whatsapp")
+            waIntent.putExtra(Intent.EXTRA_TEXT, text)
+            startActivity(Intent.createChooser(waIntent, "Share with"))
+        } catch (e: PackageManager.NameNotFoundException) {
+            Toast.makeText(this, "WhatsApp not Installed", Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 
     private fun listenForChallenges() {
