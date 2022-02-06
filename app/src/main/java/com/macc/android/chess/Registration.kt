@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -13,8 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 
 class Registration : AppCompatActivity()  {
 
@@ -26,6 +27,8 @@ class Registration : AppCompatActivity()  {
     private lateinit var loginButton: Button
     private lateinit var emailView: EditText
     private lateinit var passwordView: EditText
+    private var matchMoves = mutableListOf<Any>()
+    private  var valore: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,9 +62,16 @@ class Registration : AppCompatActivity()  {
     }
 
     fun register(view: View) {
-        if (emailView.text.toString()!="" && passwordView.text.toString()!="")
-            registerToFireBase(emailView.text.toString(), passwordView.text.toString())
-        else toast("Error: empty fields")
+        presenceUsername(splitString(emailView.text.toString()))
+        Handler(Looper.getMainLooper()).postDelayed({
+            println("finalmente"+valore)
+            if (emailView.text.toString()!="" && passwordView.text.toString()!="" && !valore)
+                registerToFireBase(emailView.text.toString(), passwordView.text.toString())
+            else toast("Error: empty fields or email already exist")
+
+        }, 1000)
+
+
     }
 
     private fun registerToFireBase(email:String, password:String) {
@@ -77,8 +87,11 @@ class Registration : AppCompatActivity()  {
                     ).show()
 
                     val currentUser = mAuth.currentUser
+
+
                     //save in database
-                    if (currentUser != null) {
+                    println("proviamo che 2 "+ valore)
+                    if (currentUser != null && !valore) {
 
                         myRef.child("Users").child(splitString(currentUser.email.toString())).setValue("")
                             .addOnSuccessListener {
@@ -88,10 +101,11 @@ class Registration : AppCompatActivity()  {
                             }
                         //Init with 100 Chess Points
                         myRef.child("Users").child(splitString(currentUser.email.toString()))
-                                .child("chessPoints").setValue(100)
+                            .child("chessPoints").setValue(100)
+
+                        startActivity(Intent(this, Login::class.java))
                     }
 
-                    startActivity(Intent(this, Login::class.java))
 
                 } else {
                     Log.e("ERROR", task.exception.toString())
@@ -101,6 +115,28 @@ class Registration : AppCompatActivity()  {
                 }
             }
     }
+
+
+    private fun presenceUsername(name: String) {
+        myRef.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val tuttiutenti = snapshot.value as HashMap<*, *>
+
+                for (adv in tuttiutenti.keys) {
+                    println("### adv = $adv")
+                    if (name == adv) {
+                        valore = true
+                        println("proviamo che "+ valore)
+                        //return
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+
+    }
+
 
     private fun splitString(str:String):String {
         val split = str.split("@")
