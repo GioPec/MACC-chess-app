@@ -8,6 +8,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
+import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.InputStreamReader
@@ -53,6 +55,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     }
 
     /////////// CHESS RULES FUNCTIONS //////////////////////////////////////////////////////////////
+
+    private fun toast(msg:String) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+    }
 
     private fun convertRowColFromIntToString(move: Int, type: String): String {
         //assert(move>=0 && move<=7)
@@ -154,7 +160,13 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 val r = JSONObject(InputStreamReader(inputStream).readText())
                 //Log.d("info", r.toString())
                 checkValidity = r.get("valid") as Boolean
-                ChessGame.isOnlineMate = r.get("mate") as String
+                if(ChessGame.gameInProgress == "ONLINE") {
+                    ChessGame.isOnlineMate = r.get("mate") as String
+                }
+                if(ChessGame.gameInProgress == "LOCAL") {
+                    ChessGame.isLocalMate = r.get("mate") as String
+                }
+
                 Log.d("Move validity", checkValidity.toString())
                 Log.d("Mossa ", usableFromColumn + usableFromRow + usableToCol + usableToRow)
                 return checkValidity
@@ -246,6 +258,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun drawPieceAt(canvas: Canvas, col: Float, row: Float, resID: Int) =
             canvas.drawBitmap(bitmaps[resID]!!, null, RectF(originX+col*cellSide, originY+(7-row)*cellSide, originX+(col+1)*cellSide, originY+((7-row)+1)*cellSide), paint)
 
+
     private fun loadBitmaps() =
             imgResIDs.forEach { imgResID ->
                 bitmaps[imgResID] = BitmapFactory.decodeResource(resources, imgResID)
@@ -324,7 +337,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
         event ?: return false
-
+        if (ChessGame.localGameEnded) return false
         if (ChessGame.stockfishGameEnded) return false
         if (ChessGame.gameInProgress=="ONLINE" && ChessGame.waitingForAdversary) return false
 
@@ -362,6 +375,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
                     if (ChessGame.gameInProgress == "LOCAL") {
 
+
+
                         val promotionCheck = ChessGame.promotion(movingPiece, fromRow, fromCol, row, col)
                         Log.i("Thread prima di job: ",Thread.currentThread().name )
                         val job = GlobalScope.launch(Dispatchers.IO) {
@@ -387,6 +402,17 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                     "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
                                     "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
                                     "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
+                                }
+
+                                if (movingPiece!!.player==Player.WHITE && ChessGame.isLocalMate=="true") {
+                                    ChessGame.stockfishGameEnded = true
+                                    toast("White won")
+                                    println("White won")
+
+                                }else if (movingPiece!!.player==Player.BLACK && ChessGame.isLocalMate=="true"){
+                                    ChessGame.stockfishGameEnded = true
+                                    toast("Black won")
+                                    println("Black won")
                                 }
 
                                 ChessGame.piecesBox.remove(movingPiece)
@@ -625,6 +651,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                         "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
                                         "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
                                     }
+
+
                                     ChessGame.piecesBox.remove(movingPiece)
                                     if (promotionCheck == "") {
                                         movingPiece?.let {
@@ -636,6 +664,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                                             )
                                         }
                                     }
+
                                     if (movingPiece != null) {
                                         ChessGame.pieceAt(squares[1].col, squares[1].row)?.let {
                                             if (it.player != movingPiece?.player) {

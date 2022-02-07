@@ -186,7 +186,7 @@ class Login : AppCompatActivity()  {
     }
 
     fun login(view: View) {
-        if (emailView.text.toString()!="" && passwordView.text.toString()!="") {
+        if (emailView.text.toString()!="" && splitMail(emailView.text.toString())  && passwordView.text.toString()!="") {
             Log.i("I", "login: *****************************************************")
             loginToFireBase(emailView.text.toString(), passwordView.text.toString())
         }
@@ -243,7 +243,19 @@ class Login : AppCompatActivity()  {
 
     private fun splitString(str:String):String {
         val split = str.split("@")
-        return split[0]
+
+        var stringa=split[0].replace(".", "^");
+
+        return stringa
+    }
+
+    private fun splitMail(str:String):Boolean {
+        val split = str.split("@")
+        if(split[1]=="gmail.com"){
+            return true
+        }else{
+            return false
+        }
     }
 
     private fun toast(msg:String) {

@@ -39,6 +39,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     private lateinit var resetButton: Button
     private lateinit var startButton: Button
     lateinit var progressBar: ProgressBar
+    lateinit var StockprogressBar: ProgressBar
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var speechRecognizerIntent: Intent? = null
@@ -135,6 +136,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         resetButton = findViewById(R.id.reset_button)
         startButton = findViewById(R.id.start_button)
         progressBar = findViewById(R.id.progress_bar)
+        StockprogressBar = findViewById(R.id.progress_bar_stock)
         evaluationLayout = findViewById(R.id.evaluation_layout)
         evaluationChart = findViewById(R.id.evaluation_chart)
         resumeButton = findViewById(R.id.resume_button)
@@ -154,9 +156,13 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
         if(ChessGame.stockmatch==0){
             resetButton.setEnabled(false)
+            button.setEnabled(false)
+            lightbulbButton.setEnabled(false)
             startButton.setEnabled(true)
         }else{
             resetButton.setEnabled(true)
+            button.setEnabled(true)
+            lightbulbButton.setEnabled(true)
             startButton.setEnabled(false)
         }
         ChessGame.stockmatch=ChessGame.stockmatch+1
@@ -173,6 +179,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
             resetButton.setEnabled(false)
             startButton.setEnabled(true)
+            button.setEnabled(false)
+            lightbulbButton.setEnabled(false)
             evaluationChart.invalidate()
             showEvalChart()
             chessView.invalidate()
@@ -183,6 +191,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             ChessGame.matchId=ChessGame.startMatchId()
             ChessGame.hintAlreadyUsed=false
             ChessGame.firstMove = true
+            StockprogressBar.visibility = View.VISIBLE
+            chessView.invalidate()
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
             println("chenepensi"+ChessGame.matchId)
@@ -194,7 +204,10 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
 
                 resetButton.setEnabled(true)
+                button.setEnabled(true)
+                lightbulbButton.setEnabled(true)
                 startButton.setEnabled(false)
+                StockprogressBar.visibility = View.INVISIBLE
 
             }else{
                 Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
@@ -569,8 +582,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     override fun showEvalChart() {
         //resetButton.visibility = View.INVISIBLE
         //startButton.visibility = View.INVISIBLE
-        button.visibility = View.INVISIBLE
-        lightbulbButton.visibility = View.INVISIBLE
+        button.setEnabled(false)
+        lightbulbButton.setEnabled(false)
 
         evaluationChart.invalidate()
 

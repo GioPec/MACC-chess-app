@@ -4,13 +4,10 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.widget.LinearLayout
 import android.content.Intent
 
 import android.content.BroadcastReceiver
@@ -19,7 +16,7 @@ import android.content.Context
 import android.content.IntentFilter
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import android.widget.*
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import kotlin.properties.Delegates
@@ -30,6 +27,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     private lateinit var chessView: ChessView
     private lateinit var resetButton: Button
     private lateinit var startButton: Button
+    lateinit var StockprogressBar: ProgressBar
     override fun pieceAt(square: Square): ChessPiece? = ChessGame.pieceAt(square)
 
     var resumeButton: Button? = null
@@ -55,6 +53,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         resetButton = findViewById(R.id.reset_button)
         startButton = findViewById(R.id.start_button)
         resumeButton = findViewById(R.id.resume_button)
+        StockprogressBar = findViewById(R.id.progress_bar_local)
 
 
         if(resumeButton?.getVisibility() == View.GONE){
@@ -94,6 +93,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         }
 
         startButton.setOnClickListener {
+            StockprogressBar.visibility = View.VISIBLE
             ChessGame.matchId=ChessGame.startMatchId()
             println("chenepensi"+ChessGame.matchId)
             if(ChessGame.matchId!=404) {
@@ -102,6 +102,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
                 resetButton.setEnabled(true)
                 startButton.setEnabled(false)
+                StockprogressBar.visibility = View.INVISIBLE
 
             }else{
                 Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()

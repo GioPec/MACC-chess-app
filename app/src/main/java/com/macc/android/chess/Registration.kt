@@ -65,7 +65,7 @@ class Registration : AppCompatActivity()  {
         presenceUsername(splitString(emailView.text.toString()))
         Handler(Looper.getMainLooper()).postDelayed({
             println("finalmente"+valore)
-            if (emailView.text.toString()!="" && passwordView.text.toString()!="" && !valore)
+            if (emailView.text.toString()!="" && splitMail(emailView.text.toString()) && passwordView.text.toString()!="" && !valore)
                 registerToFireBase(emailView.text.toString(), passwordView.text.toString())
             else toast("Error: empty fields or email already exist")
 
@@ -140,7 +140,17 @@ class Registration : AppCompatActivity()  {
 
     private fun splitString(str:String):String {
         val split = str.split("@")
-        return split[0]
+        var stringa=split[0].replace(".", "^");
+        return stringa
+    }
+
+    private fun splitMail(str:String):Boolean {
+        val split = str.split("@")
+        if(split[1]=="gmail.com"){
+            return true
+        }else{
+            return false
+        }
     }
 
     private fun toast(msg:String) {

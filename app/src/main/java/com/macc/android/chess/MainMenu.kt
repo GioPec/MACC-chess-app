@@ -59,6 +59,7 @@ class MainMenu : AppCompatActivity() {
         ChessGame.myOnlineColor = ""
         ChessGame.adversary = ""
         ChessGame.isOnlineMate = "false"
+        ChessGame.isLocalMate = "false"
         ///
         againistStockfishButton=findViewById(R.id.button2)
         localButton=findViewById(R.id.button3)

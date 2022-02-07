@@ -17,6 +17,7 @@ object ChessGame {
 
     var myOnlineColor = "" //WHITE, BLACK
     var isOnlineMate = "false"
+    var isLocalMate= "false"
     var link_online= "https://JaR.pythonanywhere.com"
     //var link_online= "https://giacomovenneri.pythonanywhere.com"
 
@@ -25,6 +26,8 @@ object ChessGame {
     var adversary: String = ""
     var challengeAlreadyNotified = false
     var stockfishGameEnded: Boolean = false
+    var localGameEnded: Boolean = false
+
     var gameInProgress: String = "" //LOCAL, STOCKFISH, ONLINE
     var resettedGame: Boolean = false
     val sensorListener:SensorEventListener? = null
@@ -196,6 +199,7 @@ object ChessGame {
     fun startMatchId() : Int {
         resettedGame = true
         stockfishGameEnded = false
+        localGameEnded = false
         //println("iniziamoilmatch")
         var id_match=404
         val job = GlobalScope.launch(Dispatchers.IO) { run {
