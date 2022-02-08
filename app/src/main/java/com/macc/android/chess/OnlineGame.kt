@@ -98,6 +98,11 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             lettere.text="h g f e d c b a"
             numeri.text="1 2 3 4 5 6 7 8"
 
+        }else{
+            ChessGame.lettere= arrayOf("a","b","c","d","e","f","g","h")
+            ChessGame.numeri= arrayOf("8","7","6","5","4","3","2","1")
+            lettere.text="a b c d e f g h"
+            numeri.text="8 7 6 5 4 3 2 1"
         }
 
         drawButton.isEnabled = true
@@ -143,19 +148,47 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
             //listenButton.isEnabled = true
         }
 
-
+        println("sto nella create")
 
     }
 
 
-
-    override fun onStop () {
-        super.onStop()
-
+    override fun onPause() {
+        super.onPause()
+        println("me so stoppato in pausa")
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
+        ChessGame.reset(ChessGame.matchId)
+        ChessGame.matchId=404
+        ChessGame.resettedGame = true
+        ChessGame.gameInProgress = ""
+        ChessGame.myOnlineColor = ""
+        chessView.invalidate()
         removeListeners()
+
+    }
+    override fun onStop () {
+        super.onStop()
+        /*
+        if (ChessGame.gameInProgress=="ONLINE") {
+            if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
+        }
+
+        ChessGame.reset(ChessGame.matchId)
+        ChessGame.matchId=404
+        ChessGame.resettedGame = true
+        chessView.invalidate()
+        *//*
+        println("me so stoppato")
+        resign(this)
+        ChessGame.reset(ChessGame.matchId)
+        ChessGame.matchId=404
+        ChessGame.resettedGame = true
+        ChessGame.gameInProgress = ""
+        chessView.invalidate()
+        removeListeners()*/
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -657,9 +690,17 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
                 }
                 //victory
-                else if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK") || (result=="1-0" && ChessGame.myOnlineColor=="WHITE")) {
+                else if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK")) {
 
+
+                    ChessGame.reset_black(ChessGame.matchId)
+                    toast("You won!")
+                    chessView.invalidate()
+                    //ChessGame.reset(ChessGame.matchId)
+
+                }else if((result=="1-0" && ChessGame.myOnlineColor=="WHITE")){
                     ChessGame.reset(ChessGame.matchId)
+                    //ChessGame.reset_black(ChessGame.matchId)
                     toast("You won!")
                 }
                 //loss
@@ -794,10 +835,16 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         Log.i("I", "win: ${ChessGame.gameInProgress}")
 
         //toast di notifica vittoria
-        if (color == ChessGame.myOnlineColor) {
+        if (color == ChessGame.myOnlineColor  && ChessGame.myOnlineColor=="BLACK") {
+            ChessGame.reset(ChessGame.matchId)
+            ChessGame.reset_black(ChessGame.matchId)
+            toast("You won!")
+            //chessView.invalidate()
+        }else if(color == ChessGame.myOnlineColor  && ChessGame.myOnlineColor=="WHITE"){
             ChessGame.reset(ChessGame.matchId)
             toast("You won!")
-        }else if (color!="draw") {
+        }
+        else if (color!="draw") {
             ChessGame.reset(ChessGame.matchId)
             toast("You lost!")
         }else {

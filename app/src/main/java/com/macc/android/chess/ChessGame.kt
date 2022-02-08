@@ -137,9 +137,46 @@ object ChessGame {
         addPiece(ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60))
     }
 
+    fun reset_white(){
+
+        firstMove=true
+        fromSquareHighlight = null
+        toSquareHighlight = null
+        //Log.d("!", "############# RESET_Black #############")
+        clear()
+        Log.d("!", "#############\nRESETWHITE\n#############")
+        clear()
+        for (i in 0 until 2) {
+            addPiece(ChessPiece(0 + i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt60))
+            addPiece(ChessPiece(0 + i * 7, 7, Player.BLACK, Chessman.ROOK, R.drawable.chess_rdt60))
+
+            addPiece(ChessPiece(1 + i * 5, 0, Player.WHITE, Chessman.KNIGHT, R.drawable.chess_nlt60))
+            addPiece(ChessPiece(1 + i * 5, 7, Player.BLACK, Chessman.KNIGHT, R.drawable.chess_ndt60))
+
+            addPiece(ChessPiece(2 + i * 3, 0, Player.WHITE, Chessman.BISHOP, R.drawable.chess_blt60))
+            addPiece(ChessPiece(2 + i * 3, 7, Player.BLACK, Chessman.BISHOP, R.drawable.chess_bdt60))
+        }
+
+        for (i in 0 until 8) {
+            addPiece(ChessPiece(i, 1, Player.WHITE, Chessman.PAWN, R.drawable.chess_plt60))
+            addPiece(ChessPiece(i, 6, Player.BLACK, Chessman.PAWN, R.drawable.chess_pdt60))
+        }
+
+        addPiece(ChessPiece(3, 0, Player.WHITE, Chessman.QUEEN, R.drawable.chess_qlt60))
+        addPiece(ChessPiece(3, 7, Player.BLACK, Chessman.QUEEN, R.drawable.chess_qdt60))
+
+        addPiece(ChessPiece(4, 0, Player.WHITE, Chessman.KING, R.drawable.chess_klt60))
+        addPiece(ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt60))
+
+
+
+    }
+
     fun reset_black(id: Int) {
         //resetStockfishGame(id)
         firstMove=true
+        fromSquareHighlight = null
+        toSquareHighlight = null
         //Log.d("!", "############# RESET_Black #############")
         clear()
         for (i in 0 until 2) {

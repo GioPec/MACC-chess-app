@@ -104,6 +104,38 @@ class MainMenu : AppCompatActivity() {
 
         //listenForChallenges()
     }
+
+
+    override fun onRestart() {
+        super.onRestart()
+        println("restartttttttttttttttt")
+        Log.d("Game in progress", ChessGame.gameInProgress)
+        Log.d("Resetted game", ChessGame.resettedGame.toString())
+        if (ChessGame.gameInProgress=="" || ChessGame.resettedGame) resumeButton?.visibility = View.GONE
+        else resumeButton?.visibility = View.VISIBLE  //TODO: fix
+
+        stockfishStatus = findViewById(R.id.stockfishStatus)
+        getHelloWorldFromStockfishAPI()
+        whatsAppButton = findViewById(R.id.button_WhatsApp)
+
+
+        againistStockfishButton.setOnClickListener {
+            startGameAgainstStockfish(this,ChessGame.matchId)
+        }
+        localButton.setOnClickListener {
+            startGameLocal(this,ChessGame.matchId)
+        }
+        onlineButton.setOnClickListener {
+            startGameOnline(this,ChessGame.matchId)
+        }
+
+        whatsAppButton.setOnClickListener{
+            onClickWhatsApp(this,"Hi! Challenge me on ChessApp!!!, My Username is: "+ChessGame.myUsername)
+        }
+
+
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
@@ -346,6 +378,7 @@ class MainMenu : AppCompatActivity() {
 
     private fun confirmOnline(c:String, id: Int) {
         //ChessGame.reset(id)
+        ChessGame.reset_white();
         ChessGame.gameInProgress="ONLINE"
 
         val intent = Intent(this, OnlineGame::class.java)
