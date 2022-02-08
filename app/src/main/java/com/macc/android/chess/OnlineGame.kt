@@ -447,7 +447,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         readMyChessPoints()
         readAdversaryChessPoints()
 
-        Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
+        //Toast.makeText(applicationContext,"Game is started!", Toast.LENGTH_LONG).show()
+        alert("Game", "Game is started!", "OK")
         drawResignButtons.visibility = View.VISIBLE
         ChessGame.gameInProgress = "ONLINE"
 
@@ -512,6 +513,14 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         })
 
         ////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    private fun alert(title:String, message:String, button:String) {
+        val alertDialog = AlertDialog.Builder(this@OnlineGame).create()
+        alertDialog.setTitle(title)
+        alertDialog.setMessage(message)
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, button) { dialog, _ -> dialog.dismiss() }
+        alertDialog.show()
     }
 
     private fun alertDraw() {
@@ -686,27 +695,30 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 //draw
                 if (result=="½-½") {
                     ChessGame.reset(ChessGame.matchId)
-                    toast("Draw")
-
+                    //toast("Draw")
+                    alert("Game", "It is a draw", "OK")
                 }
                 //victory
                 else if ( (result=="0-1" && ChessGame.myOnlineColor=="BLACK")) {
 
 
                     ChessGame.reset_black(ChessGame.matchId)
-                    toast("You won!")
+                    //toast("You won!")
+                    alert("Game", "You won", "OK")
                     chessView.invalidate()
                     //ChessGame.reset(ChessGame.matchId)
 
                 }else if((result=="1-0" && ChessGame.myOnlineColor=="WHITE")){
                     ChessGame.reset(ChessGame.matchId)
                     //ChessGame.reset_black(ChessGame.matchId)
-                    toast("You won!")
+                    alert("Game", "You won", "OK")
+                    //toast("You won!")
                 }
                 //loss
                 else {
                     ChessGame.reset(ChessGame.matchId)
-                    toast("You lost!")
+                    alert("Game", "You lost", "OK")
+                    //toast("You lost!")
                 }
 
                 resetFlags()
@@ -838,18 +850,22 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         if (color == ChessGame.myOnlineColor  && ChessGame.myOnlineColor=="BLACK") {
             ChessGame.reset(ChessGame.matchId)
             ChessGame.reset_black(ChessGame.matchId)
-            toast("You won!")
+            //toast("You won!")
+            //alert("Game", "You won", "OK")
             //chessView.invalidate()
         }else if(color == ChessGame.myOnlineColor  && ChessGame.myOnlineColor=="WHITE"){
             ChessGame.reset(ChessGame.matchId)
-            toast("You won!")
+            //toast("You won!")
+            //alert("Game", "You won", "OK")
         }
         else if (color!="draw") {
             ChessGame.reset(ChessGame.matchId)
-            toast("You lost!")
+            //toast("You lost!")
+            //alert("Game", "You lost", "OK")
         }else {
             ChessGame.reset(ChessGame.matchId)
             (toast("Draw"))
+            //alert("Game", "It is a draw", "OK")
         }
 
         //get match until now

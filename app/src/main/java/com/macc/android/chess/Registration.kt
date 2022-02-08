@@ -149,7 +149,7 @@ class Registration : AppCompatActivity()  {
         if(split[1]=="gmail.com"){
             return true
         }else{
-            return false
+            return true
         }
     }
 

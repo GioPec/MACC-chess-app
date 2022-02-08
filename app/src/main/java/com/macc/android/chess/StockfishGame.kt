@@ -35,7 +35,7 @@ import javax.net.ssl.HttpsURLConnection
 
 
 class StockfishGame : AppCompatActivity(), ChessDelegate {
-    private lateinit var chessView: ChessView
+
     private lateinit var resetButton: Button
     private lateinit var startButton: Button
     lateinit var progressBar: ProgressBar
@@ -48,6 +48,11 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
 
     private lateinit var evaluationLayout: LinearLayout
     private lateinit var evaluationChart: EvaluationChart
+    private lateinit var chessView: ChessView
+
+
+
+
 
     ///////////////// SHAKE DETECTION //////////////////////////////////////////////////////////////
 
@@ -77,7 +82,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 }
                 runBlocking {
                     job.join()
-                    Toast.makeText(applicationContext, bestMove, Toast.LENGTH_LONG).show()
+                    alert("Hint", "We suggest: "+bestMove.toString(), "OK")
+                    //Toast.makeText(applicationContext, bestMove, Toast.LENGTH_LONG).show()
                     lightbulbButton.tag = "off"
                     lightbulbButton.setBackgroundResource(R.drawable.light_bulb_off)
                     unregisterListener()
@@ -490,6 +496,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             job.join()
             println("bode"+moveIsValid)
             if (moveIsValid) {
+
+                if (mate!="") chessView.chessDelegate?.showEvalChart()
 
                 // Player move
                 ChessGame.removeEnpassantPawn(movingPiece, fromRow, fromCol, row, col)
