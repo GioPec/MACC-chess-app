@@ -38,8 +38,11 @@ class Profile : AppCompatActivity() {
 
     private var matchResult = mutableListOf<String>()
     private var matchMoves = mutableListOf<Any>()
-    private var matchDate = mutableListOf<String>()
+    private var matchDate = mutableListOf<Date>()
     private var matchAdversary = mutableListOf<String>()
+
+    data class myDataUse(var matchDate:Date,var matchAdversary:String, var matchMoves: Any, var matchResult: String)
+    val myDataUseList: MutableList<myDataUse>? = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +67,7 @@ class Profile : AppCompatActivity() {
 
         getChessPoints()
         getMatchesHistory()
+
 
         Handler(Looper.getMainLooper()).postDelayed({
             setContentView(R.layout.activity_profile)
@@ -107,8 +111,8 @@ class Profile : AppCompatActivity() {
                 ////
 
                 val rowTextView = TextView(this)
-
-                val result = matchResult[i]
+                var sortedByDate =  myDataUseList?.sortedBy { myDataUse -> myDataUse.matchDate }?.asReversed()
+                val result = sortedByDate?.get(i)?.matchResult
                 var resultExtended = ""
                 when (result) {
                     "w" -> resultExtended = "victory"
@@ -116,7 +120,9 @@ class Profile : AppCompatActivity() {
                     "d" -> resultExtended = "draw"
                 }
 
-                rowTextView.text = "${matchDate[i]} \nAdversary: ${matchAdversary[i]} \nResult: $resultExtended \n${matchMoves[i]}"
+                //sortedByNumber[0].name
+                println("stiamo stampando le date: "+matchDate)
+                rowTextView.text = "${sortedByDate?.get(i)?.matchDate} \nAdversary: ${sortedByDate?.get(i)?.matchAdversary} \nResult: $resultExtended \n${sortedByDate?.get(i)?.matchMoves}"
                 rowTextView.textSize = 16f
 
                 matchesHistoryLayout.addView(rowTextView)
@@ -173,6 +179,7 @@ class Profile : AppCompatActivity() {
                             //this sometimes fails, gives list???
                             val m = maybeSM[smKey] as HashMap<*, *>
                             for (date in m.keys) {
+
                                 val dateLong = (date as String).toLong()
                                 val match = m[date] as String
                                 //println("### dateLong = $dateLong")
@@ -184,11 +191,14 @@ class Profile : AppCompatActivity() {
                                 matchResult.add(match.split("|")[0])
 
                                 val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm")
-                                matchDate.add(formatter.format(Date(dateLong)))
+                                matchDate.add(Date(dateLong))
+                                //println("le date sono: "+matchDate)
 
                                 matchMoves.add(match.split("|").slice(IntRange(2, match.split("|").size - 2)))
 
                                 matchAdversary.add(adv as String)
+
+                                myDataUseList!!.add(myDataUse(Date(dateLong),adv as String,match.split("|").slice(IntRange(2, match.split("|").size - 2)),match.split("|")[0]))
 
                                 i += 1
                             }
