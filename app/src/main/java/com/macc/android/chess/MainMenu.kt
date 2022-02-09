@@ -137,8 +137,13 @@ class MainMenu : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater2 = menuInflater
+        inflater2.inflate(R.menu.television, menu)
+
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
+
+
         return true
     }
 
@@ -146,6 +151,12 @@ class MainMenu : AppCompatActivity() {
         R.id.action_profile -> {
             // User chose the "Profile" item, show the app profile page
             startActivity(Intent(this, Profile::class.java))
+            true
+        }
+
+        R.id.action_television -> {
+            // User chose the "Profile" item, show the app profile page
+            startActivity(Intent(this, Stream::class.java))
             true
         }
         else -> false

@@ -26,7 +26,7 @@ class Impostazioni : AppCompatActivity() {
         username = findViewById(R.id.username)
         username.text = ChessGame.myUsername
 
-        /**snip  */
+        //
         val intentFilter = IntentFilter()
         intentFilter.addAction("com.package.ACTION_LOGOUT")
         registerReceiver(object : BroadcastReceiver() {

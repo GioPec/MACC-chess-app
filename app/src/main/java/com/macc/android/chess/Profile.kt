@@ -138,16 +138,18 @@ class Profile : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.back, menu)
+
 
         val inflater2 = menuInflater
         inflater2.inflate(R.menu.setting, menu)
 
+        val inflater = menuInflater
+        inflater.inflate(R.menu.chiudi, menu)
+
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.action_back -> {
+        R.id.action_chiudi -> {
             this.finish();
             true
         }

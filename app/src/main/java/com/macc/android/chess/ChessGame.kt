@@ -8,6 +8,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.coroutines.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStreamReader
 import java.net.URL
@@ -20,6 +21,7 @@ object ChessGame {
     var isLocalMate= "false"
     var link_online= "https://JaR.pythonanywhere.com"
     //var link_online= "https://giacomovenneri.pythonanywhere.com"
+    var Chessdata: JSONArray? = null
 
     var myUsername = ""
     var waitingForAdversary: Boolean = true

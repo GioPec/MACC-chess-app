@@ -104,6 +104,8 @@ class Registration : AppCompatActivity()  {
                             .child("chessPoints").setValue(100)
 
                         startActivity(Intent(this, Login::class.java))
+                        finish()
+                        //return true
                     }
 
 
