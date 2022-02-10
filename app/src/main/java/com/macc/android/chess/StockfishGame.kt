@@ -124,6 +124,9 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        ChessGame.lettere= arrayOf("a","b","c","d","e","f","g","h")
+        ChessGame.numeri= arrayOf("8","7","6","5","4","3","2","1")
+
         /**snip  */
         val intentFilter = IntentFilter()
         intentFilter.addAction("com.package.ACTION_LOGOUT")
@@ -201,13 +204,12 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             chessView.invalidate()
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
-            println("chenepensi"+ChessGame.matchId)
             sensorManager!!.registerListener(sensorListener,sensorManager!!.getDefaultSensor(
                 Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
             )
             if(ChessGame.matchId!=404) {
                 ChessGame.gameInProgress = "STOCKFISH"
-                Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
+                //Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
 
                 resetButton.setEnabled(true)
                 button.setEnabled(true)
@@ -216,7 +218,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 StockprogressBar.visibility = View.INVISIBLE
 
             }else{
-                Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()
             }
             button.visibility = View.VISIBLE
             lightbulbButton.visibility = View.VISIBLE
@@ -310,6 +312,8 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
         move = move.replace("sette","7")
         move = move.replace("otto","8")
         move = move.replace(":0","e")
+        move = move.replace("è","e")
+        move = move.replace("é","e")
 
         for (l in move) {
             if (!arrayOf("a","b","c","d","e","f","g","h","1","2","3","4","5","6","7","8").contains(l.toString())) {

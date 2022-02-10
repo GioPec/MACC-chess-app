@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Html
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -122,7 +123,7 @@ class Profile : AppCompatActivity() {
 
                 //sortedByNumber[0].name
                 println("stiamo stampando le date: "+matchDate)
-                rowTextView.text = "${sortedByDate?.get(i)?.matchDate} \nAdversary: ${sortedByDate?.get(i)?.matchAdversary} \nResult: $resultExtended \n${sortedByDate?.get(i)?.matchMoves}"
+                rowTextView.text = Html.fromHtml("<b>${sortedByDate?.get(i)?.matchDate} <br>Adversary: </b>${sortedByDate?.get(i)?.matchAdversary} <br><b>Result: </b>$resultExtended \n${sortedByDate?.get(i)?.matchMoves}")
                 rowTextView.textSize = 16f
 
                 matchesHistoryLayout.addView(rowTextView)

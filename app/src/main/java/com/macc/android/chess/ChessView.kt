@@ -209,10 +209,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     private fun playSound() {
         val mp = MediaPlayer.create(this.context, R.raw.move_loud)
-        mp.setOnCompletionListener(OnCompletionListener {
-            mp.release()
-        })
         mp.start()
+        mp.setOnCompletionListener(OnCompletionListener {
+            //mp.release()
+        })
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -190,8 +190,11 @@ class MainMenu : AppCompatActivity() {
                 try {
                     val td = snapshot.value as HashMap<*, *>
                     for (key in td.keys) {
+                        //println(key)
+                        if (key=="chessPoints") continue
                         val username = td[key] as HashMap<*, *>
                         for (cm in username.keys) {
+                            //println("$key $username $cm")
                             if (cm.toString() == "currentMatch") {
                                 val adversaryUsername = key as String
                                 if (!ChessGame.challengeAlreadyNotified || (username[cm] as String)=="") {
@@ -239,7 +242,7 @@ class MainMenu : AppCompatActivity() {
                             }
                         }
                     }
-                } catch (e:Exception) { Log.i ("MainMenu", "No challenges found")}
+                } catch (e:Exception) { Log.e ("MainMenu", "No challenges found: $e")}
             }
             override fun onCancelled(error: DatabaseError) {
                 Log.e("E", "Failed to read value.", error.toException())

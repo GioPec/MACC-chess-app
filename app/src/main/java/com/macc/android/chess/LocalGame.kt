@@ -34,8 +34,10 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        ChessGame.lettere= arrayOf("a","b","c","d","e","f","g","h")
+        ChessGame.numeri= arrayOf("8","7","6","5","4","3","2","1")
+
         /**snip **/
-        /**snip  */
         val intentFilter = IntentFilter()
         intentFilter.addAction("com.package.ACTION_LOGOUT")
         registerReceiver(object : BroadcastReceiver() {
@@ -98,14 +100,14 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
             println("chenepensi"+ChessGame.matchId)
             if(ChessGame.matchId!=404) {
                 ChessGame.gameInProgress = "LOCAL"
-                Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
+                //Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
 
                 resetButton.setEnabled(true)
                 startButton.setEnabled(false)
                 StockprogressBar.visibility = View.INVISIBLE
 
             }else{
-                Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+                Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()
             }
 
         }

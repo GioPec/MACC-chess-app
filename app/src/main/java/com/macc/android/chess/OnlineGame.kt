@@ -155,10 +155,10 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     override fun onPause() {
         super.onPause()
-        println("me so stoppato in pausa")
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
+        ChessGame.reset_white()
         ChessGame.reset(ChessGame.matchId)
         ChessGame.matchId=404
         ChessGame.resettedGame = true
@@ -166,30 +166,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         ChessGame.myOnlineColor = ""
         chessView.invalidate()
         removeListeners()
-
     }
-    override fun onStop () {
-        super.onStop()
-        /*
-        if (ChessGame.gameInProgress=="ONLINE") {
-            if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
-        }
 
-        ChessGame.reset(ChessGame.matchId)
-        ChessGame.matchId=404
-        ChessGame.resettedGame = true
-        chessView.invalidate()
-        *//*
-        println("me so stoppato")
-        resign(this)
-        ChessGame.reset(ChessGame.matchId)
-        ChessGame.matchId=404
-        ChessGame.resettedGame = true
-        ChessGame.gameInProgress = ""
-        chessView.invalidate()
-        removeListeners()*/
-
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
@@ -297,7 +275,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 }
             })
         }else{
-            Toast.makeText(applicationContext, "Si stanno giocando molti match, prova tra poco ;-)", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -317,7 +295,7 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
                 if (!(isAccepted == "accepted" || isAccepted == "refused")) return
 
                 if (!hasAlreadyBeenNotified) {
-                    Toast.makeText(applicationContext, "Challenge has been $isAccepted by ${ChessGame.adversary}", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(applicationContext, "Challenge has been $isAccepted by ${ChessGame.adversary}", Toast.LENGTH_LONG).show()
                     hasAlreadyBeenNotified = true
                 }
 
