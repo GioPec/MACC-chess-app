@@ -8,13 +8,15 @@
 
     android:padding="20dp">
 
-    <ImageView
+    <TextView
         android:layout_gravity="center_horizontal"
         android:id="@+id/immagine"
         android:layout_width="140dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:src="@drawable/chess_rdt60"
+        android:text="1"
+        android:textSize="47dp"
+        android:gravity="center"
         android:background="@drawable/border"
         />
 

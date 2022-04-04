@@ -139,7 +139,8 @@ class Profile : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-
+        val inflater3 = menuInflater
+        inflater3.inflate(R.menu.classifica, menu)
 
         val inflater2 = menuInflater
         inflater2.inflate(R.menu.setting, menu)
@@ -156,6 +157,10 @@ class Profile : AppCompatActivity() {
         }
         R.id.action_setting -> {
             startActivity(Intent(this, Impostazioni::class.java))
+            true
+        }
+        R.id.action_classifica ->{
+            startActivity(Intent(this, Classification::class.java))
             true
         }
 

@@ -140,6 +140,9 @@ class MainMenu : AppCompatActivity() {
         val inflater2 = menuInflater
         inflater2.inflate(R.menu.television, menu)
 
+        val inflater3 = menuInflater
+        inflater3.inflate(R.menu.simulation, menu)
+
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
 
@@ -157,6 +160,12 @@ class MainMenu : AppCompatActivity() {
         R.id.action_television -> {
             // User chose the "Profile" item, show the app profile page
             startActivity(Intent(this, Stream::class.java))
+            true
+        }
+
+        R.id.action_simulation -> {
+            // User chose the "Profile" item, show the app profile page
+            startSimulation(this,ChessGame.matchId)
             true
         }
         else -> false
@@ -342,6 +351,8 @@ class MainMenu : AppCompatActivity() {
         }*/
     }
 
+
+
     fun startGameLocal(view: MainMenu, id: Int) {
         //create interface
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
@@ -402,6 +413,32 @@ class MainMenu : AppCompatActivity() {
         //resumeButton?.visibility = View.VISIBLE
     }
 
+
+
+    fun startSimulation(view: MainMenu, id: Int) {
+        //create interface
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> confirmSimulation(id)
+                DialogInterface.BUTTON_NEGATIVE -> {}
+            }
+        }
+        //ask user
+        if (ChessGame.gameInProgress!="" && !ChessGame.resettedGame) {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainMenu)
+            builder.setMessage("You already have an active game.\nIf you start a new one " +
+                    "you will lose all your progress!\nDo you want to proceed?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show()
+        } else confirmSimulation(id)
+    }
+    private fun confirmSimulation(id: Int) {
+        ChessGame.reset(id)
+        startActivity(Intent(this, SimulationStock::class.java))
+        ChessGame.startedmatch=0
+        resumeButton?.visibility = View.VISIBLE
+
+    }
+
     fun resumeGame(view: View) {
 
         when (ChessGame.gameInProgress) {
@@ -414,6 +451,8 @@ class MainMenu : AppCompatActivity() {
 
 
             "ONLINE" -> startActivity(Intent(this, OnlineGame::class.java))
+
+            "SIMULATION" -> startActivity(Intent(this, SimulationStock::class.java))
             "" -> return
         }
     }
