@@ -435,7 +435,7 @@ class MainMenu : AppCompatActivity() {
         ChessGame.reset(id)
         startActivity(Intent(this, SimulationStock::class.java))
         ChessGame.startedmatch=0
-        resumeButton?.visibility = View.VISIBLE
+        //resumeButton?.visibility = View.VISIBLE
 
     }
 

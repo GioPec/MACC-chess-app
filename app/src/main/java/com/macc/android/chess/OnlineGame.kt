@@ -152,9 +152,8 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
 
     }
 
-
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         if (ChessGame.gameInProgress=="ONLINE") {
             if (ChessGame.myOnlineColor=="WHITE") win("BLACK") else win("WHITE")
         }
@@ -166,6 +165,11 @@ class OnlineGame : AppCompatActivity(), ChessDelegate {
         ChessGame.myOnlineColor = ""
         chessView.invalidate()
         removeListeners()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        ChessGame.resettedGame = true
     }
 
 
