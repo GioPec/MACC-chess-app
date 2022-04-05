@@ -37,13 +37,13 @@ class Profile : AppCompatActivity() {
     private lateinit var logoutButton: Button
     private lateinit var matchesHistoryLayout: LinearLayout
 
-    private var matchResult = mutableListOf<String>()
-    private var matchMoves = mutableListOf<Any>()
-    private var matchDate = mutableListOf<Date>()
-    private var matchAdversary = mutableListOf<String>()
+
 
     data class myDataUse(var matchDate:Date,var matchAdversary:String, var matchMoves: Any, var matchResult: String)
-    val myDataUseList: MutableList<myDataUse>? = mutableListOf()
+
+
+    data class chessPointInfo(var PointsList:IntArray, var PointsListLength:Int)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,25 +66,39 @@ class Profile : AppCompatActivity() {
 
         //TODO: fix this below (chronological order)
 
-        getChessPoints()
-        getMatchesHistory()
+        //getChessPoints()
+        //matchResult,matchMoves,matchDate,matchAdversary
 
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            setContentView(R.layout.activity_profile)
+        getChessPoints(object : CallbackPoint {
+            override fun onCallback(risposta: MutableList<chessPointInfo>?) {
+                ChessGame.chessPointsListLength=risposta?.get(0)!!.PointsListLength
+                ChessGame.chessPointsList=risposta?.get(0)!!.PointsList
 
-            username = findViewById(R.id.username)
-            chessPoints = findViewById(R.id.chess_points)
-            //logoutButton = findViewById(R.id.logout_button)
-            matchesHistoryLayout = findViewById(R.id.matches_history_layout)
+                setContentView(R.layout.activity_profile)
 
-            username.text = ChessGame.myUsername
-            if (ChessGame.chessPointsListLength<1) chessPoints.text = "Chess Points: 100"
-            else chessPoints.text = "Chess Points: ${ChessGame.chessPointsList[ChessGame.chessPointsListLength - 1]}"
+                username = findViewById(R.id.username)
+                chessPoints = findViewById(R.id.chess_points)
+                //logoutButton = findViewById(R.id.logout_button)
 
-            //////////////////////////////////
 
-            val n = matchResult.size - 1 // total number of textviews to add
+                username.text = ChessGame.myUsername
+                if (ChessGame.chessPointsListLength<1) chessPoints.text = "Chess Points: 100"
+                else chessPoints.text = "Chess Points: ${ChessGame.chessPointsList[ChessGame.chessPointsListLength - 1]}"
+
+
+            }
+        })
+
+        getMatchesHistory(object : CallbackStory {
+            override fun onCallback(
+                myDataUseList: MutableList<myDataUse>?,
+                matchResult: MutableList<String>,
+                matchMoves: MutableList<Any>,
+                matchDate: MutableList<Date>,
+                matchAdversary: MutableList<String>
+            ) {
+                val n = matchResult.size - 1 // total number of textviews to add
 /*            val theArray = mutableListOf<Any>(n)
 
             for (i in 0..n) {
@@ -92,50 +106,65 @@ class Profile : AppCompatActivity() {
                 println(theArray)
             }
             theArray.sortBy { Comparable(it) }  //???*/
+                //////////////////////////////////
+                matchesHistoryLayout = findViewById(R.id.matches_history_layout)
+
+                if (BuildConfig.DEBUG && !(matchResult.size == matchMoves.size && matchMoves.size == matchDate.size)) {
+                    error("Assertion failed")
+                }
+
+                if (n<0) return
+
+                for (i in 0..n) {
+                    val rowTextView = TextView(this@Profile)
+                    var sortedByDate =  myDataUseList?.sortedBy { myDataUse -> myDataUse.matchDate }?.asReversed()
+                    val result = sortedByDate?.get(i)?.matchResult
+                    var resultExtended = ""
+
+
+                    when (result) {
+                        "w" -> resultExtended = "victory"
+                        "l" -> resultExtended = "defeat"
+                        "d" -> resultExtended = "draw"
+                    }
+
+                    //sortedByNumber[0].name
+                    println("stiamo stampando le date: "+matchDate)
+                    rowTextView.text = Html.fromHtml("<b>${sortedByDate?.get(i)?.matchDate} <br>Adversary: </b>${sortedByDate?.get(i)?.matchAdversary} <br><b>Result: </b>$resultExtended \n${sortedByDate?.get(i)?.matchMoves}")
+                    rowTextView.textSize = 16f
+
+                    matchesHistoryLayout.addView(rowTextView)
+
+                    ////
+
+                    //padding between matches
+                    val paddingTextView = TextView(this@Profile)
+                    paddingTextView.text = ""
+                    matchesHistoryLayout.addView(paddingTextView)
+
+                }
+
+            }
+        })
+/*
+        Handler(Looper.getMainLooper()).postDelayed({
+
             //////////////////////////////////
 
 
-            if (BuildConfig.DEBUG && !(matchResult.size == matchMoves.size && matchMoves.size == matchDate.size)) {
-                error("Assertion failed")
-            }
 
-            if (n<0) return@postDelayed
+
 
             //val myTextViews = arrayOfNulls<TextView>(n) // create an empty array;
 
-            for (i in 0..n) {
 
-                //TODO: restyle
 
-                //TODO: sort on date attribute?
 
-                ////
 
-                val rowTextView = TextView(this)
-                var sortedByDate =  myDataUseList?.sortedBy { myDataUse -> myDataUse.matchDate }?.asReversed()
-                val result = sortedByDate?.get(i)?.matchResult
-                var resultExtended = ""
-                when (result) {
-                    "w" -> resultExtended = "victory"
-                    "l" -> resultExtended = "defeat"
-                    "d" -> resultExtended = "draw"
-                }
 
-                //sortedByNumber[0].name
-                println("stiamo stampando le date: "+matchDate)
-                rowTextView.text = Html.fromHtml("<b>${sortedByDate?.get(i)?.matchDate} <br>Adversary: </b>${sortedByDate?.get(i)?.matchAdversary} <br><b>Result: </b>$resultExtended \n${sortedByDate?.get(i)?.matchMoves}")
-                rowTextView.textSize = 16f
 
-                matchesHistoryLayout.addView(rowTextView)
-
-                ////
-
-                //padding between matches
-                val paddingTextView = TextView(this)
-                paddingTextView.text = ""
-                matchesHistoryLayout.addView(paddingTextView)
             }
-        }, 1000)
+        }, 1000)*/
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -167,9 +196,15 @@ class Profile : AppCompatActivity() {
         else -> false
     }
 
-    private fun getMatchesHistory() {
+    private fun getMatchesHistory(myCallback: CallbackStory) {
 
         var i=0
+        var matchResult = mutableListOf<String>()
+        var matchMoves = mutableListOf<Any>()
+        var matchDate = mutableListOf<Date>()
+        var matchAdversary = mutableListOf<String>()
+
+        val myDataUseList: MutableList<myDataUse>? = mutableListOf()
 
         myRef.child("Users").child(ChessGame.myUsername).addListenerForSingleValueEvent(object : ValueEventListener {
 
@@ -213,7 +248,7 @@ class Profile : AppCompatActivity() {
                         }
                     }
                 }
-
+                myCallback.onCallback(myDataUseList,matchResult,matchMoves,matchDate,matchAdversary)
                 //println("matchResult = $matchResult")
                 //println("matchDate = $matchDate")
                 //println("matchMoves = $matchMoves")
@@ -225,7 +260,7 @@ class Profile : AppCompatActivity() {
 
 
 
-    private fun getChessPoints() {
+    private fun getChessPoints(myCallback: CallbackPoint) {
 
         val matchesMap = LinkedHashMap<String, Int>()
 
@@ -270,9 +305,23 @@ class Profile : AppCompatActivity() {
                 val matchesMapSorted = matchesMap.toSortedMap()     //to correct the temporal order of matches
                 //println("matchesMapSorted = $matchesMapSorted")
                 ChessGame.chessPointsList = matchesMapSorted.values.toIntArray()
+
+                val ChessPunti: MutableList<chessPointInfo>? = mutableListOf()
+                ChessPunti?.add(chessPointInfo(matchesMapSorted.values.toIntArray(),i))
+
+                myCallback.onCallback(ChessPunti)
             }
 
             override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+
+    interface CallbackPoint {
+        fun onCallback(value: MutableList<chessPointInfo>?)
+    }
+
+    interface CallbackStory {
+        fun onCallback(value1: MutableList<myDataUse>?, value2: MutableList<String>, value3: MutableList<Any>, value4: MutableList<Date>, value5: MutableList<String>)
     }
 }
