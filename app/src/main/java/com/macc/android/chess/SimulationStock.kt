@@ -1,10 +1,7 @@
 package com.macc.android.chess
 
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -15,7 +12,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -82,6 +78,7 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
 
 
         if(ChessGame.startedmatch==0){
+            ChessGame.simulationvinto=0
             resetButton.setEnabled(false)
             startButton.setEnabled(true)
             pauseButton.setEnabled(false)
@@ -91,6 +88,12 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
             startButton.setEnabled(false)
             pauseButton.setEnabled(false)
             restartButton.setEnabled(true)
+        }
+        if(ChessGame.simulationvinto>0){
+            resetButton.setEnabled(true)
+            startButton.setEnabled(false)
+            pauseButton.setEnabled(false)
+            restartButton.setEnabled(false)
         }
         /*println("startedmatch"+startedmatch)
         startedmatch=startedmatch+1
@@ -112,6 +115,7 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
             restartButton.setEnabled(false)
             chessView.invalidate()
 
+
         }
 
         pauseButton.setOnClickListener{
@@ -128,20 +132,38 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
         }
 
         startButton.setOnClickListener {
-            StockprogressBar.visibility = View.VISIBLE
+            //StockprogressBar.visibility = View.VISIBLE
+            //val start = System.currentTimeMillis()
             ChessGame.matchId=ChessGame.startMatchId()
             println("chenepensi"+ChessGame.matchId)
             if(ChessGame.matchId!=404) {
                 ChessGame.gameInProgress = "SIMULATION"
                 //Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
-                ChessGame.resettedGame = false
-                resetButton.setEnabled(true)
+
                 startButton.setEnabled(false)
+                resetButton.setEnabled(true)
                 pauseButton.setEnabled(true)
                 restartButton.setEnabled(false)
-                StockprogressBar.visibility = View.INVISIBLE
 
+                //StockprogressBar.visibility = View.INVISIBLE
 
+                //val runTime = System.currentTimeMillis() - start
+                //println("iltempi "+runTime)
+                /*
+                ChessGame.resettedGame = false
+                val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+                    when (which) {
+                        DialogInterface.BUTTON_POSITIVE -> startRepeatingTask()
+                        DialogInterface.BUTTON_NEGATIVE -> resetButton.setEnabled(false)
+                    }
+                }
+                //ask user
+                if (ChessGame.gameInProgress!="" && !ChessGame.resettedGame) {
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(this@SimulationStock)
+                    builder.setMessage("booo?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show()
+                } else resetButton.setEnabled(false)
+*/
                 /*
                 var MioRun: Runnable
 
@@ -185,9 +207,16 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
                 mHandler!!.postDelayed(this, mInterval.toLong())
             }else if(risposta=="bianco"){
                 mHandler!!.removeCallbacks(this)
+                ChessGame.simulationvinto=1
+                pauseButton.setEnabled(false)
+                restartButton.setEnabled(false)
                 alert("Victory","White won","Ok")
+
             }else if(risposta=="nero"){
                 mHandler!!.removeCallbacks(this)
+                ChessGame.simulationvinto=2
+                pauseButton.setEnabled(false)
+                restartButton.setEnabled(false)
                 alert("Victory","Black won","Ok")
             }
 

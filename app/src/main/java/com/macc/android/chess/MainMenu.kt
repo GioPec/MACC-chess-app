@@ -78,6 +78,7 @@ class MainMenu : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        println("iniziostr")
         Log.d("Game in progress", ChessGame.gameInProgress)
         Log.d("Resetted game", ChessGame.resettedGame.toString())
         if (ChessGame.gameInProgress=="" || ChessGame.resettedGame) resumeButton?.visibility = View.GONE

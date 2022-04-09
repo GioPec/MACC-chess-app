@@ -16,6 +16,9 @@ import javax.net.ssl.HttpsURLConnection
 
 object ChessGame {
 
+
+    var simulationvinto= 0
+
     var myOnlineColor = "" //WHITE, BLACK
     var isOnlineMate = "false"
     var isLocalMate= "false"

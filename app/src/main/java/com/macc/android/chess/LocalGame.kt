@@ -98,6 +98,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
             StockprogressBar.visibility = View.VISIBLE
             ChessGame.matchId=ChessGame.startMatchId()
             println("chenepensi"+ChessGame.matchId)
+            //val start1 = System.currentTimeMillis()
             if(ChessGame.matchId!=404) {
                 ChessGame.gameInProgress = "LOCAL"
                 //Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
@@ -105,6 +106,8 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
                 resetButton.setEnabled(true)
                 startButton.setEnabled(false)
                 StockprogressBar.visibility = View.INVISIBLE
+                //val w1 = System.currentTimeMillis() - start1
+                //println("tempo local "+w1)
 
             }else{
                 Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()

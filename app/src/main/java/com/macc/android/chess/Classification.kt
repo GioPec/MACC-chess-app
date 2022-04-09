@@ -50,7 +50,7 @@ class Classification : AppCompatActivity() {
         myRef = database.reference
 
 
-        matchesPoint = findViewById(R.id.matches_points)
+        matchesPoint = findViewById(R.id.matches_pp)
 
         readData(object : MyCallback {
             override fun onCallback(risposta: List<datiInfo>?) {
