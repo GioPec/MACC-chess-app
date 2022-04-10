@@ -108,6 +108,7 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
             ChessGame.reset(ChessGame.matchId)
             ChessGame.matchId=404
             ChessGame.resettedGame = true
+            ChessGame.iniziosimulationgame=0
             stopRepeatingTask()
             resetButton.setEnabled(false)
             startButton.setEnabled(true)
@@ -140,8 +141,9 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
                 ChessGame.gameInProgress = "SIMULATION"
                 //Toast.makeText(applicationContext, "Buona partita", Toast.LENGTH_LONG).show()
 
-                startButton.setEnabled(false)
+                ChessGame.resettedGame = false
                 resetButton.setEnabled(true)
+                startButton.setEnabled(false)
                 pauseButton.setEnabled(true)
                 restartButton.setEnabled(false)
 
@@ -182,7 +184,7 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
                 */
 
                 //doFirstMove()
-                Handler().postDelayed(this::doFirstMove, 2000)
+                //Handler().postDelayed(this::doFirstMove, 2000)
 
                 startRepeatingTask()
 
@@ -348,111 +350,118 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
     }
 
     fun doOptimalSimulation() : String{
-        var moveIsValid=false
-        var response=""
-        var mate= ""
-        var turno= 0
-        var risposta=""
-        val job = GlobalScope.launch(Dispatchers.IO) {
-            Log.i("Thread job: ", Thread.currentThread().name)
-            run {
-                var id_string = ChessGame.matchId.toString()
-                val name =
-                    "https://JaR.pythonanywhere.com" + "/optimal?" + "index=" + id_string
-                val url = URL(name)
-                val conn = url.openConnection() as HttpsURLConnection
-                try {
-                    conn.run {
-                        requestMethod = "GET"
-                        val r = JSONObject(InputStreamReader(inputStream).readText())
-                        Log.d("Stockfish response", r.toString())
-                        moveIsValid = r.get("valid") as Boolean
-                        response = r.get("move") as String
-                        mate = r.get("mate") as String
-                        turno = r.get("turno") as Int
+        if(ChessGame.iniziosimulationgame==0){
+            var re=doFirstMove()
+            ChessGame.iniziosimulationgame=1
+            return re
+
+        }else {
+            var moveIsValid = false
+            var response = ""
+            var mate = ""
+            var turno = 0
+            var risposta = ""
+            val job = GlobalScope.launch(Dispatchers.IO) {
+                Log.i("Thread job: ", Thread.currentThread().name)
+                run {
+                    var id_string = ChessGame.matchId.toString()
+                    val name =
+                        "https://JaR.pythonanywhere.com" + "/optimal?" + "index=" + id_string
+                    val url = URL(name)
+                    val conn = url.openConnection() as HttpsURLConnection
+                    try {
+                        conn.run {
+                            requestMethod = "GET"
+                            val r = JSONObject(InputStreamReader(inputStream).readText())
+                            Log.d("Stockfish response", r.toString())
+                            moveIsValid = r.get("valid") as Boolean
+                            response = r.get("move") as String
+                            mate = r.get("mate") as String
+                            turno = r.get("turno") as Int
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Move error: ", e.toString())
                     }
-                } catch (e: Exception) {
-                    Log.e("Move error: ", e.toString())
                 }
             }
-        }
 
-        runBlocking {
-            job.join()
-            Log.i("Thread runblocking: ", Thread.currentThread().name)
-            if (moveIsValid) {
+            runBlocking {
+                job.join()
+                Log.i("Thread runblocking: ", Thread.currentThread().name)
+                if (moveIsValid) {
 
-                if (mate == "player") {
-                    ChessGame.stockfishGameEnded = true
-                }
-
-
-                // Stockfish response
-                else {
-                    val squares = ChessGame.convertMoveStringToSquares(response)
-                    var movingPiece = ChessGame.pieceAt(squares[0])
-
-                    val promotionCheck = ChessGame.promotion(
-                        movingPiece,
-                        squares[0].row,
-                        squares[0].col,
-                        squares[1].row,
-                        squares[1].col
-                    )
-                    ChessGame.removeEnpassantPawn(
-                        movingPiece,
-                        squares[0].row,
-                        squares[0].col,
-                        squares[1].row,
-                        squares[1].col
-                    )
-                    when (ChessGame.castle(
-                        movingPiece,
-                        squares[0].row,
-                        squares[0].col,
-                        squares[1].row,
-                        squares[1].col
-                    )) {
-                        "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
-                        "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
-                        "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
-                        "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
+                    if (mate == "player") {
+                        ChessGame.stockfishGameEnded = true
                     }
 
 
-                    ChessGame.piecesBox.remove(movingPiece)
-                    if (promotionCheck == "") {
-                        movingPiece?.let {
-                            ChessGame.addPiece(
-                                it.copy(
-                                    col = squares[1].col,
-                                    row = squares[1].row
-                                )
-                            )
+                    // Stockfish response
+                    else {
+                        val squares = ChessGame.convertMoveStringToSquares(response)
+                        var movingPiece = ChessGame.pieceAt(squares[0])
+
+                        val promotionCheck = ChessGame.promotion(
+                            movingPiece,
+                            squares[0].row,
+                            squares[0].col,
+                            squares[1].row,
+                            squares[1].col
+                        )
+                        ChessGame.removeEnpassantPawn(
+                            movingPiece,
+                            squares[0].row,
+                            squares[0].col,
+                            squares[1].row,
+                            squares[1].col
+                        )
+                        when (ChessGame.castle(
+                            movingPiece,
+                            squares[0].row,
+                            squares[0].col,
+                            squares[1].row,
+                            squares[1].col
+                        )) {
+                            "whiteshort" -> ChessGame.movePiece(7, 0, 5, 0)
+                            "whitelong" -> ChessGame.movePiece(0, 0, 3, 0)
+                            "blackshort" -> ChessGame.movePiece(7, 7, 5, 7)
+                            "blacklong" -> ChessGame.movePiece(0, 7, 3, 7)
                         }
-                    }
 
-                    if (movingPiece != null) {
-                        ChessGame.pieceAt(squares[1].col, squares[1].row)?.let {
-                            if (it.player != movingPiece?.player) {
-                                ChessGame.piecesBox.remove(it)
+
+                        ChessGame.piecesBox.remove(movingPiece)
+                        if (promotionCheck == "") {
+                            movingPiece?.let {
+                                ChessGame.addPiece(
+                                    it.copy(
+                                        col = squares[1].col,
+                                        row = squares[1].row
+                                    )
+                                )
                             }
                         }
-                    }
-                    ChessGame.toString()
-                    chessView.invalidate()
-                    if (mate == "true" && turno%2==0) {
-                        ChessGame.stockfishGameEnded = true
-                        risposta="bianco"
-                    }else if (mate == "true" && turno%2==1){
-                        ChessGame.stockfishGameEnded = true
-                        risposta="nero"
-                    }
-                }
 
+                        if (movingPiece != null) {
+                            ChessGame.pieceAt(squares[1].col, squares[1].row)?.let {
+                                if (it.player != movingPiece?.player) {
+                                    ChessGame.piecesBox.remove(it)
+                                }
+                            }
+                        }
+                        ChessGame.toString()
+                        chessView.invalidate()
+                        if (mate == "true" && turno % 2 == 0) {
+                            ChessGame.stockfishGameEnded = true
+                            risposta = "bianco"
+                        } else if (mate == "true" && turno % 2 == 1) {
+                            ChessGame.stockfishGameEnded = true
+                            risposta = "nero"
+                        }
+                    }
+
+                }
             }
+            return risposta
         }
-        return risposta
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

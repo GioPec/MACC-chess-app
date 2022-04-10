@@ -200,7 +200,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
             ChessGame.matchId=ChessGame.startMatchId()
             ChessGame.hintAlreadyUsed=false
             ChessGame.firstMove = true
-            StockprogressBar.visibility = View.VISIBLE
+            //StockprogressBar.visibility = View.VISIBLE
             chessView.invalidate()
             lightbulbButton.tag = "on"
             lightbulbButton.setBackgroundResource(R.drawable.light_bulb_on)
@@ -215,7 +215,7 @@ class StockfishGame : AppCompatActivity(), ChessDelegate {
                 button.setEnabled(true)
                 lightbulbButton.setEnabled(true)
                 startButton.setEnabled(false)
-                StockprogressBar.visibility = View.INVISIBLE
+                //StockprogressBar.visibility = View.INVISIBLE
 
             }else{
                 Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()

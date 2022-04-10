@@ -374,6 +374,7 @@ class MainMenu : AppCompatActivity() {
         ChessGame.reset(id)
         startActivity(Intent(this, LocalGame::class.java))
         ChessGame.startedmatch=0
+        ChessGame.iniziosimulationgame=0
 
         /*
         ChessGame.matchId=ChessGame.startMatchId()
@@ -406,6 +407,7 @@ class MainMenu : AppCompatActivity() {
         //ChessGame.reset(id)
         ChessGame.reset_white();
         ChessGame.gameInProgress="ONLINE"
+        ChessGame.iniziosimulationgame=0
 
         val intent = Intent(this, OnlineGame::class.java)
         intent.putExtra("color", c)
@@ -436,6 +438,7 @@ class MainMenu : AppCompatActivity() {
         ChessGame.reset(id)
         startActivity(Intent(this, SimulationStock::class.java))
         ChessGame.startedmatch=0
+        ChessGame.iniziosimulationgame=0
         //resumeButton?.visibility = View.VISIBLE
 
     }

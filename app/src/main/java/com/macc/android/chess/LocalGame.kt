@@ -95,7 +95,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
         }
 
         startButton.setOnClickListener {
-            StockprogressBar.visibility = View.VISIBLE
+            //StockprogressBar.visibility = View.VISIBLE
             ChessGame.matchId=ChessGame.startMatchId()
             println("chenepensi"+ChessGame.matchId)
             //val start1 = System.currentTimeMillis()
@@ -105,7 +105,7 @@ class LocalGame : AppCompatActivity(), ChessDelegate {
 
                 resetButton.setEnabled(true)
                 startButton.setEnabled(false)
-                StockprogressBar.visibility = View.INVISIBLE
+                //StockprogressBar.visibility = View.INVISIBLE
                 //val w1 = System.currentTimeMillis() - start1
                 //println("tempo local "+w1)
 
