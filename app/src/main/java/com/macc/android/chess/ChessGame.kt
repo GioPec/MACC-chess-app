@@ -18,6 +18,7 @@ object ChessGame {
 
 
     var simulationvinto= 0
+    var iniziosimulationgame= 0
 
     var myOnlineColor = "" //WHITE, BLACK
     var isOnlineMate = "false"
@@ -227,7 +228,7 @@ object ChessGame {
                         Log.d("RESET", reset_id.toString()+" "+reset_need.toString())
                     }
                 } catch (e: Exception) {
-                    Log.e("Reset error", e.toString())
+                    Log.i("Reset error", e.toString())
                 }
             }
         }

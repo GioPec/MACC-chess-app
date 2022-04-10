@@ -182,10 +182,8 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
                 */
 
                 //doFirstMove()
-                Handler().postDelayed(this::doFirstMove, 2000)
 
-                startRepeatingTask()
-
+                doMatch()
 
             }else{
                 Toast.makeText(applicationContext, "Server full, please try again later", Toast.LENGTH_LONG).show()
@@ -193,6 +191,12 @@ class SimulationStock : AppCompatActivity(), ChessDelegate {
 
         }
 
+    }
+
+    fun doMatch(){
+        Handler().postDelayed(this::doFirstMove, 2000)
+
+        startRepeatingTask()
     }
 
 
