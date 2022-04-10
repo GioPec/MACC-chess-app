@@ -19,6 +19,7 @@ object ChessGame {
 
     var simulationvinto= 0
     var iniziosimulationgame=0
+    var listenchallenge=0
 
     var myOnlineColor = "" //WHITE, BLACK
     var isOnlineMate = "false"

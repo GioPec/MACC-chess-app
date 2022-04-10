@@ -35,7 +35,13 @@ class Notifications() {
 
         val nm = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.ECLAIR) nm.notify(NOTIFIYTAG, 0, builder.build())
-        else nm.notify(NOTIFIYTAG.hashCode(), builder.build())
+        if(ChessGame.listenchallenge==0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) nm.notify(
+                NOTIFIYTAG,
+                0,
+                builder.build()
+            )
+            else nm.notify(NOTIFIYTAG.hashCode(), builder.build())
+        }
     }
 }

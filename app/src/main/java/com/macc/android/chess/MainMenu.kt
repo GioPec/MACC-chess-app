@@ -216,11 +216,13 @@ class MainMenu : AppCompatActivity() {
                                         val notifyMe = Notifications()
                                         notifyMe.notify(applicationContext, "$adversaryUsername has challenged you!", number)
                                         number++
+                                        ChessGame.listenchallenge=1
                                     }
 
                                     val dialogClickListener = DialogInterface.OnClickListener { _, which ->
                                         when (which) {
                                             DialogInterface.BUTTON_POSITIVE -> {
+
                                                 myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("currentMatch")
                                                         .setValue("accepted")
 
@@ -232,11 +234,13 @@ class MainMenu : AppCompatActivity() {
                                                     Log.e("firebase", "Error getting data", it)
                                                 }
 
+                                                ChessGame.listenchallenge=0
                                                 ChessGame.myOnlineColor = "BLACK"
                                                 ChessGame.adversary = adversaryUsername
                                                 confirmOnline("BLACK",ChessGame.matchId)
                                             }
                                             DialogInterface.BUTTON_NEGATIVE -> {
+                                                ChessGame.listenchallenge=0
                                                 myRef.child("Users").child(ChessGame.myUsername).child(adversaryUsername).child("currentMatch")
                                                         .setValue("refused")
                                             }
